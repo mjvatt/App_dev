@@ -1,6 +1,8 @@
+"""
 Created on Wed Jan 14 20:08:35 2025
 
 @author: Mike Vatt
+"""
 
 import tkinter as tk
 import json
