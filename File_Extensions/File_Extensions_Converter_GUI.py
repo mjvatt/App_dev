@@ -2,7 +2,7 @@
 """
 Created on Tue Mar  5 21:59:10 2024
 
-@author: mjvat
+@author: Mike Vatt
 """
 
 import os
