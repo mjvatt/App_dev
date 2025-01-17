@@ -68,7 +68,8 @@ class CoachRankingApp(QWidget):
         self.num_coaches = len(coaches)
         self.canvas_width = 400
 
-        self.image_dir = r"C:\Users\mjvat\Videos\Screen Recordings\NFL Images"  # Replace with your actual path
+        # Need to update to actual path of NFL Images
+        self.image_dir = r"NFL Images"  
 
         self.nfl_logo_size = QSize(100, 100)
         self.nfl_logo_height = self.nfl_logo_size.height() + self.padding * 2
@@ -188,16 +189,19 @@ class CoachRankingApp(QWidget):
         # Check if the clicked item belongs to a coach's row
         if item:
             for coach, items in self.coach_items.items():
-                if item in items:  # If the clicked item is part of this coach's row
+                # If the clicked item is part of this coach's row
+                if item in items:  
                     self.dragged_coach = coach
                     self.dragged_items = items
                     self.drag_start_y = scene_pos.y()
-                    self.drag_offset = self.drag_start_y - items[2].scenePos().y()  # Calculate correct offset
+                    # Calculate correct offset
+                    self.drag_offset = self.drag_start_y - items[2].scenePos().y()  
                     
                     # Bring all row items to the front
                     for i in self.dragged_items:
                         if i is not None:
-                            i.setZValue(1)  # Set higher Z-value to bring to front
+                             # Set higher Z-value to bring to front
+                            i.setZValue(1) 
                     break
     
     def on_drag_motion(self, event):
@@ -210,7 +214,8 @@ class CoachRankingApp(QWidget):
             
             for item in self.dragged_items:
                 if item is not None:
-                    item.moveBy(0, delta_y)  # Move all items by the same vertical delta
+                    # Move all items by the same vertical delta
+                    item.moveBy(0, delta_y)  
             self.graphics_scene.update()
     
     def on_drag_end(self, event):
@@ -230,8 +235,9 @@ class CoachRankingApp(QWidget):
                 target_index = len(self.coach_order) - 1
     
             current_index = self.coach_order.index(self.dragged_coach)
-    
-            if current_index != target_index:  # Only move if necessary
+
+            # Only move if necessary
+            if current_index != target_index:  
                 self.coach_order.insert(target_index, self.coach_order.pop(current_index))
                 self.update_display()
     
