@@ -59,7 +59,8 @@ class CoachRankingApp:
         self.num_coaches = len(coaches)
         self.canvas_width = 400
 
-        self.image_dir = r"C:\Users\mjvat\Videos\Screen Recordings\NFL Images"  # Replace with your actual path
+        # Need to update location of NFL Images
+        self.image_dir = r"NFL Images"   
 
         self.nfl_logo_size = (100, 100)
         self.nfl_logo_height = self.nfl_logo_size[1] + self.padding * 2
@@ -70,7 +71,7 @@ class CoachRankingApp:
         self.load_images()
 
         self.canvas_height = self.nfl_logo_height + (self.num_coaches * self.row_height) + self.padding
-        initial_window_height = min(self.canvas_height, 800) # set the initial height to the canvas height or 800, whichever is smaller
+        initial_window_height = min(self.canvas_height, 800) 
         self.canvas = tk.Canvas(root, width=self.canvas_width, height=initial_window_height, bg="#f0f0f0", scrollregion=(0, 0, self.canvas_width, self.canvas_height)) #set initial height
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -192,7 +193,7 @@ class CoachRankingApp:
 
             if current_index != target_row:
                 self.coach_order[current_index], self.coach_order[target_row] = self.coach_order[target_row], self.coach_order[current_index]
-                self.update_display()  # Correct call here
+                self.update_display() 
 
             del self.dragged_coach
             del self.dragged_items
@@ -225,7 +226,7 @@ class CoachRankingApp:
                 with open(filename, "r") as f:
                     self.coach_order = json.load(f)
                 print(f"Rankings loaded from {filename}")
-                self.update_display()  # Correct call here
+                self.update_display()  
 
             except Exception as e:
                 print(f"Error loading rankings: {e}")
