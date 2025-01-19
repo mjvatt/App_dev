@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<!--
+<!-
 Author: Mike Vatt
 Date: 18 Jan 2025
 -->
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -33,7 +34,7 @@ Date: 18 Jan 2025
             margin-bottom: 20px;
         }
 
-        #cityInput {
+        #searchInput {
             flex-grow: 1;
             padding: 10px;
             border: none;
@@ -58,7 +59,7 @@ Date: 18 Jan 2025
 
         .weather-data {
             font-size: 1.2em;
-            display: none; /* Initially hide weather data */
+            display: none;
         }
 
         #icon img {
@@ -69,14 +70,39 @@ Date: 18 Jan 2025
             color: #e74c3c;
             margin-top: 10px;
         }
+        .temp-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .temp-toggle button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #eee;
+            color: #333;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .temp-toggle button.active {
+            background-color: #3498db;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Weather App</h1>
         <div class="search-box">
-            <input type="text" id="cityInput" placeholder="Enter city name">
+            <input type="text" id="searchInput" placeholder="Enter city or zip code">
             <button id="searchButton">Search</button>
+        </div>
+        <div class="temp-toggle">
+            <button id="celsiusBtn" class="active">°C</button>
+            <button id="fahrenheitBtn">°F</button>
         </div>
         <div id="weatherData" class="weather-data">
             <div id="location"></div>
@@ -88,8 +114,8 @@ Date: 18 Jan 2025
     </div>
 
     <script>
-        const apiKey = 'd09e0775d3e944127d1f6b89dbc56a77'; 
-        const cityInput = document.getElementById('cityInput');
+        const apiKey = 'd09e0775d3e944127d1f6b89dbc56a77'; // 
+        const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
         const locationElement = document.getElementById('location');
         const temperatureElement = document.getElementById('temperature');
@@ -97,20 +123,51 @@ Date: 18 Jan 2025
         const iconElement = document.getElementById('icon');
         const errorMessage = document.getElementById('errorMessage');
         const weatherData = document.getElementById('weatherData');
+        const celsiusBtn = document.getElementById('celsiusBtn');
+        const fahrenheitBtn = document.getElementById('fahrenheitBtn');
+        let currentUnit = 'metric';
 
-        searchButton.addEventListener('click', () => {
-            const city = cityInput.value;
-            if (city) {
-                getWeatherData(city);
+        searchButton.addEventListener('click', performSearch);
+
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                performSearch();
             }
         });
 
-        async function getWeatherData(city) {
+        celsiusBtn.addEventListener('click', () => {
+            currentUnit = 'metric';
+            updateTemperatureDisplay();
+            celsiusBtn.classList.add('active');
+            fahrenheitBtn.classList.remove('active');
+        });
+
+        fahrenheitBtn.addEventListener('click', () => {
+            currentUnit = 'imperial';
+            updateTemperatureDisplay();
+            fahrenheitBtn.classList.add('active');
+            celsiusBtn.classList.remove('active');
+        });
+
+        function performSearch() {
+            const searchTerm = searchInput.value;
+            if (searchTerm) {
+                getWeatherData(searchTerm);
+            }
+        }
+
+        async function getWeatherData(searchTerm) {
+            let apiUrl;
+            if (isNaN(searchTerm)) {
+                apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&appid=${apiKey}&units=${currentUnit}`;
+            } else {
+                apiUrl = `https://api.openweathermap.org/data/2.5/weather?zip=${searchTerm},us&appid=${apiKey}&units=${currentUnit}`;
+            }
             try {
-                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+                const response = await fetch(apiUrl);
                 if (!response.ok) {
                     if (response.status === 404) {
-                        throw new Error('City not found');
+                        throw new Error('City/Zip not found');
                     } else {
                         throw new Error('Network response was not ok');
                     }
@@ -128,9 +185,18 @@ Date: 18 Jan 2025
 
         function displayWeatherData(data) {
             locationElement.textContent = data.name + ", " + data.sys.country;
-            temperatureElement.textContent = `Temperature: ${data.main.temp}°C`;
+            updateTemperatureDisplay(data);
             descriptionElement.textContent = data.weather[0].description;
             iconElement.innerHTML = `<img src="http://openweathermap.org/img/w/${data.weather[0].icon}.png" alt="Weather Icon">`;
+        }
+        function updateTemperatureDisplay(data) {
+          if (data) {
+            if (currentUnit === 'metric') {
+                temperatureElement.textContent = `Temperature: ${data.main.temp}°C`;
+            } else {
+                temperatureElement.textContent = `Temperature: ${data.main.temp}°F`;
+            }
+          }
         }
     </script>
 </body>
