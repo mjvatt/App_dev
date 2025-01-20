@@ -43,8 +43,41 @@ Date: 19 Jan 2025
             margin: 20px auto;
             width: 100px;
             height: auto;
-			image-orientation: from-image;
+            image-orientation: from-image;
         }
+
+        .coach-item.dragging {
+            opacity: 0.5;
+        }
+
+        .coach-item.drag-over {
+            border-top: 2px solid blue;
+        }
+
+        .coach-item .rank {
+            width: 20px;
+            text-align: center;
+            margin-right: 10px;
+        }
+		.coach-item .rank::after { 
+            content: "."; 
+            margin-left: 3px;
+        }
+		.coach-item:nth-child(even) { /* Style even rows */
+            background-color: #e0f2f7; /* Light blue background */
+        }
+		.coach-item.dragging {
+            opacity: 0.5;
+            background-color: orange; /* Highlight dragged item */
+        }
+		h1 {
+			font-family: sans-serif; /* Or a specific font like 'Arial', 'Verdana', etc. */
+			font-size: 2em; /* Adjust size as needed */
+			text-align: center; /* Center the text */
+			margin-top: 20px; /* Add top margin */
+			margin-bottom: 20px; /* Add bottom margin */
+			font-weight: bold;
+		}
     </style>
 </head>
 <body>
@@ -97,16 +130,22 @@ Date: 19 Jan 2025
 
         const coachList = document.getElementById('coach-list');
 
-        function createCoachItem(coach, team) {
+        function createCoachItem(coach, team, rank) {
             const li = document.createElement('li');
             li.classList.add('coach-item');
             li.draggable = true;
 
+            const rankSpan = document.createElement('span');
+            rankSpan.classList.add('rank');
+            rankSpan.textContent = rank;
+            li.appendChild(rankSpan);
+
             const img = document.createElement('img');
             img.src = `images/${team}.png`;
+            img.alt = `${coach}'s Team Logo`;
 
             img.onload = function() {
-                img.alt = `${coach}'s Team Logo`;
+                // Image loaded successfully, nothing to do here as alt is already set correctly
             };
 
             img.onerror = function() {
@@ -127,10 +166,40 @@ Date: 19 Jan 2025
             return li;
         }
 
+        let currentRank = 1;
         for (const coach in coaches) {
             const team = coaches[coach];
-            const listItem = createCoachItem(coach, team);
+            const listItem = createCoachItem(coach, team, currentRank);
             coachList.appendChild(listItem);
+            currentRank++;
+        }
+
+        let draggedItem = null;
+
+        coachList.addEventListener('dragstart', (event) => {
+            draggedItem = event.target;
+            event.target.classList.add('dragging');
+        });
+
+        coachList.addEventListener('dragend', (event) => {
+            event.target.classList.remove('dragging');
+            draggedItem = null;
+            updateRanks(); // Update ranks after drag ends
+        });
+
+        coachList.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            const target = event.target.closest('.coach-item');
+            if (!target || target === draggedItem) return;
+
+            coachList.insertBefore(draggedItem, target);
+        });
+
+        function updateRanks() {
+            const items = coachList.querySelectorAll('.coach-item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].querySelector('.rank').textContent = i + 1;
+            }
         }
     </script>
 
