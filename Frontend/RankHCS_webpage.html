@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--
+Author: Mike Vatt
+Date: 19 Jan 2025
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Coach Ranking</title>
+    <style>
+        #coach-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px auto;
+            width: 500px;
+            border: 1px solid #ccc;
+        }
+
+        .coach-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: move;
+        }
+
+        .coach-item:last-child {
+            border-bottom: none;
+        }
+
+        .coach-item img {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            min-height: 30px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        #nfl-logo {
+            display: block;
+            margin: 20px auto;
+            width: 100px;
+            height: auto;
+			image-orientation: from-image;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>NFL Head Coach Ranking</h1>
+
+    <img id="nfl-logo" src="images/NFL.png" alt="NFL Logo">
+
+    <ul id="coach-list"></ul>
+
+    <script>
+        const coaches = {
+            "Jonathan Gannon": "ARI",
+            "Raheem Morris": "ATL",
+            "John Harbaugh": "BAL",
+            "Sean McDermott": "BUF",
+            "Dave Canales": "CAR",
+            "Matt Eberflus": "CHI",
+            "Zac Taylor": "CIN",
+            "Kevin Stefanski": "CLE",
+            "Mike McCarthy": "DAL",
+            "Sean Payton": "DEN",
+            "Dan Campbell": "DET",
+            "Matt LaFleur": "GB",
+            "DeMeco Ryans": "HOU",
+            "Shane Steichen": "IND",
+            "Doug Pederson": "JAX",
+            "Andy Reid": "KC",
+            "Antonio Pierce": "LVR",
+            "Jim Harbaugh": "LAC",
+            "Sean McVay": "LAR",
+            "Mike McDaniel": "MIA",
+            "Kevin O'Connell": "MIN",
+            "Mike Vrabel": "TEN",
+            "Dennis Allen": "NO",
+            "Brian Daboll": "NYG",
+            "Jeff Ulbrich": "NYJ",
+            "Nick Sirianni": "PHI",
+            "Mike Tomlin": "PIT",
+            "Kyle Shanahan": "SF",
+            "Mike Macdonald": "SEA",
+            "Todd Bowles": "TB",
+            "Brian Callahan": "TEN",
+            "Dan Quinn": "WAS",
+            "Urban Meyer": "UNEMP",
+            "Deion Sanders": "UNEMP",
+            "Jarod Mayo": "UNEMP",
+            "Robert Saleh": "UNEMP"
+        };
+
+        const coachList = document.getElementById('coach-list');
+
+        function createCoachItem(coach, team) {
+            const li = document.createElement('li');
+            li.classList.add('coach-item');
+            li.draggable = true;
+
+            const img = document.createElement('img');
+            img.src = `images/${team}.png`;
+
+            img.onload = function() {
+                img.alt = `${coach}'s Team Logo`;
+            };
+
+            img.onerror = function() {
+                if (team === "UNEMP") {
+                    img.src = 'images/UNEMP.png';
+                    img.alt = 'Unemployed Coach';
+                } else {
+                    img.src = 'images/NFL.png';
+                    img.alt = 'NFL Logo';
+                }
+            };
+
+            const text = document.createTextNode(`${coach} - ${team}`);
+
+            li.appendChild(img);
+            li.appendChild(text);
+
+            return li;
+        }
+
+        for (const coach in coaches) {
+            const team = coaches[coach];
+            const listItem = createCoachItem(coach, team);
+            coachList.appendChild(listItem);
+        }
+    </script>
+
+</body>
+</html>
