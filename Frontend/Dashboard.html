@@ -14,6 +14,9 @@ Date: 20 Jan 2025
             margin: 0;
             background-color: #111827;
             color: #e2e8f0;
+        }
+
+        .container {
             display: flex;
             min-height: 100vh;
         }
@@ -22,67 +25,94 @@ Date: 20 Jan 2025
             width: 250px;
             background-color: #1f2937;
             padding: 20px;
-            transition: width 0.3s ease-in-out;
-            overflow-x: hidden;
+            transition: margin-left 0.3s ease-in-out;
+            height: 100vh;
+            overflow-y: auto;
+            position: fixed;
         }
 
         .sidebar.collapsed {
-            width: 60px;
+            margin-left: -250px;
         }
+
         .sidebar.collapsed span {
             display: none;
         }
-        .sidebar.collapsed .hamburger {
-            margin-left: 0px;
+
+        .hamburger {
+            cursor: pointer;
+            padding: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #374151;
+            border-radius: 5px;
+            z-index: 102;
+            position: fixed;
+            top: 20px;
+            left: 270px;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .hamburger.collapsed {
+            left: 20px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding-left: 0px;
+            margin-top: 60px;
         }
 
         .sidebar ul li a {
-            padding: 15px;
-            font-size: 1.1rem;
+            padding: 20px;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
             text-decoration: none;
             color: #cbd5e1;
             transition: background-color 0.3s;
             border-radius: 5px;
+            white-space: nowrap;
         }
+
         .sidebar ul li a:hover {
             background-color: #374151;
         }
 
         .sidebar ul li a i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-            width: 20px;
+            margin-right: 15px;
+            font-size: 1.6rem;
+            width: 30px;
             text-align: center;
-        }
-
-        .hamburger {
-            cursor: pointer;
-            padding: 10px;
-            margin-left: 20px;
-            font-size: 1.5rem;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-        }
-        .hamburger.collapsed {
-            margin-left: 0px;
         }
 
         .main-content {
             flex: 1;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
+            margin-left: 270px;
             transition: margin-left 0.3s ease-in-out;
         }
+
         .main-content.collapsed {
-            margin-left: 60px;
+            margin-left: 80px;
         }
-        .header {
-            margin-bottom: 20px;
-        }
+
+		.header {
+			margin-bottom: 20px;
+			padding-top: 20px;
+			padding-left: 40px; /* This is the key change */
+		}
+
+		.header input[type="text"] {
+			background-color: #374151;
+			color: #e2e8f0;
+			border: none;
+			padding: 8px;
+			border-radius: 4px;
+		}
+
         .summary-cards {
             display: grid;
             grid-template-areas:
@@ -99,12 +129,30 @@ Date: 20 Jan 2025
             text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .card h3 { margin-bottom: 0.5rem; }
-        .card p { font-size: 1.2rem; }
-        .card.passing { grid-area: passing; }
-        .card.rushing { grid-area: rushing; }
-        .card.touchdowns { grid-area: touchdowns; }
-        .card.points { grid-area: points; }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 1.2rem;
+        }
+
+        .card.passing {
+            grid-area: passing;
+        }
+
+        .card.rushing {
+            grid-area: rushing;
+        }
+
+        .card.touchdowns {
+            grid-area: touchdowns;
+        }
+
+        .card.points {
+            grid-area: points;
+        }
 
         .charts {
             display: grid;
@@ -112,6 +160,7 @@ Date: 20 Jan 2025
             gap: 20px;
             flex: 1;
         }
+
         .chart-container {
             background-color: #1f2937;
             padding: 20px;
@@ -121,62 +170,65 @@ Date: 20 Jan 2025
             flex-direction: column;
             min-height: 200px;
         }
+
         .chart-container canvas {
             flex: 1;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="sidebar" id="sidebar">
-        <div class="hamburger" id="hamburger">
-            <i class="fas fa-bars"></i>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul>
+                <li><a href="#"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+                <li><a href="#"><i class="fas fa-users"></i><span>Team Stats</span></a></li>
+                <li><a href="#"><i class="fas fa-user"></i><span>Player Stats</span></a></li>
+                <li><a href="#"><i class="fas fa-table"></i><span>Game Summaries</span></a></li>
+                <li><a href="#"><i class="fas fa-chart-pie"></i><span>Standings</span></a></li>
+                <li><a href="#"><i class="fas fa-trophy"></i><span>Playoffs</span></a></li>
+                <li><a href="#"><i class="fas fa-user-plus"></i><span>Draft</span></a></li>
+                <li><a href="#"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
+                <li><a href="#"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+            </ul>
         </div>
-        <ul>
-            <li><a href="#"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
-            <li><a href="#"><i class="fas fa-users"></i><span>Team Stats</span></a></li>
-            <li><a href="#"><i class="fas fa-user"></i><span>Player Stats</span></a></li>
-            <li><a href="#"><i class="fas fa-table"></i><span>Game Summaries</span></a></li>
-            <li><a href="#"><i class="fas fa-chart-pie"></i><span>Standings</span></a></li>
-            <li><a href="#"><i class="fas fa-trophy"></i><span>Playoffs</span></a></li>
-            <li><a href="#"><i class="fas fa-user-plus"></i><span>Draft</span></a></li>
-            <li><a href="#"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
-            <li><a href="#"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-        </ul>
-    </div>
-    <div class="main-content" id="main-content">
-        <div class="header">
-            <input type="text" placeholder="Search Teams/Players..." style="background-color: #374151; color: #e2e8f0; border: none; padding: 8px; border-radius: 4px;">
-        </div>
-        <div class="summary-cards">
-            <div class="card passing">
-                <h3>Total Passing Yards</h3>
-                <p id="totalPassingYards">0</p>
-                <p>League Avg: <span id="avgPassingYards">0</span></p>
+        <div class="main-content" id="main-content">
+            <div class="header">
+                <input type="text" placeholder="Search Teams/Players...">
             </div>
-            <div class="card rushing">
-                <h3>Total Rushing Yards</h3>
-                <p id="totalRushingYards">0</p>
-                <p>League Avg: <span id="avgRushingYards">0</span></p>
+            <div class="summary-cards">
+                <div class="card passing">
+                    <h3>Total Passing Yards</h3>
+                    <p id="totalPassingYards">0</p>
+                    <p>League Avg: <span id="avgPassingYards">0</span></p>
+                </div>
+                <div class="card rushing">
+                    <h3>Total Rushing Yards</h3>
+                    <p id="totalRushingYards">0</p>
+                    <p>League Avg: <span id="avgRushingYards">0</span></p>
+                </div>
+                <div class="card touchdowns">
+                    <h3>Total Touchdowns</h3>
+                    <p id="totalTouchdowns">0</p>
+                    <p>League Avg: <span id="avgTouchdowns">0</span></p>
+                </div>
+                <div class="card points">
+                    <h3>Avg Points/Game</h3>
+                    <p id="avgPoints">0</p>
+                    <p>League Avg: <span id="leagueAvgPoints">0</span></p>
+                </div>
             </div>
-            <div class="card touchdowns">
-                <h3>Total Touchdowns</h3>
-                <p id="totalTouchdowns">0</p>
-                <p>League Avg: <span id="avgTouchdowns">0</span></p>
-            </div>
-            <div class="card points">
-                <h3>Avg Points/Game</h3>
-                <p id="avgPoints">0</p>
-                <p>League Avg: <span id="leagueAvgPoints">0</span></p>
-            </div>
-        </div>
-        <div class="charts">
-            <div class="chart-container">
-                <canvas id="teamWinsChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <canvas id="playerPerformanceChart"></canvas>
+            <div class="charts">
+                <div class="chart-container">
+                    <canvas id="teamWinsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="playerPerformanceChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -194,12 +246,12 @@ Date: 20 Jan 2025
 
         // Sample NFL Data (replace with your actual data)
         const nflData = {
-            teams: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-            wins: [10, 8, 12, 6, 9],
-            passingYards: [4500, 4200, 4800, 3900, 4100],
-            rushingYards: [2000, 1800, 2200, 1500, 1900],
-            touchdowns: [40, 35, 45, 30, 38],
-            points: [25, 22, 28, 19, 24]
+            teams: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E', 'Team F', 'Team G', 'Team H'],
+            wins: [10, 8, 12, 6, 9, 11, 7, 13],
+            passingYards: [4500, 4200, 4800, 3900, 4100, 4600, 4000, 5000],
+            rushingYards: [2000, 1800, 2200, 1500, 1900, 2100, 1700, 2300],
+            touchdowns: [40, 35, 45, 30, 38, 42, 32, 48],
+            points: [25, 22, 28, 19, 24, 26, 20, 30]
         };
 
         // Calculate Averages
@@ -249,14 +301,16 @@ Date: 20 Jan 2025
             }
         });
 
-        // Placeholder for Player Performance Chart
+        // Player Performance Chart (Example: Passing Yards)
         const playerPerformanceData = {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+            labels: nflData.teams,
             datasets: [{
-                label: 'Player X - Passing Yards',
-                data: [250, 300, 200, 350, 280],
+                label: 'Total Passing Yards',
+                data: nflData.passingYards,
                 borderColor: '#eab308',
-                tension: 0.4
+                backgroundColor: '#eab30880', // Add a background color with some transparency
+                borderWidth: 2,
+                tension: 0.4 // Adjust the curve of the line
             }]
         };
 
