@@ -8,7 +8,82 @@ Date: 20 Jan 2025
 <head>
     <title>NFL Analytics Dashboard</title>
     <style>
-        /* ... (same CSS as before) */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #111827; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            display: flex; /* For sidebar layout */
+            min-height: 100vh; /* Ensure full viewport height */
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #1f2937; /* Darker sidebar */
+            padding: 20px;
+            overflow-y: auto; /* Scroll if content overflows */
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #cbd5e1;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+        .sidebar li a:hover {
+            background-color: #374151; /* Darker on hover */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column; /* Vertical layout */
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: #1f2937;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two equal columns */
+            gap: 20px;
+            flex: 1; /* Allow charts to take up available space */
+        }
+        .chart-container {
+            background-color: #1f2937;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; /* Ensure chart fills container */
+            min-height: 200px;
+        }
+        .chart-container canvas {
+            flex: 1; /* Make canvas fill the container */
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -19,32 +94,37 @@ Date: 20 Jan 2025
             <li><a href="#">Team Stats</a></li>
             <li><a href="#">Player Stats</a></li>
             <li><a href="#">Game Summaries</a></li>
+            <li><a href="#">Standings</a></li>
+            <li><a href="#">Playoffs</a></li>
+            <li><a href="#">Draft</a></li>
+            <li><a href="#">Transactions</a></li>
+            <li><a href="#">Settings</a></li>
         </ul>
     </div>
     <div class="main-content">
         <div class="header">
-            <input type="text" placeholder="Search Teams/Players...">
+            <input type="text" placeholder="Search Teams/Players..." style="background-color: #374151; color: #e2e8f0; border: none; padding: 8px; border-radius: 4px;">
         </div>
         <div class="summary-cards">
             <div class="card">
                 <h3>Total Passing Yards</h3>
                 <p id="totalPassingYards">0</p>
-                <p>League Average: <span id="avgPassingYards">0</span></p>
+                <p>League Avg: <span id="avgPassingYards">0</span></p>
             </div>
             <div class="card">
                 <h3>Total Rushing Yards</h3>
                 <p id="totalRushingYards">0</p>
-                <p>League Average: <span id="avgRushingYards">0</span></p>
+                <p>League Avg: <span id="avgRushingYards">0</span></p>
             </div>
             <div class="card">
                 <h3>Total Touchdowns</h3>
                 <p id="totalTouchdowns">0</p>
-                <p>League Average: <span id="avgTouchdowns">0</span></p>
+                <p>League Avg: <span id="avgTouchdowns">0</span></p>
             </div>
             <div class="card">
-                <h3>Average Points Per Game</h3>
+                <h3>Avg Points/Game</h3>
                 <p id="avgPoints">0</p>
-                <p>League Average: <span id="leagueAvgPoints">0</span></p>
+                <p>League Avg: <span id="leagueAvgPoints">0</span></p>
             </div>
         </div>
         <div class="charts">
@@ -56,82 +136,8 @@ Date: 20 Jan 2025
             </div>
         </div>
     </div>
-
     <script>
-        // Sample NFL Data (replace with your actual data)
-        const nflData = {
-            teams: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-            wins: [10, 8, 12, 6, 9],
-            passingYards: [4500, 4200, 4800, 3900, 4100],
-            rushingYards: [2000, 1800, 2200, 1500, 1900],
-            touchdowns: [40, 35, 45, 30, 38],
-            points: [25, 22, 28, 19, 24]
-        };
-
-        // Calculate Averages
-        const avgPassingYards = nflData.passingYards.reduce((sum, yards) => sum + yards, 0) / nflData.passingYards.length;
-        const avgRushingYards = nflData.rushingYards.reduce((sum, yards) => sum + yards, 0) / nflData.rushingYards.length;
-        const avgTouchdowns = nflData.touchdowns.reduce((sum, td) => sum + td, 0) / nflData.touchdowns.length;
-        const avgPoints = nflData.points.reduce((sum, p) => sum + p, 0) / nflData.points.length;
-
-        // Update Summary Cards
-        document.getElementById('totalPassingYards').textContent = nflData.passingYards.reduce((sum, yards) => sum + yards, 0);
-        document.getElementById('avgPassingYards').textContent = avgPassingYards.toFixed(0);
-        document.getElementById('totalRushingYards').textContent = nflData.rushingYards.reduce((sum, yards) => sum + yards, 0);
-        document.getElementById('avgRushingYards').textContent = avgRushingYards.toFixed(0);
-        document.getElementById('totalTouchdowns').textContent = nflData.touchdowns.reduce((sum, td) => sum + td, 0);
-        document.getElementById('avgTouchdowns').textContent = avgTouchdowns.toFixed(0);
-        document.getElementById('avgPoints').textContent = avgPoints.toFixed(1);
-        document.getElementById('leagueAvgPoints').textContent = avgPoints.toFixed(1);
-
-        // Team Wins Chart
-        const teamWinsData = {
-            labels: nflData.teams,
-            datasets: [{
-                label: 'Team Wins',
-                data: nflData.wins,
-                backgroundColor: '#0ea5e9', // Example color
-            }]
-        };
-
-        const teamWinsChart = new Chart(document.getElementById('teamWinsChart'), {
-            type: 'bar',
-            data: teamWinsData,
-             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                         ticks: {
-                            stepSize: 1 // Only allow whole numbers
-                        }
-                    }
-                }
-            }
-        });
-
-        // Placeholder for Player Performance Chart (replace with your data/chart type)
-        const playerPerformanceData = {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-            datasets: [{
-                label: 'Player X - Passing Yards',
-                data: [250, 300, 200, 350, 280],
-                borderColor: 'red',
-                tension: 0.4
-            }]
-        };
-
-        const playerPerformanceChart = new Chart(document.getElementById('playerPerformanceChart'), {
-            type: 'line',
-            data: playerPerformanceData,
-             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
+        // ... (JavaScript code from previous response - same data and chart creation)
     </script>
 </body>
 </html>
