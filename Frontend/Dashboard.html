@@ -26,20 +26,26 @@ Date: 20 Jan 2025
             width: 250px;
             background-color: #111111;
             padding: 20px;
-            transition: margin-left 0.3s ease-in-out;
+            transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
             height: 100vh;
             overflow-y: auto;
             position: fixed;
         }
 
         .sidebar.collapsed {
-            margin-left: -250px;
+            margin-left: 0px;
+			width: 80px;
         }
 
-        .sidebar.collapsed span {
+        .sidebar.collapsed ul li a span {
             display: none;
         }
 
+		.sidebar.collapsed ul li a {
+			 padding-left: 20px; 
+			 padding-right: 10px; 
+		 }
+		 
         .hamburger {
             cursor: pointer;
             padding: 10px;
@@ -52,12 +58,12 @@ Date: 20 Jan 2025
             z-index: 102;
             position: fixed;
             top: 20px;
-            left: 270px;
+            left: 35px;
             transition: left 0.3s ease-in-out;
         }
 
         .hamburger.collapsed {
-            left: 20px;
+            left: 35px;
         }
 
         .sidebar ul {
@@ -98,7 +104,7 @@ Date: 20 Jan 2025
         }
 
         .main-content.collapsed {
-            margin-left: 80px;
+            margin-left: 100px;
         }
 
         .header {
@@ -349,17 +355,19 @@ Date: 20 Jan 2025
             <div class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
             </div>
-            <ul>
-                <li><a href="#"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
-                <li><a href="#"><i class="fas fa-users"></i><span>Team Stats</span></a></li>
-                <li><a href="#"><i class="fas fa-user"></i><span>Player Stats</span></a></li>
-                <li><a href="#"><i class="fas fa-table"></i><span>Game Summaries</span></a></li>
-                <li><a href="#"><i class="fas fa-chart-pie"></i><span>Standings</span></a></li>
-                <li><a href="#"><i class="fas fa-trophy"></i><span>Playoffs</span></a></li>
-                <li><a href="#"><i class="fas fa-user-plus"></i><span>Draft</span></a></li>
-                <li><a href="#"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
-                <li><a href="#"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-            </ul>
+      
+			<ul>
+				<li><a href="#" title="Dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+				<li><a href="#" title="Team Stats"><i class="fas fa-users"></i><span>Team Stats</span></a></li>
+				<li><a href="#" title="Player Stats"><i class="fas fa-user"></i><span>Player Stats</span></a></li>
+				<li><a href="#" title="Game Summaries"><i class="fas fa-table"></i><span>Game Summaries</span></a></li>
+				<li><a href="#" title="Standings"><i class="fas fa-chart-pie"></i><span>Standings</span></a></li>
+				<li><a href="#" title="Playoffs"><i class="fas fa-trophy"></i><span>Playoffs</span></a></li>
+				<li><a href="#" title="Draft"><i class="fas fa-user-plus"></i><span>Draft</span></a></li>
+				<li><a href="#" title="Transactions"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
+				<li><a href="#" title="Settings"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+			</ul>
+
         </div>
         <div class="main-content" id="main-content">
             <div class="header">
@@ -512,13 +520,25 @@ Date: 20 Jan 2025
             const sidebar = document.getElementById('sidebar');
             const hamburger = document.getElementById('hamburger');
             const mainContent = document.getElementById('main-content');
+			const sidebarLinks = document.querySelectorAll('.sidebar ul li a'); // Get all the sidebar links
 
             hamburger.addEventListener('click', () => {
                 sidebar.classList.toggle('collapsed');
                 mainContent.classList.toggle('collapsed');
                 hamburger.classList.toggle('collapsed');
-            });
 
+				// Toggle the tooltip only when collapsed
+				if(sidebar.classList.contains('collapsed')) {
+					sidebarLinks.forEach(link => {
+						link.setAttribute('title', link.getAttribute('title')); // Add the title attribute
+					})
+			    } else {
+					sidebarLinks.forEach(link => {
+						link.removeAttribute('title'); // remove the title attribute
+					});
+			    }
+			});
+			
             // Sample NFL Data (replace with your actual data)
             const nflData = {
                 teams: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E', 'Team F', 'Team G', 'Team H'],
