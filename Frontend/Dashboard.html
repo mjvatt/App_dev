@@ -518,25 +518,32 @@ Date: 20 Jan 2025
 
         <script>
             const sidebar = document.getElementById('sidebar');
-            const hamburger = document.getElementById('hamburger');
-            const mainContent = document.getElementById('main-content');
-			const sidebarLinks = document.querySelectorAll('.sidebar ul li a'); // Get all the sidebar links
+			const hamburger = document.getElementById('hamburger');
+			const mainContent = document.getElementById('main-content');
+			const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
 
-            hamburger.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('collapsed');
-                hamburger.classList.toggle('collapsed');
+			// Store original titles on initial load
+			sidebarLinks.forEach(link => {
+			  link.dataset.originalTitle = link.getAttribute('title'); // Store in data attribute
+			  link.removeAttribute('title'); // Remove title attribute initially
+			});
+
+
+			hamburger.addEventListener('click', () => {
+				sidebar.classList.toggle('collapsed');
+				mainContent.classList.toggle('collapsed');
+				hamburger.classList.toggle('collapsed');
 
 				// Toggle the tooltip only when collapsed
 				if(sidebar.classList.contains('collapsed')) {
-					sidebarLinks.forEach(link => {
-						link.setAttribute('title', link.getAttribute('title')); // Add the title attribute
-					})
-			    } else {
-					sidebarLinks.forEach(link => {
-						link.removeAttribute('title'); // remove the title attribute
-					});
-			    }
+				  sidebarLinks.forEach(link => {
+					link.setAttribute('title', link.dataset.originalTitle); // Use stored title
+				  });
+				} else {
+				  sidebarLinks.forEach(link => {
+					link.removeAttribute('title'); // remove the title attribute
+				  });
+				}
 			});
 			
             // Sample NFL Data (replace with your actual data)
