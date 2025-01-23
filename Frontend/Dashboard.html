@@ -334,7 +334,6 @@ Date: 20 Jan 2025
              height: 350px;
         }
 
-
         .additional-charts .salary-cap-list-container {
             background-color: #111111;
             padding: 20px;
@@ -343,6 +342,17 @@ Date: 20 Jan 2025
 			overflow-y: auto;
 			max-height: 350px;
         }
+		
+		.additional-charts .salary-cap-list-container .salary-cap-list-header {
+			display: flex;
+            padding: 0px 15px 10px 0px;
+			margin-bottom: 10px;
+			justify-content: space-between;
+			align-items:center;
+			font-weight: bold;
+			font-size: 1rem;
+            border-bottom: 1px solid #374151;
+		}
 
         .additional-charts .salary-cap-list {
             list-style: none;
@@ -350,16 +360,64 @@ Date: 20 Jan 2025
             margin: 0;
         }
 		
-        .additional-charts .salary-cap-list li {
+		.additional-charts .salary-cap-list li {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
             padding-bottom: 10px;
             border-bottom: 1px dashed #374151;
             margin-bottom: 10px;
+			justify-content: space-between;
         }
+		
+		.additional-charts .salary-cap-list li span:first-child {
+			margin-left: 15px;
+			margin-right: 37px; /* gap between rank and logo */
+			font-weight: bold;
+        }
+		
+		.additional-charts .salary-cap-list-container .salary-cap-list-header span:first-child {
+			  margin-right: 10px; 
+        }
+		
+		.additional-charts .salary-cap-list li img {
+			width: 25px; 
+			height: 25px; 
+			margin-right: 10px; /* gap between logo and team name */
+			vertical-align: middle;
+		}
+		
+		.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(2){
+			  flex-grow: 1;
+			  margin-right: 20px;
+		}
+		
+		.additional-charts .salary-cap-list li span:nth-child(3) { 
+            flex-grow: 1;   
+            margin-right: 20px; 
+			font-weight: bold;
+        }
+		
+		.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(3){
+			 margin-right: 250px; 
+		}
+		
+		.additional-charts .salary-cap-list li span:nth-child(4){
+			font-weight: bold;
+			margin-right: 73px;
+		}
+		
+		.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(4){
+			 margin-left: 75px; 
+			 margin-right: 65px;
+		}
+		
+		.additional-charts .salary-cap-list li span:last-child {
+			font-weight: bold; 
+			margin-right: 25px;
+		}
         
-        .additional-charts .salary-cap-list li:last-child {
-           border-bottom: none;
+		.additional-charts .salary-cap-list li:last-child {
+			border-bottom: none;
         }
 		
         /* Responsive Styles */
@@ -564,60 +622,67 @@ Date: 20 Jan 2025
                 </div>
             </div>
 
-                  
-			<div class="additional-charts">
-                 <div class="salary-cap-list-container" id="playerSalaryListContainer">
-                    <h3>Player Salaries</h3>
-                    <ul class="salary-cap-list" id="playerSalaryList">
-                         <!-- Player list items will go here -->
-                    </ul>
-                     <div class="dropdowns">
-                        <label for="team-select-salaryChart">Select Team:</label>
-                        <select id="team-select-salaryChart">
-                           <option value="Arizona Cardinals">Arizona Cardinals</option>
-                            <option value="Atlanta Falcons">Atlanta Falcons</option>
-                            <option value="Baltimore Ravens">Baltimore Ravens</option>
-                            <option value="Buffalo Bills">Buffalo Bills</option>
-                            <option value="Carolina Panthers">Carolina Panthers</option>
-                            <option value="Chicago Bears">Chicago Bears</option>
-                            <option value="Cincinnati Bengals">Cincinnati Bengals</option>
-                            <option value="Cleveland Browns">Cleveland Browns</option>
-                            <option value="Dallas Cowboys">Dallas Cowboys</option>
-                            <option value="Denver Broncos">Denver Broncos</option>
-                            <option value="Detroit Lions">Detroit Lions</option>
-                            <option value="Green Bay Packers">Green Bay Packers</option>
-                            <option value="Houston Texans">Houston Texans</option>
-                            <option value="Indianapolis Colts">Indianapolis Colts</option>
-                            <option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
-                            <option value="Kansas City Chiefs">Kansas City Chiefs</option>
-                            <option value="Los Angeles Chargers">Los Angeles Chargers</option>
-                            <option value="Los Angeles Rams">Los Angeles Rams</option>
-                            <option value="Las Vegas Raiders">Las Vegas Raiders</option>
-                            <option value="Miami Dolphins">Miami Dolphins</option>
-                            <option value="Minnesota Vikings">Minnesota Vikings</option>
-                            <option value="New England Patriots">New England Patriots</option>
-                            <option value="New Orleans Saints">New Orleans Saints</option>
-                            <option value="New York Giants">New York Giants</option>
-                            <option value="New York Jets">New York Jets</option>
-                            <option value="Philadelphia Eagles">Philadelphia Eagles</option>
-                            <option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
-                            <option value="San Francisco 49ers">San Francisco 49ers</option>
-                            <option value="Seattle Seahawks">Seattle Seahawks</option>
-                            <option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
-                            <option value="Tennessee Titans">Tennessee Titans</option>
-                            <option value="Washington Commanders">Washington Commanders</option>
+        <div class="additional-charts">
+			<div class="salary-cap-list-container" id="playerSalaryListContainer">
+				<h3>Player Salaries</h3>
+				<ul class="salary-cap-list" id="playerSalaryList">
+					<!-- Player list items will go here -->
+				</ul>
+				<div class="dropdowns">
+					<label for="team-select-salaryChart">Select Team:</label>
+					<select id="team-select-salaryChart">
+						<option value="Arizona Cardinals">Arizona Cardinals</option>
+						<option value="Atlanta Falcons">Atlanta Falcons</option>
+						<option value="Baltimore Ravens">Baltimore Ravens</option>
+						<option value="Buffalo Bills">Buffalo Bills</option>
+						<option value="Carolina Panthers">Carolina Panthers</option>
+						<option value="Chicago Bears">Chicago Bears</option>
+						<option value="Cincinnati Bengals">Cincinnati Bengals</option>
+						<option value="Cleveland Browns">Cleveland Browns</option>
+						<option value="Dallas Cowboys">Dallas Cowboys</option>
+						<option value="Denver Broncos">Denver Broncos</option>
+						<option value="Detroit Lions">Detroit Lions</option>
+						<option value="Green Bay Packers">Green Bay Packers</option>
+						<option value="Houston Texans">Houston Texans</option>
+						<option value="Indianapolis Colts">Indianapolis Colts</option>
+						<option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
+						<option value="Kansas City Chiefs">Kansas City Chiefs</option>
+						<option value="Los Angeles Chargers">Los Angeles Chargers</option>
+						<option value="Los Angeles Rams">Los Angeles Rams</option>
+						<option value="Las Vegas Raiders">Las Vegas Raiders</option>
+						<option value="Miami Dolphins">Miami Dolphins</option>
+						<option value="Minnesota Vikings">Minnesota Vikings</option>
+						<option value="New England Patriots">New England Patriots</option>
+						<option value="New Orleans Saints">New Orleans Saints</option>
+						<option value="New York Giants">New York Giants</option>
+						<option value="New York Jets">New York Jets</option>
+						<option value="Philadelphia Eagles">Philadelphia Eagles</option>
+						<option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
+						<option value="San Francisco 49ers">San Francisco 49ers</option>
+						<option value="Seattle Seahawks">Seattle Seahawks</option>
+						<option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
+						<option value="Tennessee Titans">Tennessee Titans</option>
+						<option value="Washington Commanders">Washington Commanders</option>
 
-                        </select>
-                     </div>
-                </div>
-                <div class="salary-cap-list-container">
-                    <h3>Team Salary Cap</h3>
-                    <ul class="salary-cap-list" id="salaryCapList">
-                    </ul>
-                </div>
-            </div>
+					</select>
+				</div>
+			</div>
+      
+			<div class="salary-cap-list-container">
+				<h3>Team Salary Cap Space</h3>
+				<div class="salary-cap-list-header">
+					<span>Rank</span>
+					<span></span> <!--Empty span for correct spacing-->
+					<span>Team</span>
+					<span>Cap Space</span>
+					<span>Dead Money</span>
+				</div>
+				
+				<ul class="salary-cap-list" id="salaryCapList">
+				</ul>
+			</div>
 
-    
+		</div>    
 
         <script>
             const sidebar = document.getElementById('sidebar');
@@ -952,41 +1017,47 @@ Date: 20 Jan 2025
                 }
             };
 
-            function updateSalaryCapList() {
-                const salaryCapListElement = document.getElementById('salaryCapList');
-                salaryCapListElement.innerHTML = ''; // Clear previous list
+			function updateSalaryCapList() {
+				const salaryCapListElement = document.getElementById('salaryCapList');
+				salaryCapListElement.innerHTML = ''; 
 
-                // Convert the salaryCap object to an array of [team, cap] pairs
-                const sortedTeams = Object.entries(nflData.salaryCap)
-                    .sort(([, capA], [, capB]) => capB - capA);
+				// Convert the salaryCap object to an array of [team, cap] pairs
+				const sortedTeams = Object.entries(nflData.salaryCap)
+					.sort(([, capA], [, capB]) => capB - capA);
 
-                sortedTeams.forEach(([team, cap]) => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `<span>${team}</span><span>$${cap.toLocaleString()}</span>`;
-                    salaryCapListElement.appendChild(listItem);
-                });
-            }
+				sortedTeams.forEach(([team, cap], index) => {
+					const rank = index + 1;
+					// Add mock data for dead money. This is something that you will need to adjust to match your dataset.
+					const deadMoney = Math.floor(Math.random() * (8000000 - 1000000 + 1)) + 1000000;
+				   const listItem = document.createElement('li');
+					// Corrected path to use team name for the image name
+					listItem.innerHTML = `<span>${rank}</span><img src="./images/${team.toLowerCase().replace(/ /g, '_')}.png" alt="${team} Logo"/><span>${team}</span><span style="text-align: right;">$${cap.toLocaleString()}</span><span style="text-align: right;">$${deadMoney.toLocaleString()}</span>`;
+					salaryCapListElement.appendChild(listItem);
+				});
+			}
 
-            // Function to update the chart based on selected data
-            function updateChart(chart, xAxisDataKey, yAxisDataKey) {
-                chart.data.labels = nflData[xAxisDataKey];
-                chart.data.datasets[0].data = nflData[yAxisDataKey];
-                chart.update();
-            }
-			
 			function updatePlayerSalaryChart(selectedTeam) {
 				const playerSalaryListElement = document.getElementById('playerSalaryList');
-				playerSalaryListElement.innerHTML = ''; // Clear previous list
+				playerSalaryListElement.innerHTML = '';
 
 				const teamPlayers = nflData.players[selectedTeam];
 				if (!teamPlayers) return;
 
 				teamPlayers.forEach(player => {
 					const listItem = document.createElement('li');
-                    listItem.innerHTML = `<span>${player.name}</span><span style="text-align: right;">Salary: $${player.salary.toLocaleString()}</span><span style="text-align: right;">Cap Hit: $${player.capHit.toLocaleString()}</span>`;
-                    playerSalaryListElement.appendChild(listItem);
-                });
+					// Corrected path to use the team name for the image name
+					listItem.innerHTML = `<img src="./images/${selectedTeam.toLowerCase().replace(/ /g, '_')}.png" alt="${selectedTeam} Logo"/><span>${player.name}</span><span style="text-align: right;">Salary: $${player.salary.toLocaleString()}</span><span style="text-align: right;">Cap Hit: $${player.capHit.toLocaleString()}</span>`;
+					playerSalaryListElement.appendChild(listItem);
+				});
+			}
+			
+			// Function to update the chart based on selected data
+            function updateChart(chart, xAxisDataKey, yAxisDataKey) {
+                chart.data.labels = nflData[xAxisDataKey];
+                chart.data.datasets[0].data = nflData[yAxisDataKey];
+                chart.update();
             }
+
 
             // Get references to the dropdown menus and charts
             const teamWinsXAxisSelect = document.getElementById('x-axis-select-teamWins');
