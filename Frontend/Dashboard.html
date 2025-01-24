@@ -345,7 +345,7 @@ Date: 20 Jan 2025
 		
 		.additional-charts .salary-cap-list-container .salary-cap-list-header {
 			display: flex;
-            padding: 0px 15px 10px 0px;
+            padding: 0px 15px 10px 15px;
 			margin-bottom: 10px;
 			justify-content: space-between;
 			align-items:center;
@@ -373,10 +373,16 @@ Date: 20 Jan 2025
 			margin-left: 15px;
 			margin-right: 37px; /* gap between rank and logo */
 			font-weight: bold;
+			flex-basis: 30px; /* Width for Rank Column */
+			flex-grow: 0; /* Don't allow Rank to grow */
+			text-align: left;
         }
 		
 		.additional-charts .salary-cap-list-container .salary-cap-list-header span:first-child {
-			  margin-right: 10px; 
+			  margin-right: 37px; 
+			  flex-basis: 30px;
+			  flex-grow: 0;
+			  text-align: left;
         }
 		
 		.additional-charts .salary-cap-list li img {
@@ -387,33 +393,55 @@ Date: 20 Jan 2025
 		}
 		
 		.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(2){
-			  flex-grow: 1;
-			  margin-right: 20px;
+			  flex-grow: 0; /* Prevent empty span from growing */
+			  flex-basis: 35px;
+			  margin-right: 0px;
 		}
 		
 		.additional-charts .salary-cap-list li span:nth-child(3) { 
-            flex-grow: 1;   
-            margin-right: 20px; 
+            flex-grow: 1;  /* Need to allow Team name to grow */
+			flex-basis: auto;  /* Auto-width for Team header */
+            margin-right: 0px; 
 			font-weight: bold;
+			text-align: left;
         }
 		
 		.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(3){
-			 margin-right: 250px; 
+			 margin-right: 0px; 
+			 flex-grow: 1;
+			 flex-basis: auto;
+			 text-align: left;
 		}
 		
 		.additional-charts .salary-cap-list li span:nth-child(4){
 			font-weight: bold;
-			margin-right: 73px;
+			margin-right: 0px;
+			flex-basis: 120px;  /* Don't allow Cap Space to grow */
+			flex-grow: 0;  /* Don't allow Cap Space header to grow */
+			text-align: right;
 		}
 		
 		.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(4){
-			 margin-left: 75px; 
-			 margin-right: 65px;
+			 margin-left: 0px; 
+			 margin-right: 0px;
+			 flex-basis: 120px;  /* Width for Cap Space header */
+			 flex-grow: 0;
+			 text-align: right;
 		}
 		
 		.additional-charts .salary-cap-list li span:last-child {
 			font-weight: bold; 
-			margin-right: 25px;
+			margin-right: 15px;
+			flex-basis: 100px;  /* Width for Dead Money */
+			flex-grow: 0;  /* Don't allow Dead Money to grow */
+			text-align: right;
+		}
+		
+		.additional-charts .salary-cap-list-container .salary-cap-list-header span:last-child {
+			margin-right: 15px;
+			flex-basis: 100px;  /* Width for Dead Money header */
+			flex-grow: 0;  /* Don't allow Dead Money header to grow */
+			text-align: right; 
 		}
         
 		.additional-charts .salary-cap-list li:last-child {
