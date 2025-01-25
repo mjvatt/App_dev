@@ -28,7 +28,7 @@ Date: 20 Jan 2025
             padding: 20px;
             transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
             height: 100vh;
-            overflow-y: auto; 
+            overflow-y: auto;
             position: fixed;
         }
 
@@ -450,6 +450,55 @@ Date: 20 Jan 2025
 			border-bottom: none;
         }
 		
+		 /* Team Stats Page Specific Styles */
+		.team-stats-page {
+            display: none; /* Initially hidden */
+            flex-direction: column;
+        }
+
+		.team-stats-page .dropdown-container {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .team-stats-page .dropdown-container label {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+		
+		.team-stats-page .dropdown-container select {
+            background-color: #374151;
+            color: #e2e8f0;
+            border: 1px solid #6b7280;
+            padding: 8px;
+            border-radius: 4px;
+			min-width: 200px;
+        }
+
+		.team-stats-page .team-charts {
+			display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+			padding-left: 20px;
+			padding-right: 20px;
+		}
+
+		.team-stats-page .team-charts .chart-container {
+			 height: 350px;
+		}
+
+		.team-stats-page .team-summary-cards {
+            display: grid;
+            grid-template-areas:
+                "passing rushing touchdowns points";
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+			margin-top: 40px;
+			padding-left: 20px;
+			padding-right: 20px;
+		}
         /* Responsive Styles */
         @media (max-width: 768px) {
             .page-links {
@@ -575,12 +624,128 @@ Date: 20 Jan 2025
             </div>
 
             <div class="page-links">
-                <a href="#" class="active">Dashboard</a>
-                <a href="#">Team Stats</a>
+                <a href="#" >Dashboard</a>
+                <a href="#" class="active">Team Stats</a>
                 <a href="#">Player Stats</a>
             </div>
+			
+			<!-- Team Stats Page Content -->
+			<div class="team-stats-page" id="teamStatsPage">
+				<div class="dropdown-container">
+					<label for="team-select">Select Team:</label>
+					<select id="team-select">
+						<option value="Arizona Cardinals">Arizona Cardinals</option>
+						<option value="Atlanta Falcons">Atlanta Falcons</option>
+						<option value="Baltimore Ravens">Baltimore Ravens</option>
+						<option value="Buffalo Bills">Buffalo Bills</option>
+						<option value="Carolina Panthers">Carolina Panthers</option>
+						<option value="Chicago Bears">Chicago Bears</option>
+						<option value="Cincinnati Bengals">Cincinnati Bengals</option>
+						<option value="Cleveland Browns">Cleveland Browns</option>
+						<option value="Dallas Cowboys">Dallas Cowboys</option>
+						<option value="Denver Broncos">Denver Broncos</option>
+						<option value="Detroit Lions">Detroit Lions</option>
+						<option value="Green Bay Packers">Green Bay Packers</option>
+						<option value="Houston Texans">Houston Texans</option>
+						<option value="Indianapolis Colts">Indianapolis Colts</option>
+						<option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
+						<option value="Kansas City Chiefs">Kansas City Chiefs</option>
+						<option value="Los Angeles Chargers">Los Angeles Chargers</option>
+						<option value="Los Angeles Rams">Los Angeles Rams</option>
+						<option value="Las Vegas Raiders">Las Vegas Raiders</option>
+						<option value="Miami Dolphins">Miami Dolphins</option>
+						<option value="Minnesota Vikings">Minnesota Vikings</option>
+						<option value="New England Patriots">New England Patriots</option>
+						<option value="New Orleans Saints">New Orleans Saints</option>
+						<option value="New York Giants">New York Giants</option>
+						<option value="New York Jets">New York Jets</option>
+						<option value="Philadelphia Eagles">Philadelphia Eagles</option>
+						<option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
+						<option value="San Francisco 49ers">San Francisco 49ers</option>
+						<option value="Seattle Seahawks">Seattle Seahawks</option>
+						<option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
+						<option value="Tennessee Titans">Tennessee Titans</option>
+						<option value="Washington Commanders">Washington Commanders</option>
 
-            <div class="summary-cards">
+					</select>
+				</div>
+
+				<div class="team-summary-cards" id="teamSummaryCards">
+					<div class="card passing">
+						<h3>Total Passing Yards</h3>
+						<p id="teamTotalPassingYards">0</p>
+						<p>League Avg: <span id="teamAvgPassingYards">0</span></p>
+					</div>
+					<div class="card rushing">
+						<h3>Total Rushing Yards</h3>
+						<p id="teamTotalRushingYards">0</p>
+						<p>League Avg: <span id="teamAvgRushingYards">0</span></p>
+					</div>
+					<div class="card touchdowns">
+						<h3>Total Touchdowns</h3>
+						<p id="teamTotalTouchdowns">0</p>
+						<p>League Avg: <span id="teamAvgTouchdowns">0</span></p>
+					</div>
+					<div class="card points">
+						<h3>Avg Points/Game</h3>
+						<p id="teamAvgPoints">0</p>
+						<p>League Avg: <span id="teamLeagueAvgPoints">0</span></p>
+					</div>
+				</div>
+
+				 <div class="team-charts" id="teamCharts">
+					<div class="chart-container">
+						<canvas id="teamWinsChartTeamPage"></canvas>
+						<div class="dropdowns">
+							<label for="x-axis-select-teamWins-teamPage">X-axis:</label>
+							<select id="x-axis-select-teamWins-teamPage">
+								<option value="teams">Teams</option>
+								<option value="wins">Wins</option>
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+							</select>
+
+							<label for="y-axis-select-teamWins-teamPage">Y-axis:</label>
+							<select id="y-axis-select-teamWins-teamPage">
+								<option value="wins">Wins</option>
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="chart-container">
+						<canvas id="playerPerformanceChartTeamPage"></canvas>
+						<div class="dropdowns">
+							<label for="x-axis-select-playerPerf-teamPage">X-axis:</label>
+							<select id="x-axis-select-playerPerf-teamPage">
+								<option value="teams">Teams</option>
+								<option value="wins">Wins</option>
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+							</select>
+
+							<label for="y-axis-select-playerPerf-teamPage">Y-axis:</label>
+							<select id="y-axis-select-playerPerf-teamPage">
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+								<option value="wins">Wins</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Team Stats Page Content -->
+			
+            <div class="summary-cards" id="dashboardSummaryCards">
                 <div class="card passing">
                     <h3>Total Passing Yards</h3>
                     <p id="totalPassingYards">0</p>
@@ -602,7 +767,7 @@ Date: 20 Jan 2025
                     <p>League Avg: <span id="leagueAvgPoints">0</span></p>
                 </div>
             </div>
-            <div class="charts">
+            <div class="charts" id="dashboardCharts">
                 <div class="chart-container">
                     <canvas id="teamWinsChart"></canvas>
                     <div class="dropdowns">
@@ -652,7 +817,7 @@ Date: 20 Jan 2025
                 </div>
             </div>
 
-        <div class="additional-charts">
+        <div class="additional-charts" id="dashboardAdditionalCharts">
 			<div class="salary-cap-list-container" id="playerSalaryListContainer">
 				<h3>Player Salaries</h3>
 				<ul class="salary-cap-list" id="playerSalaryList">
@@ -819,6 +984,232 @@ Date: 20 Jan 2025
                     "Tennessee Titans": 25000000,
                     "Washington Commanders": 29000000
                 },
+				teamSpecific: {
+                    "Arizona Cardinals": {
+						wins: 7,
+						passingYards: 4000,
+						rushingYards: 1800,
+						touchdowns: 35,
+						points: 20
+					},
+					"Atlanta Falcons": {
+						wins: 8,
+						passingYards: 4200,
+						rushingYards: 1900,
+						touchdowns: 38,
+						points: 22
+					},
+					"Baltimore Ravens": {
+						wins: 12,
+						passingYards: 4800,
+						rushingYards: 2200,
+						touchdowns: 45,
+						points: 28
+					},
+					"Buffalo Bills": {
+						wins: 10,
+						passingYards: 4100,
+						rushingYards: 1600,
+						touchdowns: 33,
+						points: 26
+					},
+					"Carolina Panthers": {
+						wins: 7,
+						passingYards: 3900,
+						rushingYards: 1700,
+						touchdowns: 32,
+						points: 18
+					},
+					"Chicago Bears": {
+						wins: 11,
+						passingYards: 4500,
+						rushingYards: 2100,
+						touchdowns: 42,
+						points: 25
+					},
+					"Cincinnati Bengals": {
+						wins: 9,
+						passingYards: 4200,
+						rushingYards: 2000,
+						touchdowns: 35,
+						points: 24
+					},
+					"Cleveland Browns": {
+						wins: 13,
+						passingYards: 4900,
+						rushingYards: 2300,
+						touchdowns: 48,
+						points: 30
+					},
+                    "Dallas Cowboys": {
+						wins: 11,
+						passingYards: 4700,
+						rushingYards: 2200,
+						touchdowns: 42,
+						points: 28
+					},
+					"Denver Broncos": {
+						wins: 8,
+						passingYards: 4200,
+						rushingYards: 1600,
+						touchdowns: 36,
+						points: 20
+					},
+					"Detroit Lions": {
+						wins: 12,
+						passingYards: 4600,
+						rushingYards: 2100,
+						touchdowns: 43,
+						points: 29
+					},
+                    "Green Bay Packers": {
+						wins: 10,
+						passingYards: 4100,
+						rushingYards: 1900,
+						touchdowns: 38,
+						points: 26
+					},
+					"Houston Texans": {
+						wins: 7,
+						passingYards: 3800,
+						rushingYards: 1500,
+						touchdowns: 30,
+						points: 18
+					},
+					"Indianapolis Colts": {
+						wins: 9,
+						passingYards: 4200,
+						rushingYards: 2100,
+						touchdowns: 37,
+						points: 23
+					},
+					"Jacksonville Jaguars": {
+						wins: 7,
+						passingYards: 4000,
+						rushingYards: 1600,
+						touchdowns: 34,
+						points: 22
+					},
+                    "Kansas City Chiefs": {
+						wins: 13,
+						passingYards: 5000,
+						rushingYards: 2300,
+						touchdowns: 48,
+						points: 30
+					},
+					"Los Angeles Chargers": {
+						wins: 10,
+						passingYards: 4600,
+						rushingYards: 1900,
+						touchdowns: 41,
+						points: 26
+					},
+					"Los Angeles Rams": {
+						wins: 8,
+						passingYards: 4100,
+						rushingYards: 2000,
+						touchdowns: 37,
+						points: 24
+					},
+					"Las Vegas Raiders": {
+						wins: 12,
+						passingYards: 4700,
+						rushingYards: 2200,
+						touchdowns: 44,
+						points: 29
+					},
+                    "Miami Dolphins": {
+						wins: 6,
+						passingYards: 3900,
+						rushingYards: 1500,
+						touchdowns: 32,
+						points: 19
+					},
+					"Minnesota Vikings": {
+						wins: 9,
+						passingYards: 4300,
+						rushingYards: 1900,
+						touchdowns: 36,
+						points: 24
+					},
+                    "New England Patriots": {
+						wins: 11,
+						passingYards: 4500,
+						rushingYards: 2100,
+						touchdowns: 40,
+						points: 27
+					},
+                    "New Orleans Saints": {
+						wins: 7,
+						passingYards: 3800,
+						rushingYards: 1600,
+						touchdowns: 34,
+						points: 21
+					},
+                    "New York Giants": {
+						wins: 13,
+						passingYards: 5000,
+						rushingYards: 2200,
+						touchdowns: 48,
+						points: 30
+					},
+					"New York Jets": {
+						wins: 10,
+						passingYards: 4400,
+						rushingYards: 2100,
+						touchdowns: 40,
+						points: 26
+					},
+                    "Philadelphia Eagles": {
+						wins: 8,
+						passingYards: 4100,
+						rushingYards: 1800,
+						touchdowns: 37,
+						points: 22
+					},
+                    "Pittsburgh Steelers": {
+						wins: 12,
+						passingYards: 4700,
+						rushingYards: 2300,
+						touchdowns: 45,
+						points: 29
+					},
+                    "San Francisco 49ers": {
+						wins: 6,
+						passingYards: 3900,
+						rushingYards: 1600,
+						touchdowns: 32,
+						points: 19
+					},
+                    "Seattle Seahawks": {
+						wins: 9,
+						passingYards: 4300,
+						rushingYards: 1900,
+						touchdowns: 39,
+						points: 25
+					},
+                    "Tampa Bay Buccaneers": {
+						wins: 7,
+						passingYards: 4000,
+						rushingYards: 1700,
+						touchdowns: 34,
+						points: 22
+					},
+					"Tennessee Titans": {
+						wins: 11,
+						passingYards: 4600,
+						rushingYards: 2000,
+						touchdowns: 42,
+						points: 28
+					},
+					"Washington Commanders": {
+						wins: 13,
+						passingYards: 4900,
+						rushingYards: 2300,
+						touchdowns: 48,
+						points: 30
+					}
+				},
                 players: {
                     "Arizona Cardinals": [
                         { name: 'Player 1', salary: 5000000, capHit: 5000000 },
@@ -993,7 +1384,7 @@ Date: 20 Jan 2025
                         { name: 'Player 122', salary: 3500000, capHit: 3500000 },
                         { name: 'Player 123', salary: 2000000, capHit: 2000000 },
                         { name: 'Player 124', salary: 1000000, capHit: 1000000 },
-                        { name: 'Player 125', salary: 1500000, capHit: 1500000 },
+                        { name: 'Player 125', salary: 1500000, capHit: 1500000 }
                     ],
                     "Philadelphia Eagles": [
                         { name: 'Player 126', salary: 6000000, capHit: 6000000 },
@@ -1007,7 +1398,7 @@ Date: 20 Jan 2025
                         { name: 'Player 132', salary: 3000000, capHit: 3000000 },
                         { name: 'Player 133', salary: 2500000, capHit: 2500000 },
                         { name: 'Player 134', salary: 1000000, capHit: 1000000 },
-                        { name: 'Player 135', salary: 1000000, capHit: 1000000 },
+                        { name: 'Player 135', salary: 1000000, capHit: 1000000 }
                     ],
                     "San Francisco 49ers": [
                         { name: 'Player 136', salary: 7000000, capHit: 7000000 },
@@ -1088,6 +1479,25 @@ Date: 20 Jan 2025
                 chart.update();
             }
 
+			function updateTeamStatsDisplay(selectedTeam) {
+				const teamData = nflData.teamSpecific[selectedTeam];
+				if (!teamData) return;
+			
+				// Update Summary Cards on the Team Stats Page
+				document.getElementById('teamTotalPassingYards').textContent = teamData.passingYards;
+				document.getElementById('teamAvgPassingYards').textContent = (teamData.passingYards / nflData.teams.length).toFixed(0);
+				document.getElementById('teamTotalRushingYards').textContent = teamData.rushingYards;
+				document.getElementById('teamAvgRushingYards').textContent = (teamData.rushingYards / nflData.teams.length).toFixed(0);
+				document.getElementById('teamTotalTouchdowns').textContent = teamData.touchdowns;
+				document.getElementById('teamAvgTouchdowns').textContent = (teamData.touchdowns / nflData.teams.length).toFixed(0);
+				document.getElementById('teamAvgPoints').textContent = teamData.points;
+                document.getElementById('teamLeagueAvgPoints').textContent = (nflData.points.reduce((sum, points) => sum + points, 0) / nflData.points.length).toFixed(1);
+
+				//Update Team Page Charts
+				updateChart(teamWinsChartTeamPage, 'teams', 'wins');
+				updateChart(playerPerformanceChartTeamPage, 'teams', 'passingYards');
+			}
+
 
             // Get references to the dropdown menus and charts
             const teamWinsXAxisSelect = document.getElementById('x-axis-select-teamWins');
@@ -1095,8 +1505,50 @@ Date: 20 Jan 2025
             const playerPerfXAxisSelect = document.getElementById('x-axis-select-playerPerf');
             const playerPerfYAxisSelect = document.getElementById('y-axis-select-playerPerf');
             const teamSelectSalaryChart = document.getElementById('team-select-salaryChart');
+			const teamSelectDropdown = document.getElementById('team-select');
+
+			const teamWinsXAxisSelectTeamPage = document.getElementById('x-axis-select-teamWins-teamPage');
+            const teamWinsYAxisSelectTeamPage = document.getElementById('y-axis-select-teamWins-teamPage');
+            const playerPerfXAxisSelectTeamPage = document.getElementById('x-axis-select-playerPerf-teamPage');
+            const playerPerfYAxisSelectTeamPage = document.getElementById('y-axis-select-playerPerf-teamPage');
 
             const teamWinsChart = new Chart(document.getElementById('teamWinsChart'), {
+                type: 'bar',
+                data: {
+                    labels: nflData.teams,
+                    datasets: [{
+                        label: 'Team Wins',
+                        data: nflData.wins,
+                        backgroundColor: '#0ea5e9',
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: '#374151'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#374151'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+			
+			const teamWinsChartTeamPage = new Chart(document.getElementById('teamWinsChartTeamPage'), {
                 type: 'bar',
                 data: {
                     labels: nflData.teams,
@@ -1167,6 +1619,42 @@ Date: 20 Jan 2025
                     }
                 }
             });
+			
+			const playerPerformanceChartTeamPage = new Chart(document.getElementById('playerPerformanceChartTeamPage'), {
+                type: 'line',
+                data: {
+                    labels: nflData.teams,
+                    datasets: [{
+                        label: 'Total Passing Yards',
+                        data: nflData.passingYards,
+                        borderColor: '#eab308',
+                        backgroundColor: '#eab30880',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#374151'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#374151'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
 
             // Add event listeners to the dropdown menus
             teamWinsXAxisSelect.addEventListener('change', () => {
@@ -1193,10 +1681,39 @@ Date: 20 Jan 2025
                 updateChart(playerPerformanceChart, xAxisDataKey, yAxisDataKey);
             });
 
+			teamWinsXAxisSelectTeamPage.addEventListener('change', () => {
+                const xAxisDataKey = teamWinsXAxisSelectTeamPage.value;
+                const yAxisDataKey = teamWinsYAxisSelectTeamPage.value;
+                updateChart(teamWinsChartTeamPage, xAxisDataKey, yAxisDataKey);
+            });
+
+            teamWinsYAxisSelectTeamPage.addEventListener('change', () => {
+                const xAxisDataKey = teamWinsXAxisSelectTeamPage.value;
+                const yAxisDataKey = teamWinsYAxisSelectTeamPage.value;
+                updateChart(teamWinsChartTeamPage, xAxisDataKey, yAxisDataKey);
+            });
+
+            playerPerfXAxisSelectTeamPage.addEventListener('change', () => {
+                const xAxisDataKey = playerPerfXAxisSelectTeamPage.value;
+                const yAxisDataKey = playerPerfYAxisSelectTeamPage.value;
+                updateChart(playerPerformanceChartTeamPage, xAxisDataKey, yAxisDataKey);
+            });
+
+            playerPerfYAxisSelectTeamPage.addEventListener('change', () => {
+                const xAxisDataKey = playerPerfXAxisSelectTeamPage.value;
+                const yAxisDataKey = playerPerfYAxisSelectTeamPage.value;
+                updateChart(playerPerformanceChartTeamPage, xAxisDataKey, yAxisDataKey);
+            });
+			
             teamSelectSalaryChart.addEventListener('change', () => {
                 const selectedTeam = teamSelectSalaryChart.value;
                 updatePlayerSalaryChart(selectedTeam);
             });
+
+			teamSelectDropdown.addEventListener('change', () => {
+				const selectedTeam = teamSelectDropdown.value;
+				updateTeamStatsDisplay(selectedTeam);
+			});
 
             // Calculate Averages
             const avgPassingYards = nflData.passingYards.reduce((sum, yards) => sum + yards, 0) / nflData.passingYards.length;
@@ -1216,21 +1733,26 @@ Date: 20 Jan 2025
 
             // Initial Population of Salary Cap List and Salary Chart
             updateSalaryCapList();
-            updatePlayerSalaryChart('Team A');
+            updatePlayerSalaryChart('Arizona Cardinals');
 
+			// Populate team stats on page load. Default team is first team in the array.
+			updateTeamStatsDisplay('Arizona Cardinals');
+			
             // Get references to the page links and content sections
             const pageLinks = document.querySelectorAll('.page-links a');
-            const summaryCards = document.querySelector('.summary-cards');
-            const charts = document.querySelector('.charts');
+            const summaryCards = document.getElementById('dashboardSummaryCards');
+            const charts = document.getElementById('dashboardCharts');
             const widgetsArea = document.querySelector('.widgets-area');
-            const additionalCharts = document.querySelector('.additional-charts');
-
+            const additionalCharts = document.getElementById('dashboardAdditionalCharts');
+			const teamStatsPage = document.getElementById('teamStatsPage');
+			
             // Function to hide all content sections
             function hideAllContent() {
                 summaryCards.style.display = 'none';
                 charts.style.display = 'none';
                 widgetsArea.style.display = 'none';
                 additionalCharts.style.display = 'none';
+				teamStatsPage.style.display = 'none';
             }
 
             // Function to show a specific content section
@@ -1257,12 +1779,10 @@ Date: 20 Jan 2025
                         showContent(summaryCards);
                         showContent(charts);
                         showContent(widgetsArea);
-                        showContent(additionalCharts)
+                        showContent(additionalCharts);
                     } else if (linkText === 'Team Stats') {
-                        // Show content for Team Stats 
-                        // Example:
-                        // const teamStatsContent = document.querySelector('.team-stats-content');
-                        // showContent(teamStatsContent);
+						showContent(teamStatsPage);
+                        
                     } else if (linkText === 'Player Stats') {
                         // Show content for Player Stats 
                         // Example:
@@ -1271,6 +1791,11 @@ Date: 20 Jan 2025
                     }
                 });
             });
+
+			// Initialize the team stats page to be the active tab.
+			pageLinks[1].classList.add('active'); // Set 'Team Stats' as active
+			hideAllContent();
+			showContent(teamStatsPage)
         </script>
 </body>
 
