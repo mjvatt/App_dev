@@ -1,0 +1,346 @@
+<!--
+Author: Mike Vatt
+Date: 20 Jan 2025
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Analytics Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul>
+                <li><a href="#" title="Dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+                <li><a href="#" title="Team Stats"><i class="fas fa-users"></i><span>Team Stats</span></a></li>
+                <li><a href="#" title="Player Stats"><i class="fas fa-user"></i><span>Player Stats</span></a></li>
+                <li><a href="#" title="Game Summaries"><i class="fas fa-table"></i><span>Game Summaries</span></a></li>
+                <li><a href="#" title="Standings"><i class="fas fa-chart-pie"></i><span>Standings</span></a></li>
+                <li><a href="#" title="Playoffs"><i class="fas fa-trophy"></i><span>Playoffs</span></a></li>
+                <li><a href="#" title="Draft"><i class="fas fa-user-plus"></i><span>Draft</span></a></li>
+                <li><a href="#" title="Transactions"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
+                <li><a href="#" title="Settings"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+            </ul>
+
+        </div>
+        <div class="main-content" id="main-content">
+            <div class="header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search Teams/Players...">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            <div class="widgets-area">
+                <div class="widget">
+                    <div class="widget-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <h3>Quick Stats</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="quick-stat">
+                            <p>Avg Points</p>
+                            <p>24.3</p>
+                        </div>
+                        <div class="quick-stat">
+                            <p>Total Yards</p>
+                            <p>50600</p>
+                        </div>
+                        <div class="quick-stat">
+                            <p>Pass Yds/Game</p>
+                            <p>292.5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget">
+                    <div class="widget-title">
+                        <i class="fas fa-users"></i>
+                        <h3>Top Players</h3>
+                    </div>
+                    <div class="widget-content">
+                        <ul>
+                            <li>
+                                <span class="player-name">Player A</span>
+                                <span class="player-stat">YDS: 4800</span>
+                            </li>
+                            <li>
+                                <span class="player-name">Player B</span>
+                                <span class="player-stat">TD: 45</span>
+                            </li>
+                            <li>
+                                <span class="player-name">Player C</span>
+                                <span class="player-stat">REC: 110</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="widget">
+                    <div class="widget-title">
+                        <i class="fas fa-newspaper"></i>
+                        <h3>Recent News</h3>
+                    </div>
+                    <div class="widget-content">
+                        <ul>
+                            <li>Team X signs new QB.</li>
+                            <li>Player Y traded to Team Z.</li>
+                            <li>Head Coach Press Conference today.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-links">
+                <a href="#" class="active">Dashboard</a>
+                <a href="#" >Team Stats</a>
+                <a href="#" >Player Stats</a>
+            </div>
+			
+			<!-- Team Stats Page Content -->
+			<div class="team-stats-page" id="teamStatsPage">
+				<div class="dropdown-container">
+					<label for="team-select">Select Team:</label>
+					<select id="team-select">
+						<option value="Arizona Cardinals">Arizona Cardinals</option>
+						<option value="Atlanta Falcons">Atlanta Falcons</option>
+						<option value="Baltimore Ravens">Baltimore Ravens</option>
+						<option value="Buffalo Bills">Buffalo Bills</option>
+						<option value="Carolina Panthers">Carolina Panthers</option>
+						<option value="Chicago Bears">Chicago Bears</option>
+						<option value="Cincinnati Bengals">Cincinnati Bengals</option>
+						<option value="Cleveland Browns">Cleveland Browns</option>
+						<option value="Dallas Cowboys">Dallas Cowboys</option>
+						<option value="Denver Broncos">Denver Broncos</option>
+						<option value="Detroit Lions">Detroit Lions</option>
+						<option value="Green Bay Packers">Green Bay Packers</option>
+						<option value="Houston Texans">Houston Texans</option>
+						<option value="Indianapolis Colts">Indianapolis Colts</option>
+						<option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
+						<option value="Kansas City Chiefs">Kansas City Chiefs</option>
+						<option value="Los Angeles Chargers">Los Angeles Chargers</option>
+						<option value="Los Angeles Rams">Los Angeles Rams</option>
+						<option value="Las Vegas Raiders">Las Vegas Raiders</option>
+						<option value="Miami Dolphins">Miami Dolphins</option>
+						<option value="Minnesota Vikings">Minnesota Vikings</option>
+						<option value="New England Patriots">New England Patriots</option>
+						<option value="New Orleans Saints">New Orleans Saints</option>
+						<option value="New York Giants">New York Giants</option>
+						<option value="New York Jets">New York Jets</option>
+						<option value="Philadelphia Eagles">Philadelphia Eagles</option>
+						<option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
+						<option value="San Francisco 49ers">San Francisco 49ers</option>
+						<option value="Seattle Seahawks">Seattle Seahawks</option>
+						<option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
+						<option value="Tennessee Titans">Tennessee Titans</option>
+						<option value="Washington Commanders">Washington Commanders</option>
+
+					</select>
+				</div>
+
+				<div class="team-summary-cards" id="teamSummaryCards">
+					<div class="card passing">
+						<h3>Total Passing Yards</h3>
+						<p id="teamTotalPassingYards">0</p>
+						<p>League Avg: <span id="teamAvgPassingYards">0</span></p>
+					</div>
+					<div class="card rushing">
+						<h3>Total Rushing Yards</h3>
+						<p id="teamTotalRushingYards">0</p>
+						<p>League Avg: <span id="teamAvgRushingYards">0</span></p>
+					</div>
+					<div class="card touchdowns">
+						<h3>Total Touchdowns</h3>
+						<p id="teamTotalTouchdowns">0</p>
+						<p>League Avg: <span id="teamAvgTouchdowns">0</span></p>
+					</div>
+					<div class="card points">
+						<h3>Avg Points/Game</h3>
+						<p id="teamAvgPoints">0</p>
+						<p>League Avg: <span id="teamLeagueAvgPoints">0</span></p>
+					</div>
+				</div>
+
+				 <div class="team-charts" id="teamCharts">
+					<div class="chart-container">
+						<canvas id="teamWinsChartTeamPage"></canvas>
+						<div class="dropdowns">
+							<label for="x-axis-select-teamWins-teamPage">X-axis:</label>
+								<select id="x-axis-select-teamWins-teamPage">
+									<option value="team">Team</option>
+									<option value="wins">Wins</option>
+									<option value="passingYards">Passing Yards</option>
+									<option value="rushingYards">Rushing Yards</option>
+									<option value="touchdowns">Touchdowns</option>
+									<option value="points">Points</option>
+								</select>
+
+
+							<label for="y-axis-select-teamWins-teamPage">Y-axis:</label>
+							<select id="y-axis-select-teamWins-teamPage">
+								<option value="wins">Wins</option>
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="chart-container">
+						<canvas id="playerPerformanceChartTeamPage"></canvas>
+						<div class="dropdowns">
+							<label for="x-axis-select-playerPerf-teamPage">X-axis:</label>
+								<select id="x-axis-select-playerPerf-teamPage">
+									<option value="team">Team</option>
+									<option value="wins">Wins</option>
+									<option value="passingYards">Passing Yards</option>
+									<option value="rushingYards">Rushing Yards</option>
+									<option value="touchdowns">Touchdowns</option>
+									<option value="points">Points</option>
+								</select>
+
+							<label for="y-axis-select-playerPerf-teamPage">Y-axis:</label>
+							<select id="y-axis-select-playerPerf-teamPage">
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+								<option value="wins">Wins</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Team Stats Page Content -->
+			
+      
+			<div class="summary-cards" id="dashboardSummaryCards">
+					<div class="card passing">
+						<h3>Total Passing Yards</h3>
+						<p id="totalPassingYards">0</p>
+						<p>League Avg: <span id="avgPassingYards">0</span></p>
+					</div>
+					<div class="card rushing">
+						<h3>Total Rushing Yards</h3>
+						<p id="totalRushingYards">0</p>
+						<p>League Avg: <span id="avgRushingYards">0</span></p>
+					</div>
+					<div class="card touchdowns">
+						<h3>Total Touchdowns</h3>
+						<p id="totalTouchdowns">0</p>
+						<p>League Avg: <span id="avgTouchdowns">0</span></p>
+					</div>
+					<div class="card points">
+						<h3>Avg Points/Game</h3>
+						<p id="avgPoints">0</p>
+						<p>League Avg: <span id="leagueAvgPoints">0</span></p>
+					</div>
+				</div>
+
+				<div class="charts" id="dashboardCharts">
+					<div class="chart-container">
+						<canvas id="teamWinsChart"></canvas>
+						<div class="dropdowns">
+							<label for="y-axis-select-teamWins">Y-axis:</label>
+							<select id="y-axis-select-teamWins">
+								<option value="wins">Wins</option>
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="chart-container">
+						<canvas id="playerPerformanceChart"></canvas>
+						<div class="dropdowns">
+							<label for="y-axis-select-playerPerf">Y-axis:</label>
+							<select id="y-axis-select-playerPerf">
+								<option value="passingYards">Passing Yards</option>
+								<option value="rushingYards">Rushing Yards</option>
+								<option value="touchdowns">Touchdowns</option>
+								<option value="points">Points</option>
+								<option value="wins">Wins</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+        <div class="additional-charts" id="dashboardAdditionalCharts">
+			<div class="salary-cap-list-container" id="playerSalaryListContainer">
+				<h3>Player Salaries</h3>
+				<ul class="salary-cap-list" id="playerSalaryList">
+					<!-- Player list items will go here -->
+				</ul>
+				<div class="dropdowns">
+					<label for="team-select-salaryChart">Select Team:</label>
+					<select id="team-select-salaryChart">
+						<option value="Arizona Cardinals">Arizona Cardinals</option>
+						<option value="Atlanta Falcons">Atlanta Falcons</option>
+						<option value="Baltimore Ravens">Baltimore Ravens</option>
+						<option value="Buffalo Bills">Buffalo Bills</option>
+						<option value="Carolina Panthers">Carolina Panthers</option>
+						<option value="Chicago Bears">Chicago Bears</option>
+						<option value="Cincinnati Bengals">Cincinnati Bengals</option>
+						<option value="Cleveland Browns">Cleveland Browns</option>
+						<option value="Dallas Cowboys">Dallas Cowboys</option>
+						<option value="Denver Broncos">Denver Broncos</option>
+						<option value="Detroit Lions">Detroit Lions</option>
+						<option value="Green Bay Packers">Green Bay Packers</option>
+						<option value="Houston Texans">Houston Texans</option>
+						<option value="Indianapolis Colts">Indianapolis Colts</option>
+						<option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
+						<option value="Kansas City Chiefs">Kansas City Chiefs</option>
+						<option value="Los Angeles Chargers">Los Angeles Chargers</option>
+						<option value="Los Angeles Rams">Los Angeles Rams</option>
+						<option value="Las Vegas Raiders">Las Vegas Raiders</option>
+						<option value="Miami Dolphins">Miami Dolphins</option>
+						<option value="Minnesota Vikings">Minnesota Vikings</option>
+						<option value="New England Patriots">New England Patriots</option>
+						<option value="New Orleans Saints">New Orleans Saints</option>
+						<option value="New York Giants">New York Giants</option>
+						<option value="New York Jets">New York Jets</option>
+						<option value="Philadelphia Eagles">Philadelphia Eagles</option>
+						<option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
+						<option value="San Francisco 49ers">San Francisco 49ers</option>
+						<option value="Seattle Seahawks">Seattle Seahawks</option>
+						<option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
+						<option value="Tennessee Titans">Tennessee Titans</option>
+						<option value="Washington Commanders">Washington Commanders</option>
+
+					</select>
+				</div>
+			</div>
+      
+			<div class="salary-cap-list-container">
+				<h3>Team Salary Cap Space</h3>
+				<div class="salary-cap-list-header">
+					<span>Rank</span>
+					<span></span> <!--Empty span for correct spacing-->
+					<span>Team</span>
+					<span>Cap Space</span>
+					<span>Dead Money</span>
+				</div>
+				
+				<ul class="salary-cap-list" id="salaryCapList">
+				</ul>
+			</div>
+
+		</div>    
+
+	<script src="js/scripts.js"></script>
+</body>
+
+</html>

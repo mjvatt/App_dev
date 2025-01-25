@@ -1,0 +1,539 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #000000;
+    color: #e2e8f0;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 250px;
+    background-color: #111111;
+    padding: 20px;
+    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+}
+
+.sidebar.collapsed {
+    margin-left: 0px;
+    width: 80px;
+}
+
+.sidebar.collapsed ul li a span {
+    display: none;
+}
+
+.sidebar.collapsed ul li a {
+    padding-left: 20px;
+    padding-right: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding-left: 0px;
+    margin-top: 60px;
+}
+
+.sidebar ul li a {
+    padding: 20px;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #cbd5e1;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.sidebar ul li a:hover {
+    background-color: #374151;
+}
+
+.sidebar ul li a i {
+    margin-right: 15px;
+    font-size: 1.6rem;
+    width: 30px;
+    text-align: center;
+}
+
+/* Hamburger styles */
+.hamburger {
+    cursor: pointer;
+    padding: 10px;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #374151;
+    border-radius: 5px;
+    z-index: 102;
+    position: fixed;
+    top: 20px;
+    left: 35px;
+    transition: left 0.3s ease-in-out;
+}
+
+.hamburger.collapsed {
+    left: 35px;
+}
+
+
+/* Main Content styles */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 270px;
+    transition: margin-left 0.3s ease-in-out;
+    background-color: #000000;
+}
+
+.main-content.collapsed {
+    margin-left: 100px;
+}
+
+.header {
+    margin-bottom: 20px;
+    padding-top: 20px;
+    padding-left: 80px;
+}
+
+/* Summary Cards styles */
+.summary-cards {
+    display: grid;
+    grid-template-areas:
+        "passing rushing touchdowns points";
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+}
+
+.card {
+    background-color: #111111;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    font-size: 1.2rem;
+    color: #e2e8f0;
+}
+
+.card.passing {
+    grid-area: passing;
+}
+
+.card.rushing {
+    grid-area: rushing;
+}
+
+.card.touchdowns {
+    grid-area: touchdowns;
+}
+
+.card.points {
+    grid-area: points;
+}
+
+/* Charts styles */
+.charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+	height: 400px;
+}
+
+.chart-container {
+    position: relative;
+    background-color: #111111;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    max-height: 350px;
+    overflow-y: auto;
+	width: auto; 
+}
+
+.chart-container canvas {
+    flex: 1;
+}
+
+.header input[type="text"] {
+    background-color: #374151;
+    color: #e2e8f0;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-container input {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.main-content .header .search-container i {
+    position: absolute;
+    top: 25%;
+    right: 10px;
+    color: #cbd5e1;
+    pointer-events: none
+}
+
+/* Widgets Area styles */
+.widgets-area {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.widget {
+    background-color: #111111;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.widget-title {
+    padding: 10px 20px;
+    border-bottom: 1px solid #374151;
+    display: flex;
+    align-items: center;
+}
+
+.widget-title i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.widget-title h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.widget-content {
+    padding: 20px;
+    color: #e2e8f0;
+}
+
+/* Quick Stats Widget styles */
+.quick-stat {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.quick-stat p {
+    margin: 0;
+}
+
+/* Top Players Widget styles */
+.widget-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.widget-content ul li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #374151;
+    padding-bottom: 10px;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.player-stat {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+/* Recent News Widget styles */
+.widget-content ul li {
+    border: none;
+    font-size: 0.9rem;
+}
+
+/* Page Links styles */
+.page-links {
+    display: flex;
+    margin-bottom: 40px;
+    margin-top: 40px;
+    padding-left: 20px;
+}
+
+.page-links a { 
+    background-color: #374151;
+    color: #e2e8f0;
+    padding: 15px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    margin-right: 0px;
+    font-weight: bold;
+    font-size: 1.5rem;
+    border: 1px solid #6b7280;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.page-links a:hover { 
+    background-color: #4b5563;
+}
+
+.page-links a.active {
+    background-color: #ff9500;
+    color: #000000;
+    border-bottom: none;
+}
+
+/* Additional Charts styles */
+.additional-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+	overflow: auto;
+	max-height: 600px;
+}
+
+.additional-charts .chart-container {
+    height: 350px;
+}
+
+.additional-charts .salary-cap-list-container {
+    background-color: #111111;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 350px;
+}
+
+.additional-charts .salary-cap-list-container .salary-cap-list-header {
+    display: flex;
+    padding: 0px 15px 10px 15px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.additional-charts .salary-cap-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.additional-charts .salary-cap-list li {
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #374151;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.additional-charts .salary-cap-list li span:first-child {
+    margin-right: 27px;
+    /* gap between rank and logo */
+    font-weight: bold;
+    flex-basis: 30px;
+    /* Width for Rank Column */
+    flex-grow: 0;
+    /* Don't allow Rank to grow */
+    text-align: left;
+}
+
+.additional-charts .salary-cap-list-container .salary-cap-list-header span:first-child {
+    margin-right: 27px;
+    flex-basis: 30px;
+    flex-grow: 0;
+    text-align: left;
+}
+
+.additional-charts .salary-cap-list li img {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    /* gap between logo and team name */
+    vertical-align: middle;
+}
+
+.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(2) {
+    flex-grow: 0;
+    /* Prevent empty span from growing */
+    flex-basis: 35px;
+    margin-right: 0px;
+}
+
+.additional-charts .salary-cap-list li span:nth-child(3) {
+    flex-grow: 1;
+    /* Need to allow Team name to grow */
+    flex-basis: auto;
+    /* Auto-width for Team header */
+    margin-right: 0px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(3) {
+    margin-right: 0px;
+    flex-grow: 1;
+    flex-basis: auto;
+    text-align: left;
+}
+
+.additional-charts .salary-cap-list li span:nth-child(4) {
+    font-weight: bold;
+    margin-right: 0px;
+    flex-basis: 150px;
+    /* Don't allow Cap Space to grow */
+    flex-grow: 0;
+    /* Don't allow Cap Space header to grow */
+    text-align: right;
+}
+
+.additional-charts .salary-cap-list-container .salary-cap-list-header span:nth-child(4) {
+    margin-left: 0px;
+    margin-right: 7px;
+    flex-basis: 150px;
+    /* Width for Cap Space header */
+    flex-grow: 0;
+    text-align: right;
+}
+
+.additional-charts .salary-cap-list li span:last-child {
+    font-weight: bold;
+    margin-right: 7px;
+    flex-basis: 140px;
+    /* Width for Dead Money */
+    flex-grow: 0;
+    /* Don't allow Dead Money to grow */
+    text-align: right;
+}
+
+.additional-charts .salary-cap-list-container .salary-cap-list-header span:last-child {
+    margin-right: 0px;
+    flex-basis: 140px;
+    /* Width for Dead Money header */
+    flex-grow: 0;
+    /* Don't allow Dead Money header to grow */
+    text-align: right;
+}
+
+.additional-charts .salary-cap-list li:last-child {
+    border-bottom: none;
+}
+
+/* Team Stats Page Specific Styles */
+.team-stats-page {
+    display: none;
+    /* Initially hidden */
+    flex-direction: column;
+}
+
+.team-stats-page .dropdown-container {
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.team-stats-page .dropdown-container label {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.team-stats-page .dropdown-container select {
+    background-color: #374151;
+    color: #e2e8f0;
+    border: 1px solid #6b7280;
+    padding: 8px;
+    border-radius: 4px;
+    min-width: 200px;
+}
+
+.team-stats-page .team-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.team-stats-page .team-charts .chart-container {
+    height: 350px;
+}
+
+.team-stats-page .team-summary-cards {
+    display: grid;
+    grid-template-areas:
+        "passing rushing touchdowns points";
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .page-links {
+        flex-direction: column;
+    }
+
+    .page-links a {
+        margin-bottom: 10px;
+    }
+
+    .dropdowns {
+        margin-bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .dropdowns label {
+        margin-right: 5px;
+    }
+
+    .dropdowns select {
+        background-color: #374151;
+        color: #e2e8f0;
+        border: 1px solid #6b7280;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .hidden {
+        display: none;
+    }
+}
