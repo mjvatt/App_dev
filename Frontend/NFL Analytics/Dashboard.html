@@ -698,14 +698,15 @@ Date: 20 Jan 2025
 						<canvas id="teamWinsChartTeamPage"></canvas>
 						<div class="dropdowns">
 							<label for="x-axis-select-teamWins-teamPage">X-axis:</label>
-							<select id="x-axis-select-teamWins-teamPage">
-								<option value="teams">Teams</option>
-								<option value="wins">Wins</option>
-								<option value="passingYards">Passing Yards</option>
-								<option value="rushingYards">Rushing Yards</option>
-								<option value="touchdowns">Touchdowns</option>
-								<option value="points">Points</option>
-							</select>
+								<select id="x-axis-select-teamWins-teamPage">
+									<option value="team">Team</option>
+									<option value="wins">Wins</option>
+									<option value="passingYards">Passing Yards</option>
+									<option value="rushingYards">Rushing Yards</option>
+									<option value="touchdowns">Touchdowns</option>
+									<option value="points">Points</option>
+								</select>
+
 
 							<label for="y-axis-select-teamWins-teamPage">Y-axis:</label>
 							<select id="y-axis-select-teamWins-teamPage">
@@ -722,14 +723,14 @@ Date: 20 Jan 2025
 						<canvas id="playerPerformanceChartTeamPage"></canvas>
 						<div class="dropdowns">
 							<label for="x-axis-select-playerPerf-teamPage">X-axis:</label>
-							<select id="x-axis-select-playerPerf-teamPage">
-								<option value="teams">Teams</option>
-								<option value="wins">Wins</option>
-								<option value="passingYards">Passing Yards</option>
-								<option value="rushingYards">Rushing Yards</option>
-								<option value="touchdowns">Touchdowns</option>
-								<option value="points">Points</option>
-							</select>
+								<select id="x-axis-select-playerPerf-teamPage">
+									<option value="team">Team</option>
+									<option value="wins">Wins</option>
+									<option value="passingYards">Passing Yards</option>
+									<option value="rushingYards">Rushing Yards</option>
+									<option value="touchdowns">Touchdowns</option>
+									<option value="points">Points</option>
+								</select>
 
 							<label for="y-axis-select-playerPerf-teamPage">Y-axis:</label>
 							<select id="y-axis-select-playerPerf-teamPage">
@@ -1473,16 +1474,22 @@ Date: 20 Jan 2025
 			}
 			
 			// Function to update the chart based on selected data
-            function updateChart(chart, xAxisDataKey, yAxisDataKey) {
-                chart.data.labels = nflData[xAxisDataKey];
-                chart.data.datasets[0].data = nflData[yAxisDataKey];
-                chart.update();
-            }
+			function updateChart(chart, xAxisDataKey, yAxisDataKey, selectedTeam) {
+				if (xAxisDataKey === 'team') {
+					chart.data.labels = [selectedTeam];
+					chart.data.datasets[0].data = [nflData.teamSpecific[selectedTeam][yAxisDataKey]];
+				} else {
+					chart.data.labels = nflData[xAxisDataKey];
+					chart.data.datasets[0].data = nflData[yAxisDataKey];
+				}
+				
+				chart.update();
+			}
 
 			function updateTeamStatsDisplay(selectedTeam) {
 				const teamData = nflData.teamSpecific[selectedTeam];
 				if (!teamData) return;
-			
+
 				// Update Summary Cards on the Team Stats Page
 				document.getElementById('teamTotalPassingYards').textContent = teamData.passingYards;
 				document.getElementById('teamAvgPassingYards').textContent = (teamData.passingYards / nflData.teams.length).toFixed(0);
@@ -1491,11 +1498,11 @@ Date: 20 Jan 2025
 				document.getElementById('teamTotalTouchdowns').textContent = teamData.touchdowns;
 				document.getElementById('teamAvgTouchdowns').textContent = (teamData.touchdowns / nflData.teams.length).toFixed(0);
 				document.getElementById('teamAvgPoints').textContent = teamData.points;
-                document.getElementById('teamLeagueAvgPoints').textContent = (nflData.points.reduce((sum, points) => sum + points, 0) / nflData.points.length).toFixed(1);
+				document.getElementById('teamLeagueAvgPoints').textContent = (nflData.points.reduce((sum, points) => sum + points, 0) / nflData.points.length).toFixed(1);
 
 				//Update Team Page Charts
-				updateChart(teamWinsChartTeamPage, 'teams', 'wins');
-				updateChart(playerPerformanceChartTeamPage, 'teams', 'passingYards');
+				updateChart(teamWinsChartTeamPage, 'team', 'wins', selectedTeam);
+				updateChart(playerPerformanceChartTeamPage, 'team', 'passingYards', selectedTeam);
 			}
 
 
@@ -1549,40 +1556,38 @@ Date: 20 Jan 2025
             });
 			
 			const teamWinsChartTeamPage = new Chart(document.getElementById('teamWinsChartTeamPage'), {
-                type: 'bar',
-                data: {
-                    labels: nflData.teams,
-                    datasets: [{
-                        label: 'Team Wins',
-                        data: nflData.wins,
-                        backgroundColor: '#0ea5e9',
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: '#374151'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: '#374151'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
+				type: 'bar',
+				data: {
+					 datasets: [{
+						label: 'Team Wins',
+						backgroundColor: '#0ea5e9',
+					}]
+				},
+				options: {
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							ticks: {
+								stepSize: 1
+							},
+							grid: {
+								color: '#374151'
+							}
+						},
+						x: {
+							grid: {
+								color: '#374151'
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							display: false
+						}
+					}
+				}
+			});
 
             const playerPerformanceChart = new Chart(document.getElementById('playerPerformanceChart'), {
                 type: 'line',
@@ -1621,40 +1626,38 @@ Date: 20 Jan 2025
             });
 			
 			const playerPerformanceChartTeamPage = new Chart(document.getElementById('playerPerformanceChartTeamPage'), {
-                type: 'line',
-                data: {
-                    labels: nflData.teams,
-                    datasets: [{
-                        label: 'Total Passing Yards',
-                        data: nflData.passingYards,
-                        borderColor: '#eab308',
-                        backgroundColor: '#eab30880',
-                        borderWidth: 2,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: '#374151'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: '#374151'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
+				type: 'line',
+				data: {
+					 datasets: [{
+						label: 'Total Passing Yards',
+						borderColor: '#eab308',
+						backgroundColor: '#eab30880',
+						borderWidth: 2,
+						tension: 0.4
+					}]
+				},
+				options: {
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							grid: {
+								color: '#374151'
+							}
+						},
+						x: {
+							grid: {
+								color: '#374151'
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							display: false
+						}
+					}
+				}
+			});
 
             // Add event listeners to the dropdown menus
             teamWinsXAxisSelect.addEventListener('change', () => {
@@ -1714,7 +1717,7 @@ Date: 20 Jan 2025
 				const selectedTeam = teamSelectDropdown.value;
 				updateTeamStatsDisplay(selectedTeam);
 			});
-
+			
             // Calculate Averages
             const avgPassingYards = nflData.passingYards.reduce((sum, yards) => sum + yards, 0) / nflData.passingYards.length;
             const avgRushingYards = nflData.rushingYards.reduce((sum, yards) => sum + yards, 0) / nflData.rushingYards.length;
