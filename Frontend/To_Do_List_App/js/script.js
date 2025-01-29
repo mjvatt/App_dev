@@ -11,14 +11,48 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function addTask(taskText) {
-        const listItem = document.createElement('li');
-        listItem.textContent = taskText;
-        listItem.setAttribute('draggable', true);
+    function loadTasks() {
+        const storedTasks = localStorage.getItem('tasks');
+        if (storedTasks) {
+            const tasks = JSON.parse(storedTasks);
+            tasks.forEach(task => {
+                addTask(task.text, task.completed, task.rank);
+            });
+        }
+    }
+
+	function saveTasks() {
+		const tasks = [];
+		const listItems = taskList.querySelectorAll('li');
+		listItems.forEach(item => {
+			// Iterate through child nodes to find the text node
+			let textContent = '';
+			for (let i = 0; i < item.childNodes.length; i++) {
+				if (item.childNodes[i].nodeType === Node.TEXT_NODE) {
+					textContent = item.childNodes[i].nodeValue.trim();
+					break; // Exit the loop once the text node is found
+				}
+			}
+
+			// Only add the task if text content is not empty
+			if (textContent !== '') {
+				tasks.push({
+					text: textContent,
+					completed: item.classList.contains('complete-task'),
+					rank: item.getAttribute('data-rank')
+				});
+			}
+		});
+		localStorage.setItem('tasks', JSON.stringify(tasks));
+	}
+
+	function addTask(taskText, completed = false, rank = null) {
+		const listItem = document.createElement('li');
+		listItem.appendChild(document.createTextNode(taskText));
+		listItem.setAttribute('draggable', true);
 
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('button-container');
-       
 
         const doneButton = document.createElement('button');
         doneButton.textContent = 'Done';
@@ -36,13 +70,14 @@ document.addEventListener('DOMContentLoaded', function () {
             event.stopPropagation();
             listItem.classList.toggle('complete-task');
             doneButton.classList.toggle('complete');
+            doneButton.textContent = listItem.classList.contains('complete-task')? 'Complete': 'Done';
         });
-
 
         deleteButton.addEventListener('click', function (event) {
             event.stopPropagation();
             listItem.remove();
             updateRanks();
+            saveTasks();
         });
 
         listItem.addEventListener('click', function(event) {
@@ -50,19 +85,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 listItem.classList.toggle('complete-task');
             }
         });
-       
-        taskList.appendChild(listItem);
-        updateRanks();
-    }
 
+		if (completed) {
+			listItem.classList.add('complete-task');
+			doneButton.classList.add('complete');
+			doneButton.textContent = 'Complete';
+		}
+
+		if (rank!== null) {
+			listItem.setAttribute('data-rank', rank);
+		}
+
+		taskList.appendChild(listItem);
+		updateRanks();
+		saveTasks();
+	}
+	
     addButton.addEventListener('click', function () {
         const taskText = taskInput.value.trim();
-        if (taskText !== '') {
+        if (taskText.trim() !== '') {
             addTask(taskText);
             taskInput.value = '';
         }
     });
-
 
     taskInput.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
@@ -81,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
     taskList.addEventListener('dragover', function (event) {
         event.preventDefault();
         const target = event.target.closest('li');
-        if (target && target !== draggingItem) {
+        if (target && target!== draggingItem) {
             const rect = target.getBoundingClientRect();
             const mouseY = event.clientY;
             const middleY = rect.top + rect.height / 2;
@@ -98,9 +143,9 @@ document.addEventListener('DOMContentLoaded', function () {
         draggingItem.classList.remove('dragging');
         draggingItem = null;
         updateRanks();
+        saveTasks();
     });
 
-        // Add support for dropping in an empty list
     taskList.addEventListener('drop', function(event) {
         event.preventDefault();
         if (draggingItem && event.target.id === 'taskList') {
@@ -108,6 +153,9 @@ document.addEventListener('DOMContentLoaded', function () {
             draggingItem.classList.remove('dragging');
             draggingItem = null;
             updateRanks();
+            saveTasks();
         }
     });
+
+    loadTasks();
 });
