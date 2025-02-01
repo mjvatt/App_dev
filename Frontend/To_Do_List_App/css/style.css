@@ -15,7 +15,7 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     width: 80%;
-    max-width: 600px;
+    max-width: 900px; /* Increased max width */
 }
 
 h1 {
@@ -26,6 +26,7 @@ h1 {
 .input-area {
     display: flex;
     margin-bottom: 15px;
+    align-items: center; /* Align items vertically */
 }
 
 .input-area input[type="text"] {
@@ -43,7 +44,92 @@ h1 {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    margin-left: 8px;
 }
+
+.input-area .select-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+	margin-top: -20px; /* Adjusted margin to align with input */
+}
+
+.input-area .select-header {
+   font-size: 0.8em;
+   text-align: center;
+   margin-bottom: 4px;
+}
+
+.input-area select {
+    padding: 10px 15px;
+    background-color: white;
+    color: black;
+	border: 1px solid #ddd;
+    border-radius: 4px;
+	cursor: pointer;
+}
+
+.list-management {
+    display: flex;
+    margin-bottom: 15px;
+	align-items: center;
+}
+
+.list-management input[type="text"] {
+	padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 8px;
+	flex-grow: 1;
+}
+
+.list-management button {
+	padding: 10px 15px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+	margin-left: 8px;
+}
+
+.lists-wrapper {
+    display: flex;
+	flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.list-container {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 5px;
+    background-color: #fff;
+    min-width: 200px;
+}
+
+.list-container h2 {
+    text-align: center;
+    margin-bottom: 10px;
+	display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-container h2 button{
+	color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+	background-color: #d9534f;
+	margin-left: 5px;
+}
+.list-container h2 button:hover {
+    background-color: #c9302c;
+}
+
 
 ul {
     padding: 0;

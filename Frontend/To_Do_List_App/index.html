@@ -16,11 +16,20 @@ Date: 27 Jan 2025
         <h1>My To-Do List</h1>
         <div class="input-area">
             <input type="text" id="taskInput" placeholder="Add a new task...">
+            <div class="select-container">
+                <div class="select-header">Available Lists</div>
+               <select id="listSelect">
+               </select>
+           </div>
             <button id="addButton">Add</button>
         </div>
-        <ul id="taskList">
-            <!-- Tasks will be added here by JavaScript -->
-        </ul>
+        <div class="list-management">
+            <input type="text" id="newListInput" placeholder="List Name">
+            <button id="addListButton">Add List</button>
+        </div>
+        <div class="lists-wrapper">
+             <!-- Lists will be added here by JavaScript -->
+         </div>
     </div>
     <script src="js/script.js"></script>
 </body>
