@@ -1,8 +1,3 @@
-<!--
-Author: Mike Vatt
-Date: 27 Jan 2025
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,27 +5,41 @@ Date: 27 Jan 2025
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
     <link rel="stylesheet" href="css/style.css">
+	<!--
+	Author: Mike Vatt
+	Date: 27 Jan 2025
+	-->
 </head>
 <body>
-    <div class="container">
-        <h1>My To-Do List</h1>
-        <div class="input-area">
-            <input type="text" id="taskInput" placeholder="Add a new task...">
-            <div class="select-container">
-                <div class="select-header">Available Lists</div>
-               <select id="listSelect">
-               </select>
-           </div>
-            <button id="addButton">Add</button>
-        </div>
-        <div class="list-management">
-            <input type="text" id="newListInput" placeholder="List Name">
-            <button id="addListButton">Add List</button>
-        </div>
-        <div class="lists-wrapper">
-             <!-- Lists will be added here by JavaScript -->
-         </div>
-    </div>
-    <script src="js/script.js"></script>
+	
+	<header>
+		<!-- if needed -->
+	</header>
+	
+	<main>
+		<div class="container">
+			<h1>My To-Do List</h1>
+			<div class="input-area">
+				<input type="text" id="taskInput" placeholder="Add a new task...">
+				<div class="select-container">
+					<div class="select-header">Available Lists</div>
+				   <select id="listSelect">
+				   </select>
+			   </div>
+				<button id="addButton">Add</button>
+			</div>
+			<div class="list-management">
+				<input type="text" id="newListInput" placeholder="List Name">
+				<button id="addListButton">Add List</button>
+			</div>
+			<div class="lists-wrapper">
+				 <!-- Lists will be added here by JavaScript -->
+			 </div>
+		</div>
+		<script src="js/script.js"></script>
+	</main>
+	<footer>
+		<!-- if needed -->
+	</footer>
 </body>
 </html>
