@@ -1,0 +1,80 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fafafa; /* Light gray background */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+}
+
+header {
+    background-color: white;
+    border-bottom: 1px solid #dbdbdb;
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+main {
+    width: 600px; /* Adjust as needed */
+}
+
+.post {
+    background-color: white;
+    border: 1px solid #dbdbdb;
+    margin-bottom: 20px;
+    border-radius: 3px;
+    overflow: hidden; /* Prevent content from overflowing */
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.post-image {
+    width: 100%;
+    display: block; /* Remove extra space below image */
+}
+
+.post-content {
+    padding: 10px;
+}
+
+.post-actions {
+    margin-bottom: 10px;
+}
+
+.post-actions button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.post-caption {
+    margin: 0;
+}
+
+/* Responsive Design (adjust breakpoint as needed) */
+@media (max-width: 768px) {
+    main {
+        width: 95%; /* Take up more width on smaller screens */
+    }
+}

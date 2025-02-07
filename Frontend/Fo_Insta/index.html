@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram (Simplified)</title>
+    <link rel="stylesheet" href="style.css">
+	<!--
+	Author: Mike Vatt
+	Date: 06 Feb 2025
+	-->
+</head>
+<body>
+
+    <header>
+        <h1>Instagram</h1>
+    </header>
+
+    <main>
+        <!-- Posts will go here -->
+
+        <div class="post">
+            <div class="post-header">
+                <img src="images/user_avatar.jpg" alt="User Avatar" class="avatar">  
+                <span class="username">john_doe</span>
+            </div>
+
+            <img src="images/post_image.jpg" alt="Post Image" class="post-image">  
+
+            <div class="post-content">
+                <div class="post-actions">
+                    <button onclick="likePost(this)">Like</button>
+                    <button>Comment</button>
+                    <button>Share</button>
+                </div>
+                <p class="post-caption">
+                    <strong>john_doe</strong> Beautiful sunset! #sunset #photography
+                </p>
+            </div>
+        </div>
+
+        <!-- Add more posts here (duplicate and modify the above post div) -->
+
+        <div class="post">
+            <div class="post-header">
+                <img src="images/user_avatar2.jpg" alt="User Avatar" class="avatar"> 
+                <span class="username">jane_smith</span>
+            </div>
+
+            <img src="images/post_image2.jpg" alt="Post Image" class="post-image">
+
+            <div class="post-content">
+                <div class="post-actions">
+                    <button onclick="likePost(this)">Like</button>
+                    <button>Comment</button>
+                    <button>Share</button>
+                </div>
+                <p class="post-caption">
+                    <strong>jane_smith</strong> New York is amazing! #newyork #travel
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>  
+</body>
+</html>
