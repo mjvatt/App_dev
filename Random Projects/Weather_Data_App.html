@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<--
+Author: Mike Vatt
+Date: 18 Jan 2025
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #2980b9, #3498db);
+            margin: 0;
+            color: white;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+            color: #333;
+        }
+
+        #searchButton {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #searchButton:hover {
+            background-color: #2980b9;
+        }
+
+        .weather-data {
+            font-size: 1.2em;
+            display: none;
+        }
+
+        #icon img {
+            max-width: 100px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Enter city or zip code">
+            <button id="searchButton">Search</button>
+        </div>
+        <div id="weatherData" class="weather-data">
+            <div id="location"></div>
+            <div id="temperature"></div>
+            <div id="description"></div>
+            <div id="icon"></div>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <script>
+        const apiKey = 'd09e0775d3e944127d1f6b89dbc56a77'; 
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const locationElement = document.getElementById('location');
+        const temperatureElement = document.getElementById('temperature');
+        const descriptionElement = document.getElementById('description');
+        const iconElement = document.getElementById('icon');
+        const errorMessage = document.getElementById('errorMessage');
+        const weatherData = document.getElementById('weatherData');
+
+        searchButton.addEventListener('click', performSearch);
+
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        function performSearch() {
+            const searchTerm = searchInput.value;
+            if (searchTerm) {
+                getWeatherData(searchTerm);
+            }
+        }
+
+        async function getWeatherData(searchTerm) {
+            let apiUrl;
+            if (isNaN(searchTerm)) {
+                apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&appid=${apiKey}&units=metric`;
+            } else {
+                apiUrl = `https://api.openweathermap.org/data/2.5/weather?zip=${searchTerm},us&appid=${apiKey}&units=metric`;
+            }
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('City/Zip not found');
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                }
+                const data = await response.json();
+                displayWeatherData(data);
+                errorMessage.textContent = "";
+                weatherData.style.display = "block";
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                errorMessage.textContent = error.message;
+                weatherData.style.display = "none";
+            }
+        }
+
+        function displayWeatherData(data) {
+            locationElement.textContent = data.name + ", " + data.sys.country;
+            temperatureElement.textContent = `Temperature: ${data.main.temp}°C`;
+            descriptionElement.textContent = data.weather[0].description;
+            iconElement.innerHTML = `<img src="http://openweathermap.org/img/w/${data.weather[0].icon}.png" alt="Weather Icon">`;
+        }
+    </script>
+</body>
+</html>

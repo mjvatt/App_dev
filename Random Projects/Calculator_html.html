@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <style>
+    body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to right, #3498db, #9b59b6);
+            font-family: sans-serif;
+        }
+
+        .calculator {
+            background-color: #34495e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            width: 400px;
+        }
+
+        #display {
+            width: calc(100% - 20px);
+            margin: 10px;
+            padding: 10px;
+            font-size: 1.8em;
+            border: none;
+            background-color: #ecf0f1;
+            text-align: right;
+            border-radius: 5px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 10px;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #e74c3c;
+            color: white;
+            transition: background-color 0.3s ease, transform 0.1s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+
+        button:hover {
+            background-color: #c0392b;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+
+        .equal {
+            background-color: #27ae60;
+        }
+
+        .equal:hover {
+            background-color: #219653;
+        }
+
+        .zero {
+            grid-column: 1 / span 2;
+        }
+
+        .scientific {
+            background-color: #3498db;
+        }
+
+        .scientific:hover {
+            background-color: #2980b9;
+        }
+        .operator {
+           background-color: #f39c12;
+        }
+        .operator:hover{
+           background-color: #d68910;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" id="display" readonly>
+        <div class="buttons">
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="backspace()">←</button>
+            <button onclick="appendToDisplay('%')">%</button>
+            <button onclick="appendToDisplay('/')" class = "operator">/</button>
+            <button onclick="calculateSquareRoot()" class="scientific">√</button>
+
+
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('*')" class = "operator">*</button>
+            <button onclick="calculatePower()" class="scientific">x²</button>
+
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('-')" class = "operator">-</button>
+            <button onclick="calculateSin()" class="scientific">sin</button>
+
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendToDisplay('+')" class = "operator">+</button>
+            <button onclick="calculateCos()" class="scientific">cos</button>
+
+            <button onclick="appendToDisplay('0')" class="zero">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button class="equal" onclick="calculate()">=</button>
+            <button onclick="calculateTan()" class="scientific">tan</button>
+
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
+            <button onclick="changeSign()">+/-</button>
+            <button onclick="calculateCube()" class = "scientific">x³</button>
+            <button onclick="calculateFactorial()" class = "scientific">x!</button>
+
+        </div>
+    </div>
+
+    <script>
+        let isNewCalculation = true;
+
+        function appendToDisplay(value) {
+            if (isNewCalculation && !isNaN(parseFloat(value)) ) {
+                document.getElementById('display').value = value;
+                isNewCalculation = false;
+            }
+              else if (isNewCalculation && value === '('){
+                  document.getElementById('display').value = value;
+                isNewCalculation = false;
+              }
+            else {
+                document.getElementById('display').value += value;
+            }
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+            isNewCalculation = true;
+        }
+
+       function calculate() {
+            try {
+                let expression = document.getElementById('display').value;
+                expression = expression.replace(/(^|\D)0+(\d)/g, '$1$2');
+                expression = expression.replace(/sin\(/g, 'Math.sin(');
+                expression = expression.replace(/cos\(/g, 'Math.cos(');
+                expression = expression.replace(/tan\(/g, 'Math.tan(');
+
+                let result = eval(expression);
+
+                if (isNaN(result) || !isFinite(result)) {
+                    throw "Invalid Calculation";
+                }
+                document.getElementById('display').value = result;
+                isNewCalculation = true;
+            } catch (error) {
+                document.getElementById('display').value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+        function backspace() {
+            let display = document.getElementById('display');
+            display.value = display.value.slice(0, -1);
+            if(display.value === '')
+            {
+                isNewCalculation = true;
+            }
+            else {
+                isNewCalculation = false;
+            }
+        }
+
+        function calculateSquareRoot() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                if (value < 0) {
+                    throw "Cannot calculate square root of a negative number";
+                }
+                display.value = Math.sqrt(value);
+                isNewCalculation = true;
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+         function calculatePower() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                display.value = Math.pow(value, 2);
+                isNewCalculation = true;
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+        function calculateSin() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                display.value = Math.sin(value * Math.PI / 180);
+                isNewCalculation = true;
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+        function calculateCos() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                display.value = Math.cos(value * Math.PI / 180);
+                isNewCalculation = true;
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+        function calculateTan() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                display.value = Math.tan(value * Math.PI / 180);
+                isNewCalculation = true;
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+        function changeSign() {
+            let display = document.getElementById('display');
+            let currentValue = display.value;
+
+            if (currentValue === "") {
+                return;
+            }
+
+            if (currentValue === "Error") {
+                return;
+            }
+
+            if (/[+\-*/%(]/.test(currentValue))
+            {
+              if (/[\+\-\*/\(]$/.test(currentValue))
+              {
+                return;
+              }
+
+                try {
+                  let result = eval(currentValue);
+                  display.value = result * -1;
+
+                }
+                catch (error){
+                  return;
+                }
+            }
+
+            else
+            {
+                let value = parseFloat(currentValue);
+
+                if (!isNaN(value)) {
+                    display.value = -value;
+                }
+            }
+              isNewCalculation = true;
+        }
+
+        function calculateCube() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                display.value = Math.pow(value, 3);
+                isNewCalculation = true;
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+        function calculateFactorial() {
+            let display = document.getElementById('display');
+            try {
+                let value = parseFloat(display.value);
+                if (isNaN(value)) {
+                    throw "Invalid Input";
+                }
+                if (value < 0 || !Number.isInteger(value)) {
+                    throw "Factorial is only defined for non-negative integers";
+                }
+                if (value > 170) {
+                    throw "Result too large"; // Prevent overflow
+                }
+
+                let result = 1;
+                for (let i = 2; i <= value; i++) {
+                    result *= i;
+                }
+                display.value = result;
+                isNewCalculation = true;
+
+            } catch (error) {
+                display.value = 'Error';
+                console.error(error);
+                isNewCalculation = true;
+            }
+        }
+
+      document.addEventListener('keydown', function(event) {
+        const key = event.key;
+        const display = document.getElementById('display');
+        const calculatorDiv = document.querySelector('.calculator');
+
+        if (display === document.activeElement || calculatorDiv.contains(document.activeElement)) {
+
+            if (/^F\d+$/.test(key)) {
+                event.preventDefault();
+                return;
+            }
+            if (key === '(' || key === ')') {
+                appendToDisplay(key);
+                return;
+            }
+
+            if (/[0-9]/.test(key)) {
+                if (isNewCalculation) {
+                    display.value = key;
+                    isNewCalculation = false;
+                } else {
+                    appendToDisplay(key);
+                }
+            } else if (/[+\-*/.%]/.test(key)) {
+                if (key === '/') {
+                    event.preventDefault();
+                }
+                if (/[\+\-\*/%]/.test(key) && /[\+\-\*/%]$/.test(display.value)) {
+                    display.value = display.value.slice(0, -1) + key;
+                } else {
+                    appendToDisplay(key);
+                }
+                isNewCalculation = false;
+
+            } else if (key === "Enter") {
+                calculate();
+            } else if (key === "Backspace") {
+                backspace();
+            } else if (key === "Escape") {
+                clearDisplay();
+            }
+        }
+    });
+    </script>
+</body>
+</html>
