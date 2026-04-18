@@ -1,0 +1,1010 @@
+year,conf,div,team,w,l,t,pct,pf,pa,home_w,home_l,home_t,away_w,away_l,away_t,div_w,div_l,div_t,conf_w,conf_l,conf_t,playoff
+1994,AFC,East,Miami Dolphins,10,6,0,.625,389,327,6,2,0,4,4,0,5,3,0,8,4,0,y
+1994,AFC,East,New England Patriots,10,6,0,.625,351,312,5,3,0,5,3,0,4,4,0,6,6,0,y
+1994,AFC,Central,Indianapolis Colts,8,8,0,.500,307,320,5,3,0,3,5,0,4,4,0,8,6,0,
+1994,AFC,East,Buffalo Bills,7,9,0,.438,340,356,4,4,0,3,5,0,3,5,0,6,6,0,
+1994,AFC,East,New York Jets,6,10,0,.375,264,320,4,4,0,2,6,0,4,4,0,5,7,0,
+1994,AFC,Central,Pittsburgh Steelers,12,4,0,.750,316,234,7,1,0,5,3,0,6,0,0,10,2,0,y
+1994,AFC,Central,Cleveland Browns,11,5,0,.688,340,204,6,2,0,5,3,0,4,2,0,8,4,0,y
+1994,AFC,Central,Cincinnati Bengals,3,13,0,.188,276,406,2,6,0,1,7,0,1,5,0,2,10,0,
+1994,AFC,Central,Houston Oilers,2,14,0,.125,226,352,2,6,0,0,8,0,1,5,0,2,10,0,
+1994,AFC,West,San Diego Chargers,11,5,0,.688,381,306,5,3,0,6,2,0,6,2,0,9,3,0,y
+1994,AFC,West,Kansas City Chiefs,9,7,0,.562,319,298,5,3,0,4,4,0,4,4,0,6,6,0,y
+1994,AFC,West,Los Angeles Raiders,9,7,0,.562,303,327,4,4,0,5,3,0,4,4,0,6,6,0,
+1994,AFC,West,Denver Broncos,7,9,0,.438,347,396,4,4,0,3,5,0,4,4,0,6,6,0,
+1994,NFC,West,Seattle Seahawks,6,10,0,.375,287,323,3,5,0,3,5,0,2,6,0,4,10,0,
+1994,NFC,East,Dallas Cowboys,12,4,0,.750,414,248,6,2,0,6,2,0,7,1,0,9,3,0,y
+1994,NFC,East,New York Giants,9,7,0,.562,279,305,4,4,0,5,3,0,6,2,0,6,6,0,
+1994,NFC,West,Arizona Cardinals,8,8,0,.500,235,267,5,3,0,3,5,0,4,4,0,5,7,0,
+1994,NFC,East,Philadelphia Eagles,7,9,0,.438,308,308,5,3,0,2,6,0,3,5,0,6,6,0,
+1994,NFC,East,Washington Redskins,3,13,0,.188,320,412,0,8,0,3,5,0,0,8,0,2,12,0,
+1994,NFC,Central,Minnesota Vikings,10,6,0,.625,356,314,6,2,0,4,4,0,5,3,0,8,4,0,y
+1994,NFC,Central,Green Bay Packers,9,7,0,.562,382,287,7,1,0,2,6,0,6,2,0,8,4,0,y
+1994,NFC,Central,Detroit Lions,9,7,0,.562,357,342,6,2,0,3,5,0,4,4,0,7,5,0,y
+1994,NFC,Central,Chicago Bears,9,7,0,.562,271,307,5,3,0,4,4,0,3,5,0,6,6,0,y
+1994,NFC,Central,Tampa Bay Buccaneers,6,10,0,.375,251,351,4,4,0,2,6,0,2,6,0,5,9,0,
+1994,NFC,West,San Francisco 49ers,13,3,0,.812,505,296,7,1,0,6,2,0,6,0,0,10,2,0,y
+1994,NFC,Central,New Orleans Saints,7,9,0,.438,348,407,3,5,0,4,4,0,4,2,0,6,6,0,
+1994,NFC,Central,Atlanta Falcons,7,9,0,.438,317,385,5,3,0,2,6,0,2,4,0,6,6,0,
+1994,NFC,West,Los Angeles Rams,4,12,0,.250,286,365,3,5,0,1,7,0,0,6,0,2,10,0,
+1995,AFC,East,Buffalo Bills,10,6,0,.625,350,335,6,2,0,4,4,0,5,3,0,7,5,0,y
+1995,AFC,Central,Indianapolis Colts,9,7,0,.562,331,316,5,3,0,4,4,0,6,2,0,7,5,0,y
+1995,AFC,East,Miami Dolphins,9,7,0,.562,398,332,5,3,0,4,4,0,3,5,0,7,5,0,y
+1995,AFC,East,New England Patriots,6,10,0,.375,294,377,3,5,0,3,5,0,5,3,0,6,6,0,
+1995,AFC,East,New York Jets,3,13,0,.188,233,384,2,6,0,1,7,0,1,7,0,3,9,0,
+1995,AFC,Central,Pittsburgh Steelers,11,5,0,.688,407,327,6,2,0,5,3,0,6,2,0,9,3,0,y
+1995,AFC,Central,Cincinnati Bengals,7,9,0,.438,349,374,3,5,0,4,4,0,4,4,0,5,7,0,
+1995,AFC,Central,Houston Oilers,7,9,0,.438,348,324,3,5,0,4,4,0,3,5,0,6,6,0,
+1995,AFC,Central,Cleveland Browns,5,11,0,.312,289,356,3,5,0,2,6,0,3,5,0,4,8,0,
+1995,AFC,Central,Jacksonville Jaguars,4,12,0,.250,275,404,2,6,0,2,6,0,4,4,0,4,8,0,
+1995,AFC,West,Kansas City Chiefs,13,3,0,.812,358,241,8,0,0,5,3,0,8,0,0,10,2,0,y
+1995,AFC,West,San Diego Chargers,9,7,0,.562,321,323,5,3,0,4,4,0,4,4,0,6,6,0,y
+1995,NFC,West,Seattle Seahawks,8,8,0,.500,363,366,5,3,0,3,5,0,3,5,0,5,7,0,
+1995,AFC,West,Denver Broncos,8,8,0,.500,388,345,6,2,0,2,6,0,3,5,0,6,6,0,
+1995,AFC,West,Oakland Raiders,8,8,0,.500,348,332,4,4,0,4,4,0,2,6,0,5,7,0,
+1995,NFC,East,Dallas Cowboys,12,4,0,.750,435,291,6,2,0,6,2,0,5,3,0,8,4,0,y
+1995,NFC,East,Philadelphia Eagles,10,6,0,.625,318,338,6,2,0,4,4,0,7,1,0,9,3,0,y
+1995,NFC,East,Washington Redskins,6,10,0,.375,326,359,4,4,0,2,6,0,3,5,0,6,6,0,
+1995,NFC,East,New York Giants,5,11,0,.312,290,340,3,5,0,2,6,0,4,4,0,5,7,0,
+1995,NFC,West,Arizona Cardinals,4,12,0,.250,275,422,3,5,0,1,7,0,1,7,0,3,9,0,
+1995,NFC,Central,Green Bay Packers,11,5,0,.688,404,314,7,1,0,4,4,0,5,3,0,7,5,0,y
+1995,NFC,Central,Detroit Lions,10,6,0,.625,436,336,7,1,0,3,5,0,6,2,0,7,5,0,y
+1995,NFC,Central,Chicago Bears,9,7,0,.562,392,360,5,3,0,4,4,0,4,4,0,7,5,0,
+1995,NFC,Central,Minnesota Vikings,8,8,0,.500,412,385,6,2,0,2,6,0,3,5,0,5,7,0,
+1995,NFC,Central,Tampa Bay Buccaneers,7,9,0,.438,238,335,5,3,0,2,6,0,2,6,0,5,7,0,
+1995,NFC,West,San Francisco 49ers,11,5,0,.688,457,258,6,2,0,5,3,0,5,3,0,8,4,0,y
+1995,NFC,Central,Atlanta Falcons,9,7,0,.562,362,349,7,1,0,2,6,0,5,3,0,7,5,0,y
+1995,NFC,West,St. Louis Rams,7,9,0,.438,309,418,4,4,0,3,5,0,4,4,0,6,6,0,
+1995,NFC,Central,New Orleans Saints,7,9,0,.438,319,348,4,4,0,3,5,0,3,5,0,3,9,0,
+1995,NFC,Central,Carolina Panthers,7,9,0,.438,289,325,5,3,0,2,6,0,3,5,0,4,8,0,
+1996,AFC,East,New England Patriots,11,5,0,.688,418,313,6,2,0,5,3,0,6,2,0,9,3,0,y
+1996,AFC,East,Buffalo Bills,10,6,0,.625,319,266,7,1,0,3,5,0,4,4,0,6,6,0,y
+1996,AFC,Central,Indianapolis Colts,9,7,0,.562,317,334,6,2,0,3,5,0,4,4,0,6,6,0,y
+1996,AFC,East,Miami Dolphins,8,8,0,.500,339,325,4,4,0,4,4,0,6,2,0,7,5,0,
+1996,AFC,East,New York Jets,1,15,0,.062,279,454,0,8,0,1,7,0,0,8,0,0,12,0,
+1996,AFC,Central,Pittsburgh Steelers,10,6,0,.625,344,257,7,1,0,3,5,0,4,4,0,8,4,0,y
+1996,AFC,Central,Jacksonville Jaguars,9,7,0,.562,325,335,7,1,0,2,6,0,5,3,0,7,5,0,y
+1996,AFC,Central,Cincinnati Bengals,8,8,0,.500,372,369,6,2,0,2,6,0,5,3,0,6,6,0,
+1996,AFC,Central,Houston Oilers,8,8,0,.500,345,319,2,6,0,6,2,0,5,3,0,6,6,0,
+1996,AFC,Central,Baltimore Ravens,4,12,0,.250,371,441,4,4,0,0,8,0,1,7,0,2,10,0,
+1996,AFC,West,Denver Broncos,13,3,0,.812,391,275,8,0,0,5,3,0,6,2,0,10,2,0,y
+1996,AFC,West,Kansas City Chiefs,9,7,0,.562,297,300,5,3,0,4,4,0,4,4,0,5,7,0,
+1996,AFC,West,San Diego Chargers,8,8,0,.500,310,376,5,3,0,3,5,0,5,3,0,7,5,0,
+1996,AFC,West,Oakland Raiders,7,9,0,.438,340,293,4,4,0,3,5,0,3,5,0,6,6,0,
+1996,NFC,West,Seattle Seahawks,7,9,0,.438,317,376,4,4,0,3,5,0,2,6,0,5,7,0,
+1996,NFC,East,Dallas Cowboys,10,6,0,.625,286,250,6,2,0,4,4,0,5,3,0,8,4,0,y
+1996,NFC,East,Philadelphia Eagles,10,6,0,.625,363,341,5,3,0,5,3,0,5,3,0,8,4,0,y
+1996,NFC,East,Washington Redskins,9,7,0,.562,364,312,5,3,0,4,4,0,4,4,0,6,6,0,
+1996,NFC,West,Arizona Cardinals,7,9,0,.438,300,397,5,3,0,2,6,0,4,4,0,7,5,0,
+1996,NFC,East,New York Giants,6,10,0,.375,242,297,3,5,0,3,5,0,2,6,0,4,8,0,
+1996,NFC,Central,Green Bay Packers,13,3,0,.812,456,210,8,0,0,5,3,0,7,1,0,10,2,0,y
+1996,NFC,Central,Minnesota Vikings,9,7,0,.562,298,315,5,3,0,4,4,0,5,3,0,8,4,0,y
+1996,NFC,Central,Chicago Bears,7,9,0,.438,283,305,6,2,0,1,7,0,3,5,0,5,7,0,
+1996,NFC,Central,Tampa Bay Buccaneers,6,10,0,.375,221,293,5,3,0,1,7,0,2,6,0,4,8,0,
+1996,NFC,Central,Detroit Lions,5,11,0,.312,302,368,4,4,0,1,7,0,3,5,0,4,8,0,
+1996,NFC,Central,Carolina Panthers,12,4,0,.750,367,218,8,0,0,4,4,0,7,1,0,9,3,0,y
+1996,NFC,West,San Francisco 49ers,12,4,0,.750,398,257,6,2,0,6,2,0,6,2,0,8,4,0,y
+1996,NFC,West,St. Louis Rams,6,10,0,.375,303,409,4,4,0,2,6,0,4,4,0,4,8,0,
+1996,NFC,Central,Atlanta Falcons,3,13,0,.188,309,461,2,6,0,1,7,0,3,5,0,3,9,0,
+1996,NFC,Central,New Orleans Saints,3,13,0,.188,229,339,2,6,0,1,7,0,0,8,0,2,10,0,
+1997,AFC,East,New England Patriots,10,6,0,.625,369,289,6,2,0,4,4,0,7,1,0,9,3,0,y
+1997,AFC,East,Miami Dolphins,9,7,0,.562,339,327,6,2,0,3,5,0,4,4,0,8,4,0,y
+1997,AFC,East,New York Jets,9,7,0,.562,348,287,5,3,0,4,4,0,2,6,0,6,6,0,
+1997,AFC,East,Buffalo Bills,6,10,0,.375,255,367,4,4,0,2,6,0,5,3,0,5,7,0,
+1997,AFC,Central,Indianapolis Colts,3,13,0,.188,313,401,2,6,0,1,7,0,2,6,0,2,10,0,
+1997,AFC,Central,Pittsburgh Steelers,11,5,0,.688,372,307,7,1,0,4,4,0,6,2,0,9,3,0,y
+1997,AFC,Central,Jacksonville Jaguars,11,5,0,.688,394,318,7,1,0,4,4,0,6,2,0,9,3,0,y
+1997,AFC,Central,Tennessee Oilers,8,8,0,.500,333,310,6,2,0,2,6,0,2,6,0,4,8,0,
+1997,AFC,Central,Cincinnati Bengals,7,9,0,.438,355,405,6,2,0,1,7,0,3,5,0,5,7,0,
+1997,AFC,Central,Baltimore Ravens,6,9,1,.406,326,345,3,4,1,3,5,0,3,5,0,4,8,0,
+1997,AFC,West,Kansas City Chiefs,13,3,0,.812,375,232,8,0,0,5,3,0,7,1,0,9,3,0,y
+1997,AFC,West,Denver Broncos,12,4,0,.750,472,287,8,0,0,4,4,0,6,2,0,9,3,0,y
+1997,NFC,West,Seattle Seahawks,8,8,0,.500,365,362,4,4,0,4,4,0,4,4,0,6,6,0,
+1997,AFC,West,Oakland Raiders,4,12,0,.250,324,419,2,6,0,2,6,0,2,6,0,2,10,0,
+1997,AFC,West,San Diego Chargers,4,12,0,.250,266,425,2,6,0,2,6,0,1,7,0,3,9,0,
+1997,NFC,East,New York Giants,10,5,1,.656,307,265,6,2,0,4,3,1,7,0,1,9,2,1,y
+1997,NFC,East,Washington Redskins,8,7,1,.531,327,289,5,2,1,3,5,0,4,3,1,7,4,1,
+1997,NFC,East,Philadelphia Eagles,6,9,1,.406,317,372,6,2,0,0,7,1,3,5,0,4,8,0,
+1997,NFC,East,Dallas Cowboys,6,10,0,.375,304,314,5,3,0,1,7,0,3,5,0,4,8,0,
+1997,NFC,West,Arizona Cardinals,4,12,0,.250,283,379,3,5,0,1,7,0,2,6,0,3,9,0,
+1997,NFC,Central,Green Bay Packers,13,3,0,.812,422,282,8,0,0,5,3,0,7,1,0,10,2,0,y
+1997,NFC,Central,Tampa Bay Buccaneers,10,6,0,.625,299,263,5,3,0,5,3,0,3,5,0,7,5,0,y
+1997,NFC,Central,Detroit Lions,9,7,0,.562,379,306,6,2,0,3,5,0,6,2,0,7,5,0,y
+1997,NFC,Central,Minnesota Vikings,9,7,0,.562,354,359,5,3,0,4,4,0,3,5,0,6,6,0,y
+1997,NFC,Central,Chicago Bears,4,12,0,.250,263,421,2,6,0,2,6,0,1,7,0,2,10,0,
+1997,NFC,West,San Francisco 49ers,13,3,0,.812,375,265,8,0,0,5,3,0,8,0,0,11,1,0,y
+1997,NFC,Central,Carolina Panthers,7,9,0,.438,265,314,2,6,0,5,3,0,4,4,0,5,7,0,
+1997,NFC,Central,Atlanta Falcons,7,9,0,.438,320,361,3,5,0,4,4,0,4,4,0,5,7,0,
+1997,NFC,Central,New Orleans Saints,6,10,0,.375,237,327,3,5,0,3,5,0,1,7,0,4,8,0,
+1997,NFC,West,St. Louis Rams,5,11,0,.312,299,359,2,6,0,3,5,0,3,5,0,5,7,0,
+1998,AFC,East,New York Jets,12,4,0,.750,416,266,7,1,0,5,3,0,7,1,0,10,2,0,y
+1998,AFC,East,Miami Dolphins,10,6,0,.625,321,265,7,1,0,3,5,0,4,4,0,7,5,0,y
+1998,AFC,East,Buffalo Bills,10,6,0,.625,400,333,6,2,0,4,4,0,4,4,0,7,5,0,y
+1998,AFC,East,New England Patriots,9,7,0,.562,337,329,6,2,0,3,5,0,4,4,0,7,5,0,y
+1998,AFC,Central,Indianapolis Colts,3,13,0,.188,310,444,3,5,0,0,8,0,1,7,0,3,9,0,
+1998,AFC,Central,Jacksonville Jaguars,11,5,0,.688,392,338,7,1,0,4,4,0,6,2,0,8,4,0,y
+1998,AFC,Central,Tennessee Oilers,8,8,0,.500,330,320,3,5,0,5,3,0,7,1,0,7,5,0,
+1998,AFC,Central,Pittsburgh Steelers,7,9,0,.438,263,303,5,3,0,2,6,0,3,5,0,5,7,0,
+1998,AFC,Central,Baltimore Ravens,6,10,0,.375,269,335,4,4,0,2,6,0,2,6,0,5,7,0,
+1998,AFC,Central,Cincinnati Bengals,3,13,0,.188,268,452,1,7,0,2,6,0,2,6,0,2,10,0,
+1998,AFC,West,Denver Broncos,14,2,0,.875,501,309,8,0,0,6,2,0,8,0,0,11,1,0,y
+1998,AFC,West,Oakland Raiders,8,8,0,.500,288,356,4,4,0,4,4,0,4,4,0,5,7,0,
+1998,NFC,West,Seattle Seahawks,8,8,0,.500,372,310,6,2,0,2,6,0,3,5,0,5,7,0,
+1998,AFC,West,Kansas City Chiefs,7,9,0,.438,327,363,5,3,0,2,6,0,4,4,0,4,8,0,
+1998,AFC,West,San Diego Chargers,5,11,0,.312,241,342,4,4,0,1,7,0,1,7,0,4,8,0,
+1998,NFC,East,Dallas Cowboys,10,6,0,.625,381,275,6,2,0,4,4,0,8,0,0,9,3,0,y
+1998,NFC,West,Arizona Cardinals,9,7,0,.562,325,378,5,3,0,4,4,0,4,4,0,8,4,0,y
+1998,NFC,East,New York Giants,8,8,0,.500,287,309,5,3,0,3,5,0,5,3,0,5,7,0,
+1998,NFC,East,Washington Redskins,6,10,0,.375,319,421,4,4,0,2,6,0,2,6,0,4,8,0,
+1998,NFC,East,Philadelphia Eagles,3,13,0,.188,161,344,3,5,0,0,8,0,1,7,0,3,9,0,
+1998,NFC,Central,Minnesota Vikings,15,1,0,.938,556,296,8,0,0,7,1,0,7,1,0,11,1,0,y
+1998,NFC,Central,Green Bay Packers,11,5,0,.688,408,319,7,1,0,4,4,0,4,4,0,8,4,0,y
+1998,NFC,Central,Tampa Bay Buccaneers,8,8,0,.500,314,295,6,2,0,2,6,0,4,4,0,6,6,0,
+1998,NFC,Central,Detroit Lions,5,11,0,.312,306,378,4,4,0,1,7,0,4,4,0,4,8,0,
+1998,NFC,Central,Chicago Bears,4,12,0,.250,276,368,3,5,0,1,7,0,1,7,0,2,10,0,
+1998,NFC,Central,Atlanta Falcons,14,2,0,.875,442,289,8,0,0,6,2,0,7,1,0,11,1,0,y
+1998,NFC,West,San Francisco 49ers,12,4,0,.750,479,328,8,0,0,4,4,0,7,1,0,10,2,0,y
+1998,NFC,Central,New Orleans Saints,6,10,0,.375,305,359,4,4,0,2,6,0,3,5,0,5,7,0,
+1998,NFC,Central,Carolina Panthers,4,12,0,.250,336,413,2,6,0,2,6,0,3,5,0,3,9,0,
+1998,NFC,West,St. Louis Rams,4,12,0,.250,285,378,2,6,0,2,6,0,0,8,0,1,11,0,
+1999,AFC,Central,Indianapolis Colts,13,3,0,.812,423,333,7,1,0,6,2,0,5,3,0,9,3,0,y
+1999,AFC,East,Buffalo Bills,11,5,0,.688,320,229,6,2,0,5,3,0,6,2,0,8,4,0,y
+1999,AFC,East,Miami Dolphins,9,7,0,.562,326,336,5,3,0,4,4,0,3,5,0,7,5,0,y
+1999,AFC,East,New York Jets,8,8,0,.500,308,309,4,4,0,4,4,0,4,4,0,6,6,0,
+1999,AFC,East,New England Patriots,8,8,0,.500,299,284,5,3,0,3,5,0,2,6,0,5,7,0,
+1999,AFC,Central,Jacksonville Jaguars,14,2,0,.875,396,217,7,1,0,7,1,0,8,2,0,10,2,0,y
+1999,AFC,Central,Tennessee Titans,13,3,0,.812,392,324,8,0,0,5,3,0,9,1,0,10,2,0,y
+1999,AFC,Central,Baltimore Ravens,8,8,0,.500,324,277,4,4,0,4,4,0,6,4,0,6,7,0,
+1999,AFC,Central,Pittsburgh Steelers,6,10,0,.375,317,320,2,6,0,4,4,0,3,7,0,3,10,0,
+1999,AFC,Central,Cincinnati Bengals,4,12,0,.250,283,460,2,6,0,2,6,0,3,7,0,3,10,0,
+1999,AFC,Central,Cleveland Browns,2,14,0,.125,217,437,0,8,0,2,6,0,1,9,0,1,12,0,
+1999,NFC,West,Seattle Seahawks,9,7,0,.562,338,298,5,3,0,4,4,0,4,4,0,7,5,0,y
+1999,AFC,West,Kansas City Chiefs,9,7,0,.562,390,322,6,2,0,3,5,0,4,4,0,7,5,0,
+1999,AFC,West,San Diego Chargers,8,8,0,.500,269,316,4,4,0,4,4,0,5,3,0,7,5,0,
+1999,AFC,West,Oakland Raiders,8,8,0,.500,390,329,5,3,0,3,5,0,3,5,0,5,7,0,
+1999,AFC,West,Denver Broncos,6,10,0,.375,314,318,3,5,0,3,5,0,4,4,0,4,8,0,
+1999,NFC,East,Washington Redskins,10,6,0,.625,443,377,6,2,0,4,4,0,5,3,0,8,4,0,y
+1999,NFC,East,Dallas Cowboys,8,8,0,.500,352,276,7,1,0,1,7,0,5,3,0,7,5,0,y
+1999,NFC,East,New York Giants,7,9,0,.438,299,358,4,4,0,3,5,0,3,5,0,5,7,0,
+1999,NFC,West,Arizona Cardinals,6,10,0,.375,245,382,4,4,0,2,6,0,5,3,0,6,6,0,
+1999,NFC,East,Philadelphia Eagles,5,11,0,.312,272,357,4,4,0,1,7,0,2,6,0,4,8,0,
+1999,NFC,Central,Tampa Bay Buccaneers,11,5,0,.688,270,235,7,1,0,4,4,0,5,3,0,8,4,0,y
+1999,NFC,Central,Minnesota Vikings,10,6,0,.625,399,335,6,2,0,4,4,0,4,4,0,8,4,0,y
+1999,NFC,Central,Detroit Lions,8,8,0,.500,322,323,6,2,0,2,6,0,4,4,0,7,5,0,y
+1999,NFC,Central,Green Bay Packers,8,8,0,.500,357,341,5,3,0,3,5,0,4,4,0,6,6,0,
+1999,NFC,Central,Chicago Bears,6,10,0,.375,272,341,3,5,0,3,5,0,3,5,0,4,8,0,
+1999,NFC,West,St. Louis Rams,13,3,0,.812,526,242,8,0,0,5,3,0,8,0,0,10,2,0,y
+1999,NFC,Central,Carolina Panthers,8,8,0,.500,421,381,5,3,0,3,5,0,4,4,0,6,6,0,
+1999,NFC,Central,Atlanta Falcons,5,11,0,.312,285,380,4,4,0,1,7,0,4,4,0,5,7,0,
+1999,NFC,West,San Francisco 49ers,4,12,0,.250,295,453,3,5,0,1,7,0,2,6,0,3,9,0,
+1999,NFC,Central,New Orleans Saints,3,13,0,.188,260,434,3,5,0,0,8,0,2,6,0,3,9,0,
+2000,AFC,East,Miami Dolphins,11,5,0,.688,323,226,5,3,0,6,2,0,5,3,0,9,3,0,y
+2000,AFC,Central,Indianapolis Colts,10,6,0,.625,429,326,6,2,0,4,4,0,5,3,0,8,4,0,y
+2000,AFC,East,New York Jets,9,7,0,.562,321,321,5,3,0,4,4,0,6,2,0,6,6,0,
+2000,AFC,East,Buffalo Bills,8,8,0,.500,315,350,5,3,0,3,5,0,2,6,0,6,6,0,
+2000,AFC,East,New England Patriots,5,11,0,.312,276,338,3,5,0,2,6,0,2,6,0,5,7,0,
+2000,AFC,Central,Tennessee Titans,13,3,0,.812,346,191,7,1,0,6,2,0,8,2,0,9,3,0,y
+2000,AFC,Central,Baltimore Ravens,12,4,0,.750,333,165,6,2,0,6,2,0,8,2,0,10,3,0,y
+2000,AFC,Central,Pittsburgh Steelers,9,7,0,.562,321,255,4,4,0,5,3,0,5,5,0,8,5,0,
+2000,AFC,Central,Jacksonville Jaguars,7,9,0,.438,367,327,4,4,0,3,5,0,5,5,0,5,7,0,
+2000,AFC,Central,Cincinnati Bengals,4,12,0,.250,185,359,3,5,0,1,7,0,2,8,0,3,10,0,
+2000,AFC,Central,Cleveland Browns,3,13,0,.188,161,419,2,6,0,1,7,0,2,8,0,3,10,0,
+2000,AFC,West,Oakland Raiders,12,4,0,.750,479,299,7,1,0,5,3,0,5,3,0,8,4,0,y
+2000,AFC,West,Denver Broncos,11,5,0,.688,485,369,6,2,0,5,3,0,6,2,0,8,4,0,y
+2000,AFC,West,Kansas City Chiefs,7,9,0,.438,355,354,5,3,0,2,6,0,5,3,0,5,7,0,
+2000,NFC,West,Seattle Seahawks,6,10,0,.375,320,405,3,5,0,3,5,0,3,5,0,4,8,0,
+2000,AFC,West,San Diego Chargers,1,15,0,.062,269,440,1,7,0,0,8,0,1,7,0,1,11,0,
+2000,NFC,East,New York Giants,12,4,0,.750,328,246,5,3,0,7,1,0,7,1,0,9,3,0,y
+2000,NFC,East,Philadelphia Eagles,11,5,0,.688,351,245,5,3,0,6,2,0,5,3,0,8,4,0,y
+2000,NFC,East,Washington Redskins,8,8,0,.500,281,269,4,4,0,4,4,0,3,5,0,6,6,0,
+2000,NFC,East,Dallas Cowboys,5,11,0,.312,294,361,3,5,0,2,6,0,3,5,0,4,8,0,
+2000,NFC,West,Arizona Cardinals,3,13,0,.188,210,443,3,5,0,0,8,0,2,6,0,2,10,0,
+2000,NFC,Central,Minnesota Vikings,11,5,0,.688,397,371,7,1,0,4,4,0,5,3,0,8,4,0,y
+2000,NFC,Central,Tampa Bay Buccaneers,10,6,0,.625,388,269,6,2,0,4,4,0,4,4,0,7,5,0,y
+2000,NFC,Central,Green Bay Packers,9,7,0,.562,353,323,6,2,0,3,5,0,5,3,0,8,4,0,
+2000,NFC,Central,Detroit Lions,9,7,0,.562,307,307,4,4,0,5,3,0,3,5,0,7,5,0,
+2000,NFC,Central,Chicago Bears,5,11,0,.312,216,355,3,5,0,2,6,0,3,5,0,3,9,0,
+2000,NFC,Central,New Orleans Saints,10,6,0,.625,354,305,3,5,0,7,1,0,7,1,0,9,3,0,y
+2000,NFC,West,St. Louis Rams,10,6,0,.625,540,471,5,3,0,5,3,0,5,3,0,7,5,0,y
+2000,NFC,Central,Carolina Panthers,7,9,0,.438,310,310,5,3,0,2,6,0,4,4,0,5,7,0,
+2000,NFC,West,San Francisco 49ers,6,10,0,.375,388,422,4,4,0,2,6,0,1,7,0,4,8,0,
+2000,NFC,Central,Atlanta Falcons,4,12,0,.250,252,413,3,5,0,1,7,0,3,5,0,3,9,0,
+2001,AFC,East,New England Patriots,11,5,0,.688,371,272,6,2,0,5,3,0,6,2,0,8,4,0,y
+2001,AFC,East,Miami Dolphins,11,5,0,.688,344,290,7,1,0,4,4,0,5,3,0,9,3,0,y
+2001,AFC,East,New York Jets,10,6,0,.625,308,295,3,5,0,7,1,0,5,3,0,8,4,0,y
+2001,AFC,Central,Indianapolis Colts,6,10,0,.375,413,486,3,5,0,3,5,0,3,5,0,5,7,0,
+2001,AFC,East,Buffalo Bills,3,13,0,.188,265,420,1,7,0,2,6,0,1,7,0,2,10,0,
+2001,AFC,Central,Pittsburgh Steelers,13,3,0,.812,352,212,7,1,0,6,2,0,7,3,0,10,3,0,y
+2001,AFC,Central,Baltimore Ravens,10,6,0,.625,303,265,6,2,0,4,4,0,6,4,0,8,4,0,y
+2001,AFC,Central,Cleveland Browns,7,9,0,.438,285,319,4,4,0,3,5,0,5,5,0,6,7,0,
+2001,AFC,Central,Tennessee Titans,7,9,0,.438,336,388,3,5,0,4,4,0,3,7,0,4,8,0,
+2001,AFC,Central,Jacksonville Jaguars,6,10,0,.375,294,286,3,5,0,3,5,0,5,5,0,5,8,0,
+2001,AFC,Central,Cincinnati Bengals,6,10,0,.375,226,309,4,4,0,2,6,0,4,6,0,5,8,0,
+2001,AFC,West,Oakland Raiders,10,6,0,.625,399,327,5,3,0,5,3,0,6,2,0,7,5,0,y
+2001,NFC,West,Seattle Seahawks,9,7,0,.562,301,324,6,2,0,3,5,0,5,3,0,8,4,0,
+2001,AFC,West,Denver Broncos,8,8,0,.500,340,339,6,2,0,2,6,0,4,4,0,5,7,0,
+2001,AFC,West,Kansas City Chiefs,6,10,0,.375,320,344,3,5,0,3,5,0,4,4,0,5,7,0,
+2001,AFC,West,San Diego Chargers,5,11,0,.312,332,321,4,4,0,1,7,0,1,7,0,3,9,0,
+2001,NFC,East,Philadelphia Eagles,11,5,0,.688,343,208,4,4,0,7,1,0,6,2,0,8,4,0,y
+2001,NFC,East,Washington Redskins,8,8,0,.500,256,303,4,4,0,4,4,0,4,4,0,6,6,0,
+2001,NFC,East,New York Giants,7,9,0,.438,294,321,5,3,0,2,6,0,4,4,0,5,7,0,
+2001,NFC,West,Arizona Cardinals,7,9,0,.438,295,343,3,5,0,4,4,0,2,6,0,4,8,0,
+2001,NFC,East,Dallas Cowboys,5,11,0,.312,246,338,4,4,0,1,7,0,4,4,0,5,7,0,
+2001,NFC,Central,Chicago Bears,13,3,0,.812,338,203,7,1,0,6,2,0,6,2,0,10,2,0,y
+2001,NFC,Central,Green Bay Packers,12,4,0,.750,390,266,7,1,0,5,3,0,6,2,0,9,3,0,y
+2001,NFC,Central,Tampa Bay Buccaneers,9,7,0,.562,324,280,5,3,0,4,4,0,4,4,0,7,5,0,y
+2001,NFC,Central,Minnesota Vikings,5,11,0,.312,290,390,5,3,0,0,8,0,3,5,0,4,8,0,
+2001,NFC,Central,Detroit Lions,2,14,0,.125,270,424,2,6,0,0,8,0,1,7,0,2,10,0,
+2001,NFC,West,St. Louis Rams,14,2,0,.875,503,273,6,2,0,8,0,0,7,1,0,10,2,0,y
+2001,NFC,West,San Francisco 49ers,12,4,0,.750,409,282,7,1,0,5,3,0,6,2,0,8,4,0,y
+2001,NFC,Central,New Orleans Saints,7,9,0,.438,333,409,3,5,0,4,4,0,4,4,0,5,7,0,
+2001,NFC,Central,Atlanta Falcons,7,9,0,.438,291,377,3,5,0,4,4,0,3,5,0,6,6,0,
+2001,NFC,Central,Carolina Panthers,1,15,0,.062,253,410,0,8,0,1,7,0,0,8,0,1,11,0,
+2002,AFC,East,New York Jets,9,7,0,.562,359,336,5,3,0,4,4,0,4,2,0,6,6,0,y
+2002,AFC,East,New England Patriots,9,7,0,.562,381,346,5,3,0,4,4,0,4,2,0,6,6,0,
+2002,AFC,East,Miami Dolphins,9,7,0,.562,378,301,7,1,0,2,6,0,2,4,0,7,5,0,
+2002,AFC,East,Buffalo Bills,8,8,0,.500,379,397,5,3,0,3,5,0,2,4,0,5,7,0,
+2002,AFC,North,Pittsburgh Steelers,10,5,1,.656,390,345,5,2,1,5,3,0,6,0,0,8,4,0,y
+2002,AFC,North,Cleveland Browns,9,7,0,.562,344,320,3,5,0,6,2,0,3,3,0,7,5,0,y
+2002,AFC,North,Baltimore Ravens,7,9,0,.438,316,354,4,4,0,3,5,0,3,3,0,7,5,0,
+2002,AFC,North,Cincinnati Bengals,2,14,0,.125,279,456,1,7,0,1,7,0,0,6,0,1,11,0,
+2002,AFC,South,Tennessee Titans,11,5,0,.688,367,324,6,2,0,5,3,0,6,0,0,9,3,0,y
+2002,AFC,South,Indianapolis Colts,10,6,0,.625,349,313,5,3,0,5,3,0,4,2,0,8,4,0,y
+2002,AFC,South,Jacksonville Jaguars,6,10,0,.375,328,315,3,5,0,3,5,0,1,5,0,4,8,0,
+2002,AFC,South,Houston Texans,4,12,0,.250,213,356,2,6,0,2,6,0,1,5,0,2,10,0,
+2002,AFC,West,Oakland Raiders,11,5,0,.688,450,304,6,2,0,5,3,0,4,2,0,9,3,0,y
+2002,AFC,West,Denver Broncos,9,7,0,.562,392,344,5,3,0,4,4,0,3,3,0,5,7,0,
+2002,AFC,West,San Diego Chargers,8,8,0,.500,333,367,5,3,0,3,5,0,3,3,0,6,6,0,
+2002,AFC,West,Kansas City Chiefs,8,8,0,.500,467,399,6,2,0,2,6,0,2,4,0,6,6,0,
+2002,NFC,East,Philadelphia Eagles,12,4,0,.750,415,241,7,1,0,5,3,0,5,1,0,11,1,0,y
+2002,NFC,East,New York Giants,10,6,0,.625,320,279,5,3,0,5,3,0,5,1,0,8,4,0,y
+2002,NFC,East,Washington Redskins,7,9,0,.438,307,365,5,3,0,2,6,0,1,5,0,4,8,0,
+2002,NFC,East,Dallas Cowboys,5,11,0,.312,217,329,4,4,0,1,7,0,1,5,0,3,9,0,
+2002,NFC,North,Green Bay Packers,12,4,0,.750,398,328,8,0,0,4,4,0,5,1,0,9,3,0,y
+2002,NFC,North,Minnesota Vikings,6,10,0,.375,390,442,4,4,0,2,6,0,4,2,0,5,7,0,
+2002,NFC,North,Chicago Bears,4,12,0,.250,281,379,3,5,0,1,7,0,2,4,0,3,9,0,
+2002,NFC,North,Detroit Lions,3,13,0,.188,306,451,3,5,0,0,8,0,1,5,0,3,9,0,
+2002,NFC,South,Tampa Bay Buccaneers,12,4,0,.750,346,196,6,2,0,6,2,0,4,2,0,9,3,0,y
+2002,NFC,South,Atlanta Falcons,9,6,1,.594,402,314,5,3,0,4,3,1,4,2,0,7,5,0,y
+2002,NFC,South,New Orleans Saints,9,7,0,.562,432,388,4,4,0,5,3,0,3,3,0,7,5,0,
+2002,NFC,South,Carolina Panthers,7,9,0,.438,258,302,4,4,0,3,5,0,1,5,0,4,8,0,
+2002,NFC,West,San Francisco 49ers,10,6,0,.625,367,351,5,3,0,5,3,0,5,1,0,8,4,0,y
+2002,NFC,West,St. Louis Rams,7,9,0,.438,316,369,6,2,0,1,7,0,4,2,0,5,7,0,
+2002,NFC,West,Seattle Seahawks,7,9,0,.438,355,369,3,5,0,4,4,0,2,4,0,5,7,0,
+2002,NFC,West,Arizona Cardinals,5,11,0,.312,262,417,3,5,0,2,6,0,1,5,0,5,7,0,
+2003,AFC,East,New England Patriots,14,2,0,.875,348,238,8,0,0,6,2,0,5,1,0,11,1,0,y
+2003,AFC,East,Miami Dolphins,10,6,0,.625,311,261,4,4,0,6,2,0,4,2,0,7,5,0,
+2003,AFC,East,Buffalo Bills,6,10,0,.375,243,279,4,4,0,2,6,0,2,4,0,4,8,0,
+2003,AFC,East,New York Jets,6,10,0,.375,283,299,4,4,0,2,6,0,1,5,0,6,6,0,
+2003,AFC,North,Baltimore Ravens,10,6,0,.625,391,281,7,1,0,3,5,0,4,2,0,7,5,0,y
+2003,AFC,North,Cincinnati Bengals,8,8,0,.500,346,384,5,3,0,3,5,0,3,3,0,6,6,0,
+2003,AFC,North,Pittsburgh Steelers,6,10,0,.375,300,327,4,4,0,2,6,0,3,3,0,5,7,0,
+2003,AFC,North,Cleveland Browns,5,11,0,.312,254,322,2,6,0,3,5,0,2,4,0,3,9,0,
+2003,AFC,South,Indianapolis Colts,12,4,0,.750,447,336,5,3,0,7,1,0,5,1,0,9,3,0,y
+2003,AFC,South,Tennessee Titans,12,4,0,.750,435,324,7,1,0,5,3,0,4,2,0,8,4,0,y
+2003,AFC,South,Jacksonville Jaguars,5,11,0,.312,276,331,5,3,0,0,8,0,2,4,0,3,9,0,
+2003,AFC,South,Houston Texans,5,11,0,.312,255,380,3,5,0,2,6,0,1,5,0,3,9,0,
+2003,AFC,West,Kansas City Chiefs,13,3,0,.812,484,332,8,0,0,5,3,0,5,1,0,10,2,0,y
+2003,AFC,West,Denver Broncos,10,6,0,.625,381,301,6,2,0,4,4,0,5,1,0,9,3,0,y
+2003,AFC,West,Oakland Raiders,4,12,0,.250,270,379,4,4,0,0,8,0,1,5,0,3,9,0,
+2003,AFC,West,San Diego Chargers,4,12,0,.250,313,441,2,6,0,2,6,0,1,5,0,2,10,0,
+2003,NFC,East,Philadelphia Eagles,12,4,0,.750,374,287,5,3,0,7,1,0,5,1,0,9,3,0,y
+2003,NFC,East,Dallas Cowboys,10,6,0,.625,289,260,6,2,0,4,4,0,5,1,0,8,4,0,y
+2003,NFC,East,Washington Redskins,5,11,0,.312,287,372,3,5,0,2,6,0,1,5,0,3,9,0,
+2003,NFC,East,New York Giants,4,12,0,.250,243,387,1,7,0,3,5,0,1,5,0,3,9,0,
+2003,NFC,North,Green Bay Packers,10,6,0,.625,442,307,5,3,0,5,3,0,4,2,0,7,5,0,y
+2003,NFC,North,Minnesota Vikings,9,7,0,.562,416,353,6,2,0,3,5,0,4,2,0,7,5,0,
+2003,NFC,North,Chicago Bears,7,9,0,.438,283,346,6,2,0,1,7,0,2,4,0,4,8,0,
+2003,NFC,North,Detroit Lions,5,11,0,.312,270,379,5,3,0,0,8,0,2,4,0,4,8,0,
+2003,NFC,South,Carolina Panthers,11,5,0,.688,325,304,6,2,0,5,3,0,5,1,0,9,3,0,y
+2003,NFC,South,New Orleans Saints,8,8,0,.500,340,326,5,3,0,3,5,0,3,3,0,7,5,0,
+2003,NFC,South,Tampa Bay Buccaneers,7,9,0,.438,301,264,3,5,0,4,4,0,2,4,0,6,6,0,
+2003,NFC,South,Atlanta Falcons,5,11,0,.312,299,422,2,6,0,3,5,0,2,4,0,4,8,0,
+2003,NFC,West,St. Louis Rams,12,4,0,.750,447,328,8,0,0,4,4,0,4,2,0,8,4,0,y
+2003,NFC,West,Seattle Seahawks,10,6,0,.625,404,327,8,0,0,2,6,0,5,1,0,8,4,0,y
+2003,NFC,West,San Francisco 49ers,7,9,0,.438,384,337,6,2,0,1,7,0,2,4,0,6,6,0,
+2003,NFC,West,Arizona Cardinals,4,12,0,.250,225,452,4,4,0,0,8,0,1,5,0,3,9,0,
+2004,AFC,East,New England Patriots,14,2,0,.875,437,260,8,0,0,6,2,0,5,1,0,10,2,0,y
+2004,AFC,East,New York Jets,10,6,0,.625,333,261,6,2,0,4,4,0,3,3,0,7,5,0,y
+2004,AFC,East,Buffalo Bills,9,7,0,.562,395,284,5,3,0,4,4,0,3,3,0,5,7,0,
+2004,AFC,East,Miami Dolphins,4,12,0,.250,275,354,3,5,0,1,7,0,1,5,0,2,10,0,
+2004,AFC,North,Pittsburgh Steelers,15,1,0,.938,372,251,8,0,0,7,1,0,5,1,0,11,1,0,y
+2004,AFC,North,Baltimore Ravens,9,7,0,.562,317,268,6,2,0,3,5,0,3,3,0,6,6,0,
+2004,AFC,North,Cincinnati Bengals,8,8,0,.500,374,372,5,3,0,3,5,0,2,4,0,4,8,0,
+2004,AFC,North,Cleveland Browns,4,12,0,.250,276,390,3,5,0,1,7,0,2,4,0,3,9,0,
+2004,AFC,South,Indianapolis Colts,12,4,0,.750,522,351,7,1,0,5,3,0,5,1,0,8,4,0,y
+2004,AFC,South,Jacksonville Jaguars,9,7,0,.562,261,280,4,4,0,5,3,0,2,4,0,6,6,0,
+2004,AFC,South,Houston Texans,7,9,0,.438,309,339,3,5,0,4,4,0,4,2,0,6,6,0,
+2004,AFC,South,Tennessee Titans,5,11,0,.312,344,439,2,6,0,3,5,0,1,5,0,3,9,0,
+2004,AFC,West,San Diego Chargers,12,4,0,.750,446,313,7,1,0,5,3,0,5,1,0,9,3,0,y
+2004,AFC,West,Denver Broncos,10,6,0,.625,381,304,6,2,0,4,4,0,3,3,0,7,5,0,y
+2004,AFC,West,Kansas City Chiefs,7,9,0,.438,483,435,4,4,0,3,5,0,3,3,0,6,6,0,
+2004,AFC,West,Oakland Raiders,5,11,0,.312,320,442,3,5,0,2,6,0,1,5,0,3,9,0,
+2004,NFC,East,Philadelphia Eagles,13,3,0,.812,386,260,7,1,0,6,2,0,6,0,0,11,1,0,y
+2004,NFC,East,New York Giants,6,10,0,.375,303,347,3,5,0,3,5,0,3,3,0,5,7,0,
+2004,NFC,East,Dallas Cowboys,6,10,0,.375,293,405,4,4,0,2,6,0,2,4,0,5,7,0,
+2004,NFC,East,Washington Redskins,6,10,0,.375,240,265,3,5,0,3,5,0,1,5,0,6,6,0,
+2004,NFC,North,Green Bay Packers,10,6,0,.625,424,380,4,4,0,6,2,0,5,1,0,9,3,0,y
+2004,NFC,North,Minnesota Vikings,8,8,0,.500,405,395,5,3,0,3,5,0,3,3,0,5,7,0,y
+2004,NFC,North,Detroit Lions,6,10,0,.375,296,350,3,5,0,3,5,0,2,4,0,5,7,0,
+2004,NFC,North,Chicago Bears,5,11,0,.312,231,331,2,6,0,3,5,0,2,4,0,4,8,0,
+2004,NFC,South,Atlanta Falcons,11,5,0,.688,340,337,7,1,0,4,4,0,4,2,0,8,4,0,y
+2004,NFC,South,New Orleans Saints,8,8,0,.500,348,405,3,5,0,5,3,0,3,3,0,6,6,0,
+2004,NFC,South,Carolina Panthers,7,9,0,.438,355,339,3,5,0,4,4,0,3,3,0,6,6,0,
+2004,NFC,South,Tampa Bay Buccaneers,5,11,0,.312,301,304,4,4,0,1,7,0,2,4,0,4,8,0,
+2004,NFC,West,Seattle Seahawks,9,7,0,.562,371,373,5,3,0,4,4,0,3,3,0,8,4,0,y
+2004,NFC,West,St. Louis Rams,8,8,0,.500,319,392,6,2,0,2,6,0,5,1,0,7,5,0,y
+2004,NFC,West,Arizona Cardinals,6,10,0,.375,284,322,5,3,0,1,7,0,2,4,0,5,7,0,
+2004,NFC,West,San Francisco 49ers,2,14,0,.125,259,452,1,7,0,1,7,0,2,4,0,2,10,0,
+2005,AFC,East,New England Patriots,10,6,0,.625,379,338,5,3,0,5,3,0,5,1,0,7,5,0,y
+2005,AFC,East,Miami Dolphins,9,7,0,.562,318,317,5,3,0,4,4,0,3,3,0,7,5,0,
+2005,AFC,East,Buffalo Bills,5,11,0,.312,271,367,4,4,0,1,7,0,2,4,0,5,7,0,
+2005,AFC,East,New York Jets,4,12,0,.250,240,355,4,4,0,0,8,0,2,4,0,3,9,0,
+2005,AFC,North,Cincinnati Bengals,11,5,0,.688,421,350,5,3,0,6,2,0,5,1,0,7,5,0,y
+2005,AFC,North,Pittsburgh Steelers,11,5,0,.688,389,258,5,3,0,6,2,0,4,2,0,7,5,0,y
+2005,AFC,North,Baltimore Ravens,6,10,0,.375,265,299,6,2,0,0,8,0,2,4,0,4,8,0,
+2005,AFC,North,Cleveland Browns,6,10,0,.375,232,301,4,4,0,2,6,0,1,5,0,4,8,0,
+2005,AFC,South,Indianapolis Colts,14,2,0,.875,439,247,7,1,0,7,1,0,6,0,0,11,1,0,y
+2005,AFC,South,Jacksonville Jaguars,12,4,0,.750,361,269,6,2,0,6,2,0,4,2,0,9,3,0,y
+2005,AFC,South,Tennessee Titans,4,12,0,.250,299,421,3,5,0,1,7,0,2,4,0,3,9,0,
+2005,AFC,South,Houston Texans,2,14,0,.125,260,431,2,6,0,0,8,0,0,6,0,1,11,0,
+2005,AFC,West,Denver Broncos,13,3,0,.812,395,258,8,0,0,5,3,0,5,1,0,10,2,0,y
+2005,AFC,West,Kansas City Chiefs,10,6,0,.625,403,325,7,1,0,3,5,0,4,2,0,9,3,0,
+2005,AFC,West,San Diego Chargers,9,7,0,.562,418,312,4,4,0,5,3,0,3,3,0,7,5,0,
+2005,AFC,West,Oakland Raiders,4,12,0,.250,290,383,2,6,0,2,6,0,0,6,0,2,10,0,
+2005,NFC,East,New York Giants,11,5,0,.688,422,314,7,1,0,4,4,0,4,2,0,8,4,0,y
+2005,NFC,East,Washington Redskins,10,6,0,.625,359,293,6,2,0,4,4,0,5,1,0,10,2,0,y
+2005,NFC,East,Dallas Cowboys,9,7,0,.562,325,308,5,3,0,4,4,0,3,3,0,7,5,0,
+2005,NFC,East,Philadelphia Eagles,6,10,0,.375,310,388,4,4,0,2,6,0,0,6,0,3,9,0,
+2005,NFC,North,Chicago Bears,11,5,0,.688,260,202,7,1,0,4,4,0,5,1,0,10,2,0,y
+2005,NFC,North,Minnesota Vikings,9,7,0,.562,306,344,6,2,0,3,5,0,5,1,0,8,4,0,
+2005,NFC,North,Detroit Lions,5,11,0,.312,254,345,3,5,0,2,6,0,1,5,0,3,9,0,
+2005,NFC,North,Green Bay Packers,4,12,0,.250,298,344,3,5,0,1,7,0,1,5,0,4,8,0,
+2005,NFC,South,Tampa Bay Buccaneers,11,5,0,.688,300,274,6,2,0,5,3,0,5,1,0,9,3,0,y
+2005,NFC,South,Carolina Panthers,11,5,0,.688,391,259,5,3,0,6,2,0,4,2,0,8,4,0,y
+2005,NFC,South,Atlanta Falcons,8,8,0,.500,351,341,4,4,0,4,4,0,2,4,0,5,7,0,
+2005,NFC,South,New Orleans Saints,3,13,0,.188,235,398,1,7,0,2,6,0,1,5,0,1,11,0,
+2005,NFC,West,Seattle Seahawks,13,3,0,.812,452,271,8,0,0,5,3,0,6,0,0,10,2,0,y
+2005,NFC,West,St. Louis Rams,6,10,0,.375,363,429,3,5,0,3,5,0,1,5,0,3,9,0,
+2005,NFC,West,Arizona Cardinals,5,11,0,.312,311,387,3,5,0,2,6,0,3,3,0,4,8,0,
+2005,NFC,West,San Francisco 49ers,4,12,0,.250,239,428,3,5,0,1,7,0,2,4,0,3,9,0,
+2006,AFC,East,New England Patriots,12,4,0,.750,385,237,5,3,0,7,1,0,4,2,0,8,4,0,y
+2006,AFC,East,New York Jets,10,6,0,.625,316,295,4,4,0,6,2,0,4,2,0,7,5,0,y
+2006,AFC,East,Buffalo Bills,7,9,0,.438,300,311,4,4,0,3,5,0,3,3,0,5,7,0,
+2006,AFC,East,Miami Dolphins,6,10,0,.375,260,283,4,4,0,2,6,0,1,5,0,3,9,0,
+2006,AFC,North,Baltimore Ravens,13,3,0,.812,353,201,7,1,0,6,2,0,5,1,0,10,2,0,y
+2006,AFC,North,Cincinnati Bengals,8,8,0,.500,373,331,4,4,0,4,4,0,4,2,0,6,6,0,
+2006,AFC,North,Pittsburgh Steelers,8,8,0,.500,353,315,5,3,0,3,5,0,3,3,0,5,7,0,
+2006,AFC,North,Cleveland Browns,4,12,0,.250,238,356,2,6,0,2,6,0,0,6,0,3,9,0,
+2006,AFC,South,Indianapolis Colts,12,4,0,.750,427,360,8,0,0,4,4,0,3,3,0,9,3,0,y
+2006,AFC,South,Tennessee Titans,8,8,0,.500,324,400,4,4,0,4,4,0,4,2,0,5,7,0,
+2006,AFC,South,Jacksonville Jaguars,8,8,0,.500,371,274,6,2,0,2,6,0,2,4,0,5,7,0,
+2006,AFC,South,Houston Texans,6,10,0,.375,267,366,4,4,0,2,6,0,3,3,0,6,6,0,
+2006,AFC,West,San Diego Chargers,14,2,0,.875,492,303,8,0,0,6,2,0,5,1,0,10,2,0,y
+2006,AFC,West,Kansas City Chiefs,9,7,0,.562,331,315,6,2,0,3,5,0,4,2,0,5,7,0,y
+2006,AFC,West,Denver Broncos,9,7,0,.562,319,305,4,4,0,5,3,0,3,3,0,8,4,0,
+2006,AFC,West,Oakland Raiders,2,14,0,.125,168,332,2,6,0,0,8,0,0,6,0,1,11,0,
+2006,NFC,East,Philadelphia Eagles,10,6,0,.625,398,328,5,3,0,5,3,0,5,1,0,9,3,0,y
+2006,NFC,East,Dallas Cowboys,9,7,0,.562,425,350,4,4,0,5,3,0,2,4,0,6,6,0,y
+2006,NFC,East,New York Giants,8,8,0,.500,355,362,3,5,0,5,3,0,4,2,0,7,5,0,y
+2006,NFC,East,Washington Redskins,5,11,0,.312,307,376,3,5,0,2,6,0,1,5,0,3,9,0,
+2006,NFC,North,Chicago Bears,13,3,0,.812,427,255,6,2,0,7,1,0,5,1,0,11,1,0,y
+2006,NFC,North,Green Bay Packers,8,8,0,.500,301,366,3,5,0,5,3,0,5,1,0,7,5,0,
+2006,NFC,North,Minnesota Vikings,6,10,0,.375,282,327,3,5,0,3,5,0,2,4,0,6,6,0,
+2006,NFC,North,Detroit Lions,3,13,0,.188,305,398,2,6,0,1,7,0,0,6,0,2,10,0,
+2006,NFC,South,New Orleans Saints,10,6,0,.625,413,322,4,4,0,6,2,0,4,2,0,9,3,0,y
+2006,NFC,South,Carolina Panthers,8,8,0,.500,270,305,4,4,0,4,4,0,5,1,0,6,6,0,
+2006,NFC,South,Atlanta Falcons,7,9,0,.438,292,328,3,5,0,4,4,0,3,3,0,5,7,0,
+2006,NFC,South,Tampa Bay Buccaneers,4,12,0,.250,211,353,3,5,0,1,7,0,0,6,0,2,10,0,
+2006,NFC,West,Seattle Seahawks,9,7,0,.562,335,341,5,3,0,4,4,0,3,3,0,7,5,0,y
+2006,NFC,West,St. Louis Rams,8,8,0,.500,367,381,4,4,0,4,4,0,2,4,0,6,6,0,
+2006,NFC,West,San Francisco 49ers,7,9,0,.438,298,412,4,4,0,3,5,0,3,3,0,5,7,0,
+2006,NFC,West,Arizona Cardinals,5,11,0,.312,314,389,3,5,0,2,6,0,4,2,0,5,7,0,
+2007,AFC,East,New England Patriots,16,0,0,1.000,589,274,8,0,0,8,0,0,6,0,0,12,0,0,y
+2007,AFC,East,Buffalo Bills,7,9,0,.438,252,354,4,4,0,3,5,0,4,2,0,6,6,0,
+2007,AFC,East,New York Jets,4,12,0,.250,268,355,3,5,0,1,7,0,2,4,0,4,8,0,
+2007,AFC,East,Miami Dolphins,1,15,0,.062,267,437,1,7,0,0,8,0,0,6,0,1,11,0,
+2007,AFC,North,Pittsburgh Steelers,10,6,0,.625,393,269,7,1,0,3,5,0,5,1,0,7,5,0,y
+2007,AFC,North,Cleveland Browns,10,6,0,.625,402,382,7,1,0,3,5,0,3,3,0,7,5,0,
+2007,AFC,North,Cincinnati Bengals,7,9,0,.438,380,385,5,3,0,2,6,0,3,3,0,6,6,0,
+2007,AFC,North,Baltimore Ravens,5,11,0,.312,275,384,4,4,0,1,7,0,1,5,0,2,10,0,
+2007,AFC,South,Indianapolis Colts,13,3,0,.812,450,262,6,2,0,7,1,0,5,1,0,9,3,0,y
+2007,AFC,South,Jacksonville Jaguars,11,5,0,.688,411,304,6,2,0,5,3,0,2,4,0,8,4,0,y
+2007,AFC,South,Tennessee Titans,10,6,0,.625,301,297,5,3,0,5,3,0,4,2,0,7,5,0,y
+2007,AFC,South,Houston Texans,8,8,0,.500,379,384,6,2,0,2,6,0,1,5,0,5,7,0,
+2007,AFC,West,San Diego Chargers,11,5,0,.688,412,284,7,1,0,4,4,0,5,1,0,9,3,0,y
+2007,AFC,West,Denver Broncos,7,9,0,.438,320,409,5,3,0,2,6,0,3,3,0,6,6,0,
+2007,AFC,West,Kansas City Chiefs,4,12,0,.250,226,335,2,6,0,2,6,0,2,4,0,3,9,0,
+2007,AFC,West,Oakland Raiders,4,12,0,.250,283,398,2,6,0,2,6,0,2,4,0,4,8,0,
+2007,NFC,East,Dallas Cowboys,13,3,0,.812,455,325,6,2,0,7,1,0,4,2,0,10,2,0,y
+2007,NFC,East,New York Giants,10,6,0,.625,373,351,3,5,0,7,1,0,3,3,0,7,5,0,y
+2007,NFC,East,Washington Redskins,9,7,0,.562,334,310,5,3,0,4,4,0,3,3,0,7,5,0,y
+2007,NFC,East,Philadelphia Eagles,8,8,0,.500,336,300,3,5,0,5,3,0,2,4,0,5,7,0,
+2007,NFC,North,Green Bay Packers,13,3,0,.812,435,291,7,1,0,6,2,0,4,2,0,9,3,0,y
+2007,NFC,North,Minnesota Vikings,8,8,0,.500,365,311,5,3,0,3,5,0,3,3,0,6,6,0,
+2007,NFC,North,Detroit Lions,7,9,0,.438,346,444,5,3,0,2,6,0,3,3,0,4,8,0,
+2007,NFC,North,Chicago Bears,7,9,0,.438,334,348,4,4,0,3,5,0,2,4,0,4,8,0,
+2007,NFC,South,Tampa Bay Buccaneers,9,7,0,.562,334,270,6,2,0,3,5,0,5,1,0,8,4,0,y
+2007,NFC,South,Carolina Panthers,7,9,0,.438,267,347,2,6,0,5,3,0,3,3,0,7,5,0,
+2007,NFC,South,New Orleans Saints,7,9,0,.438,379,388,3,5,0,4,4,0,3,3,0,6,6,0,
+2007,NFC,South,Atlanta Falcons,4,12,0,.250,259,414,3,5,0,1,7,0,1,5,0,3,9,0,
+2007,NFC,West,Seattle Seahawks,10,6,0,.625,393,291,7,1,0,3,5,0,5,1,0,8,4,0,y
+2007,NFC,West,Arizona Cardinals,8,8,0,.500,404,399,6,2,0,2,6,0,3,3,0,5,7,0,
+2007,NFC,West,San Francisco 49ers,5,11,0,.312,219,364,3,5,0,2,6,0,3,3,0,4,8,0,
+2007,NFC,West,St. Louis Rams,3,13,0,.188,263,438,1,7,0,2,6,0,1,5,0,3,9,0,
+2008,AFC,East,Miami Dolphins,11,5,0,.688,345,317,5,3,0,6,2,0,4,2,0,8,4,0,y
+2008,AFC,East,New England Patriots,11,5,0,.688,410,309,5,3,0,6,2,0,4,2,0,7,5,0,
+2008,AFC,East,New York Jets,9,7,0,.562,405,356,5,3,0,4,4,0,4,2,0,7,5,0,
+2008,AFC,East,Buffalo Bills,7,9,0,.438,336,342,3,5,0,4,4,0,0,6,0,5,7,0,
+2008,AFC,North,Pittsburgh Steelers,12,4,0,.750,347,223,6,2,0,6,2,0,6,0,0,10,2,0,y
+2008,AFC,North,Baltimore Ravens,11,5,0,.688,385,244,6,2,0,5,3,0,4,2,0,8,4,0,y
+2008,AFC,North,Cincinnati Bengals,4,11,1,.281,204,364,3,4,1,1,7,0,1,5,0,3,9,0,
+2008,AFC,North,Cleveland Browns,4,12,0,.250,232,350,1,7,0,3,5,0,1,5,0,3,9,0,
+2008,AFC,South,Tennessee Titans,13,3,0,.812,375,234,7,1,0,6,2,0,4,2,0,9,3,0,y
+2008,AFC,South,Indianapolis Colts,12,4,0,.750,377,298,6,2,0,6,2,0,4,2,0,10,2,0,y
+2008,AFC,South,Houston Texans,8,8,0,.500,366,394,6,2,0,2,6,0,2,4,0,5,7,0,
+2008,AFC,South,Jacksonville Jaguars,5,11,0,.312,302,367,2,6,0,3,5,0,2,4,0,3,9,0,
+2008,AFC,West,San Diego Chargers,8,8,0,.500,439,347,5,3,0,3,5,0,5,1,0,7,5,0,y
+2008,AFC,West,Denver Broncos,8,8,0,.500,370,448,4,4,0,4,4,0,3,3,0,5,7,0,
+2008,AFC,West,Oakland Raiders,5,11,0,.312,263,388,2,6,0,3,5,0,2,4,0,4,8,0,
+2008,AFC,West,Kansas City Chiefs,2,14,0,.125,291,440,1,7,0,1,7,0,2,4,0,2,10,0,
+2008,NFC,East,New York Giants,12,4,0,.750,427,294,7,1,0,5,3,0,4,2,0,9,3,0,y
+2008,NFC,East,Philadelphia Eagles,9,6,1,.594,416,289,6,2,0,3,4,1,2,4,0,7,5,0,y
+2008,NFC,East,Dallas Cowboys,9,7,0,.562,362,365,6,2,0,3,5,0,3,3,0,7,5,0,
+2008,NFC,East,Washington Redskins,8,8,0,.500,265,296,4,4,0,4,4,0,3,3,0,7,5,0,
+2008,NFC,North,Minnesota Vikings,10,6,0,.625,379,333,6,2,0,4,4,0,4,2,0,8,4,0,y
+2008,NFC,North,Chicago Bears,9,7,0,.562,375,350,6,2,0,3,5,0,4,2,0,7,5,0,
+2008,NFC,North,Green Bay Packers,6,10,0,.375,419,380,4,4,0,2,6,0,4,2,0,5,7,0,
+2008,NFC,North,Detroit Lions,0,16,0,.000,268,517,0,8,0,0,8,0,0,6,0,0,12,0,
+2008,NFC,South,Carolina Panthers,12,4,0,.750,414,329,8,0,0,4,4,0,4,2,0,8,4,0,y
+2008,NFC,South,Atlanta Falcons,11,5,0,.688,391,325,7,1,0,4,4,0,3,3,0,8,4,0,y
+2008,NFC,South,Tampa Bay Buccaneers,9,7,0,.562,361,323,6,2,0,3,5,0,3,3,0,8,4,0,
+2008,NFC,South,New Orleans Saints,8,8,0,.500,463,393,6,2,0,2,6,0,2,4,0,5,7,0,
+2008,NFC,West,Arizona Cardinals,9,7,0,.562,427,426,6,2,0,3,5,0,6,0,0,7,5,0,y
+2008,NFC,West,San Francisco 49ers,7,9,0,.438,339,381,4,4,0,3,5,0,3,3,0,5,7,0,
+2008,NFC,West,Seattle Seahawks,4,12,0,.250,294,392,2,6,0,2,6,0,3,3,0,3,9,0,
+2008,NFC,West,St. Louis Rams,2,14,0,.125,232,465,1,7,0,1,7,0,0,6,0,2,10,0,
+2009,AFC,East,New England Patriots,10,6,0,.625,427,285,8,0,0,2,6,0,4,2,0,7,5,0,y
+2009,AFC,East,New York Jets,9,7,0,.562,348,236,4,4,0,5,3,0,2,4,0,7,5,0,y
+2009,AFC,East,Miami Dolphins,7,9,0,.438,360,390,4,4,0,3,5,0,4,2,0,5,7,0,
+2009,AFC,East,Buffalo Bills,6,10,0,.375,258,326,3,5,0,3,5,0,2,4,0,4,8,0,
+2009,AFC,North,Cincinnati Bengals,10,6,0,.625,305,291,6,2,0,4,4,0,6,0,0,7,5,0,y
+2009,AFC,North,Baltimore Ravens,9,7,0,.562,391,261,6,2,0,3,5,0,3,3,0,7,5,0,y
+2009,AFC,North,Pittsburgh Steelers,9,7,0,.562,368,324,6,2,0,3,5,0,2,4,0,6,6,0,
+2009,AFC,North,Cleveland Browns,5,11,0,.312,245,375,3,5,0,2,6,0,1,5,0,5,7,0,
+2009,AFC,South,Indianapolis Colts,14,2,0,.875,416,307,7,1,0,7,1,0,6,0,0,10,2,0,y
+2009,AFC,South,Houston Texans,9,7,0,.562,388,333,4,4,0,5,3,0,1,5,0,6,6,0,
+2009,AFC,South,Tennessee Titans,8,8,0,.500,354,402,5,3,0,3,5,0,2,4,0,4,8,0,
+2009,AFC,South,Jacksonville Jaguars,7,9,0,.438,290,380,5,3,0,2,6,0,3,3,0,6,6,0,
+2009,AFC,West,San Diego Chargers,13,3,0,.812,454,320,6,2,0,7,1,0,5,1,0,9,3,0,y
+2009,AFC,West,Denver Broncos,8,8,0,.500,326,324,4,4,0,4,4,0,3,3,0,6,6,0,
+2009,AFC,West,Oakland Raiders,5,11,0,.312,197,379,2,6,0,3,5,0,2,4,0,4,8,0,
+2009,AFC,West,Kansas City Chiefs,4,12,0,.250,294,424,1,7,0,3,5,0,2,4,0,3,9,0,
+2009,NFC,East,Dallas Cowboys,11,5,0,.688,361,250,6,2,0,5,3,0,4,2,0,9,3,0,y
+2009,NFC,East,Philadelphia Eagles,11,5,0,.688,429,337,6,2,0,5,3,0,4,2,0,9,3,0,y
+2009,NFC,East,New York Giants,8,8,0,.500,402,427,4,4,0,4,4,0,4,2,0,6,6,0,
+2009,NFC,East,Washington Redskins,4,12,0,.250,266,336,3,5,0,1,7,0,0,6,0,2,10,0,
+2009,NFC,North,Minnesota Vikings,12,4,0,.750,470,312,8,0,0,4,4,0,5,1,0,9,3,0,y
+2009,NFC,North,Green Bay Packers,11,5,0,.688,461,297,6,2,0,5,3,0,4,2,0,9,3,0,y
+2009,NFC,North,Chicago Bears,7,9,0,.438,327,375,5,3,0,2,6,0,3,3,0,5,7,0,
+2009,NFC,North,Detroit Lions,2,14,0,.125,262,494,2,6,0,0,8,0,0,6,0,1,11,0,
+2009,NFC,South,New Orleans Saints,13,3,0,.812,510,341,6,2,0,7,1,0,4,2,0,9,3,0,y
+2009,NFC,South,Atlanta Falcons,9,7,0,.562,363,325,6,2,0,3,5,0,3,3,0,6,6,0,
+2009,NFC,South,Carolina Panthers,8,8,0,.500,315,308,5,3,0,3,5,0,4,2,0,8,4,0,
+2009,NFC,South,Tampa Bay Buccaneers,3,13,0,.188,244,400,1,7,0,2,6,0,1,5,0,3,9,0,
+2009,NFC,West,Arizona Cardinals,10,6,0,.625,375,325,4,4,0,6,2,0,4,2,0,8,4,0,y
+2009,NFC,West,San Francisco 49ers,8,8,0,.500,330,281,6,2,0,2,6,0,5,1,0,7,5,0,
+2009,NFC,West,Seattle Seahawks,5,11,0,.312,280,390,4,4,0,1,7,0,3,3,0,4,8,0,
+2009,NFC,West,St. Louis Rams,1,15,0,.062,175,436,0,8,0,1,7,0,0,6,0,1,11,0,
+2010,AFC,East,New England Patriots,14,2,0,.875,518,313,8,0,0,6,2,0,5,1,0,10,2,0,y
+2010,AFC,East,New York Jets,11,5,0,.688,367,304,5,3,0,6,2,0,4,2,0,9,3,0,y
+2010,AFC,East,Miami Dolphins,7,9,0,.438,273,333,1,7,0,6,2,0,2,4,0,5,7,0,
+2010,AFC,East,Buffalo Bills,4,12,0,.250,283,425,2,6,0,2,6,0,1,5,0,3,9,0,
+2010,AFC,North,Pittsburgh Steelers,12,4,0,.750,375,232,5,3,0,7,1,0,5,1,0,9,3,0,y
+2010,AFC,North,Baltimore Ravens,12,4,0,.750,357,270,7,1,0,5,3,0,4,2,0,9,3,0,y
+2010,AFC,North,Cleveland Browns,5,11,0,.312,271,332,3,5,0,2,6,0,1,5,0,3,9,0,
+2010,AFC,North,Cincinnati Bengals,4,12,0,.250,322,395,3,5,0,1,7,0,2,4,0,3,9,0,
+2010,AFC,South,Indianapolis Colts,10,6,0,.625,435,388,6,2,0,4,4,0,4,2,0,8,4,0,y
+2010,AFC,South,Jacksonville Jaguars,8,8,0,.500,353,419,5,3,0,3,5,0,3,3,0,7,5,0,
+2010,AFC,South,Houston Texans,6,10,0,.375,390,427,4,4,0,2,6,0,3,3,0,5,7,0,
+2010,AFC,South,Tennessee Titans,6,10,0,.375,356,339,3,5,0,3,5,0,2,4,0,3,9,0,
+2010,AFC,West,Kansas City Chiefs,10,6,0,.625,366,326,7,1,0,3,5,0,2,4,0,6,6,0,y
+2010,AFC,West,San Diego Chargers,9,7,0,.562,441,322,6,2,0,3,5,0,3,3,0,7,5,0,
+2010,AFC,West,Oakland Raiders,8,8,0,.500,410,371,5,3,0,3,5,0,6,0,0,6,6,0,
+2010,AFC,West,Denver Broncos,4,12,0,.250,344,471,3,5,0,1,7,0,1,5,0,3,9,0,
+2010,NFC,East,Philadelphia Eagles,10,6,0,.625,439,377,4,4,0,6,2,0,4,2,0,7,5,0,y
+2010,NFC,East,New York Giants,10,6,0,.625,394,347,5,3,0,5,3,0,3,3,0,8,4,0,
+2010,NFC,East,Dallas Cowboys,6,10,0,.375,394,436,2,6,0,4,4,0,3,3,0,4,8,0,
+2010,NFC,East,Washington Redskins,6,10,0,.375,302,377,2,6,0,4,4,0,2,4,0,4,8,0,
+2010,NFC,North,Chicago Bears,11,5,0,.688,334,286,5,3,0,6,2,0,5,1,0,8,4,0,y
+2010,NFC,North,Green Bay Packers,10,6,0,.625,388,240,7,1,0,3,5,0,4,2,0,8,4,0,y
+2010,NFC,North,Detroit Lions,6,10,0,.375,362,369,4,4,0,2,6,0,2,4,0,5,7,0,
+2010,NFC,North,Minnesota Vikings,6,10,0,.375,281,348,4,4,0,2,6,0,1,5,0,5,7,0,
+2010,NFC,South,Atlanta Falcons,13,3,0,.812,414,288,7,1,0,6,2,0,5,1,0,10,2,0,y
+2010,NFC,South,New Orleans Saints,11,5,0,.688,384,307,5,3,0,6,2,0,4,2,0,9,3,0,y
+2010,NFC,South,Tampa Bay Buccaneers,10,6,0,.625,341,318,4,4,0,6,2,0,3,3,0,8,4,0,
+2010,NFC,South,Carolina Panthers,2,14,0,.125,196,408,2,6,0,0,8,0,0,6,0,2,10,0,
+2010,NFC,West,Seattle Seahawks,7,9,0,.438,310,407,5,3,0,2,6,0,4,2,0,6,6,0,y
+2010,NFC,West,St. Louis Rams,7,9,0,.438,289,328,5,3,0,2,6,0,3,3,0,5,7,0,
+2010,NFC,West,San Francisco 49ers,6,10,0,.375,305,346,5,3,0,1,7,0,4,2,0,4,8,0,
+2010,NFC,West,Arizona Cardinals,5,11,0,.312,289,434,4,4,0,1,7,0,1,5,0,3,9,0,
+2011,AFC,East,New England Patriots,13,3,0,.812,513,342,7,1,0,6,2,0,5,1,0,10,2,0,y
+2011,AFC,East,New York Jets,8,8,0,.500,377,363,6,2,0,2,6,0,3,3,0,6,6,0,
+2011,AFC,East,Miami Dolphins,6,10,0,.375,329,313,4,4,0,2,6,0,3,3,0,5,7,0,
+2011,AFC,East,Buffalo Bills,6,10,0,.375,372,434,5,3,0,1,7,0,1,5,0,4,8,0,
+2011,AFC,North,Baltimore Ravens,12,4,0,.750,378,266,8,0,0,4,4,0,6,0,0,9,3,0,y
+2011,AFC,North,Pittsburgh Steelers,12,4,0,.750,325,227,7,1,0,5,3,0,4,2,0,9,3,0,y
+2011,AFC,North,Cincinnati Bengals,9,7,0,.562,344,323,4,4,0,5,3,0,2,4,0,6,6,0,y
+2011,AFC,North,Cleveland Browns,4,12,0,.250,218,307,3,5,0,1,7,0,0,6,0,3,9,0,
+2011,AFC,South,Houston Texans,10,6,0,.625,381,278,5,3,0,5,3,0,4,2,0,8,4,0,y
+2011,AFC,South,Tennessee Titans,9,7,0,.562,325,317,5,3,0,4,4,0,3,3,0,7,5,0,
+2011,AFC,South,Jacksonville Jaguars,5,11,0,.312,243,329,4,4,0,1,7,0,3,3,0,4,8,0,
+2011,AFC,South,Indianapolis Colts,2,14,0,.125,243,430,2,6,0,0,8,0,2,4,0,2,10,0,
+2011,AFC,West,Denver Broncos,8,8,0,.500,309,390,3,5,0,5,3,0,3,3,0,6,6,0,y
+2011,AFC,West,San Diego Chargers,8,8,0,.500,406,377,5,3,0,3,5,0,3,3,0,7,5,0,
+2011,AFC,West,Oakland Raiders,8,8,0,.500,359,433,3,5,0,5,3,0,3,3,0,6,6,0,
+2011,AFC,West,Kansas City Chiefs,7,9,0,.438,212,338,3,5,0,4,4,0,3,3,0,4,8,0,
+2011,NFC,East,New York Giants,9,7,0,.562,394,400,4,4,0,5,3,0,3,3,0,5,7,0,y
+2011,NFC,East,Philadelphia Eagles,8,8,0,.500,396,328,3,5,0,5,3,0,5,1,0,6,6,0,
+2011,NFC,East,Dallas Cowboys,8,8,0,.500,369,347,5,3,0,3,5,0,2,4,0,6,6,0,
+2011,NFC,East,Washington Redskins,5,11,0,.312,288,367,2,6,0,3,5,0,2,4,0,5,7,0,
+2011,NFC,North,Green Bay Packers,15,1,0,.938,560,359,8,0,0,7,1,0,6,0,0,12,0,0,y
+2011,NFC,North,Detroit Lions,10,6,0,.625,474,387,5,3,0,5,3,0,3,3,0,6,6,0,y
+2011,NFC,North,Chicago Bears,8,8,0,.500,353,341,5,3,0,3,5,0,3,3,0,7,5,0,
+2011,NFC,North,Minnesota Vikings,3,13,0,.188,340,449,1,7,0,2,6,0,0,6,0,3,9,0,
+2011,NFC,South,New Orleans Saints,13,3,0,.812,547,339,8,0,0,5,3,0,5,1,0,9,3,0,y
+2011,NFC,South,Atlanta Falcons,10,6,0,.625,402,350,6,2,0,4,4,0,3,3,0,7,5,0,y
+2011,NFC,South,Carolina Panthers,6,10,0,.375,406,429,3,5,0,3,5,0,2,4,0,3,9,0,
+2011,NFC,South,Tampa Bay Buccaneers,4,12,0,.250,287,494,3,5,0,1,7,0,2,4,0,3,9,0,
+2011,NFC,West,San Francisco 49ers,13,3,0,.812,380,229,7,1,0,6,2,0,5,1,0,10,2,0,y
+2011,NFC,West,Arizona Cardinals,8,8,0,.500,312,348,6,2,0,2,6,0,4,2,0,7,5,0,
+2011,NFC,West,Seattle Seahawks,7,9,0,.438,321,315,4,4,0,3,5,0,3,3,0,6,6,0,
+2011,NFC,West,St. Louis Rams,2,14,0,.125,193,407,1,7,0,1,7,0,0,6,0,1,11,0,
+2012,AFC,East,New England Patriots,12,4,0,.750,557,331,6,2,0,6,2,0,6,0,0,11,1,0,y
+2012,AFC,East,Miami Dolphins,7,9,0,.438,288,317,5,3,0,2,6,0,2,4,0,5,7,0,
+2012,AFC,East,New York Jets,6,10,0,.375,281,375,3,5,0,3,5,0,2,4,0,4,8,0,
+2012,AFC,East,Buffalo Bills,6,10,0,.375,344,435,4,4,0,2,6,0,2,4,0,5,7,0,
+2012,AFC,North,Baltimore Ravens,10,6,0,.625,398,344,6,2,0,4,4,0,4,2,0,8,4,0,y
+2012,AFC,North,Cincinnati Bengals,10,6,0,.625,391,320,4,4,0,6,2,0,3,3,0,7,5,0,y
+2012,AFC,North,Pittsburgh Steelers,8,8,0,.500,336,314,5,3,0,3,5,0,3,3,0,5,7,0,
+2012,AFC,North,Cleveland Browns,5,11,0,.312,302,368,4,4,0,1,7,0,2,4,0,5,7,0,
+2012,AFC,South,Houston Texans,12,4,0,.750,416,331,6,2,0,6,2,0,5,1,0,10,2,0,y
+2012,AFC,South,Indianapolis Colts,11,5,0,.688,357,387,7,1,0,4,4,0,4,2,0,8,4,0,y
+2012,AFC,South,Tennessee Titans,6,10,0,.375,330,471,4,4,0,2,6,0,1,5,0,5,7,0,
+2012,AFC,South,Jacksonville Jaguars,2,14,0,.125,255,444,1,7,0,1,7,0,2,4,0,2,10,0,
+2012,AFC,West,Denver Broncos,13,3,0,.812,481,289,7,1,0,6,2,0,6,0,0,10,2,0,y
+2012,AFC,West,San Diego Chargers,7,9,0,.438,350,350,3,5,0,4,4,0,4,2,0,7,5,0,
+2012,AFC,West,Oakland Raiders,4,12,0,.250,290,443,3,5,0,1,7,0,2,4,0,4,8,0,
+2012,AFC,West,Kansas City Chiefs,2,14,0,.125,211,425,1,7,0,1,7,0,0,6,0,0,12,0,
+2012,NFC,East,Washington Redskins,10,6,0,.625,436,388,5,3,0,5,3,0,5,1,0,8,4,0,y
+2012,NFC,East,New York Giants,9,7,0,.562,429,344,6,2,0,3,5,0,3,3,0,8,4,0,
+2012,NFC,East,Dallas Cowboys,8,8,0,.500,376,400,4,4,0,4,4,0,3,3,0,5,7,0,
+2012,NFC,East,Philadelphia Eagles,4,12,0,.250,280,444,2,6,0,2,6,0,1,5,0,2,10,0,
+2012,NFC,North,Green Bay Packers,11,5,0,.688,433,336,7,1,0,4,4,0,5,1,0,8,4,0,y
+2012,NFC,North,Minnesota Vikings,10,6,0,.625,379,348,7,1,0,3,5,0,4,2,0,7,5,0,y
+2012,NFC,North,Chicago Bears,10,6,0,.625,375,277,5,3,0,5,3,0,3,3,0,7,5,0,
+2012,NFC,North,Detroit Lions,4,12,0,.250,372,437,2,6,0,2,6,0,0,6,0,3,9,0,
+2012,NFC,South,Atlanta Falcons,13,3,0,.812,419,299,7,1,0,6,2,0,3,3,0,9,3,0,y
+2012,NFC,South,Carolina Panthers,7,9,0,.438,357,363,3,5,0,4,4,0,3,3,0,5,7,0,
+2012,NFC,South,New Orleans Saints,7,9,0,.438,461,454,4,4,0,3,5,0,3,3,0,5,7,0,
+2012,NFC,South,Tampa Bay Buccaneers,7,9,0,.438,389,394,3,5,0,4,4,0,3,3,0,4,8,0,
+2012,NFC,West,San Francisco 49ers,11,4,1,.719,397,273,6,1,1,5,3,0,3,2,1,7,4,1,y
+2012,NFC,West,Seattle Seahawks,11,5,0,.688,412,245,8,0,0,3,5,0,3,3,0,8,4,0,y
+2012,NFC,West,St. Louis Rams,7,8,1,.469,299,348,4,4,0,3,4,1,4,1,1,6,5,1,
+2012,NFC,West,Arizona Cardinals,5,11,0,.312,250,357,4,4,0,1,7,0,1,5,0,3,9,0,
+2013,AFC,East,New England Patriots,12,4,0,.750,444,338,8,0,0,4,4,0,4,2,0,9,3,0,y
+2013,AFC,East,New York Jets,8,8,0,.500,290,387,6,2,0,2,6,0,3,3,0,5,7,0,
+2013,AFC,East,Miami Dolphins,8,8,0,.500,317,335,4,4,0,4,4,0,2,4,0,7,5,0,
+2013,AFC,East,Buffalo Bills,6,10,0,.375,339,388,4,4,0,2,6,0,3,3,0,5,7,0,
+2013,AFC,North,Cincinnati Bengals,11,5,0,.688,430,305,8,0,0,3,5,0,3,3,0,8,4,0,y
+2013,AFC,North,Pittsburgh Steelers,8,8,0,.500,379,370,5,3,0,3,5,0,4,2,0,6,6,0,
+2013,AFC,North,Baltimore Ravens,8,8,0,.500,320,352,6,2,0,2,6,0,3,3,0,6,6,0,
+2013,AFC,North,Cleveland Browns,4,12,0,.250,308,406,3,5,0,1,7,0,2,4,0,3,9,0,
+2013,AFC,South,Indianapolis Colts,11,5,0,.688,391,336,6,2,0,5,3,0,6,0,0,9,3,0,y
+2013,AFC,South,Tennessee Titans,7,9,0,.438,362,381,3,5,0,4,4,0,2,4,0,6,6,0,
+2013,AFC,South,Jacksonville Jaguars,4,12,0,.250,247,449,1,7,0,3,5,0,3,3,0,4,8,0,
+2013,AFC,South,Houston Texans,2,14,0,.125,276,428,1,7,0,1,7,0,1,5,0,2,10,0,
+2013,AFC,West,Denver Broncos,13,3,0,.812,606,399,7,1,0,6,2,0,5,1,0,9,3,0,y
+2013,AFC,West,Kansas City Chiefs,11,5,0,.688,430,305,5,3,0,6,2,0,2,4,0,7,5,0,y
+2013,AFC,West,San Diego Chargers,9,7,0,.562,396,348,5,3,0,4,4,0,4,2,0,6,6,0,y
+2013,AFC,West,Oakland Raiders,4,12,0,.250,322,453,3,5,0,1,7,0,1,5,0,4,8,0,
+2013,NFC,East,Philadelphia Eagles,10,6,0,.625,442,382,4,4,0,6,2,0,4,2,0,9,3,0,y
+2013,NFC,East,Dallas Cowboys,8,8,0,.500,439,432,5,3,0,3,5,0,5,1,0,7,5,0,
+2013,NFC,East,New York Giants,7,9,0,.438,294,383,4,4,0,3,5,0,3,3,0,6,6,0,
+2013,NFC,East,Washington Redskins,3,13,0,.188,334,478,2,6,0,1,7,0,0,6,0,1,11,0,
+2013,NFC,North,Green Bay Packers,8,7,1,.531,417,428,4,3,1,4,4,0,3,2,1,6,5,1,y
+2013,NFC,North,Chicago Bears,8,8,0,.500,445,478,5,3,0,3,5,0,2,4,0,4,8,0,
+2013,NFC,North,Detroit Lions,7,9,0,.438,395,376,4,4,0,3,5,0,4,2,0,6,6,0,
+2013,NFC,North,Minnesota Vikings,5,10,1,.344,391,480,5,3,0,0,7,1,2,3,1,4,7,1,
+2013,NFC,South,Carolina Panthers,12,4,0,.750,366,241,7,1,0,5,3,0,5,1,0,9,3,0,y
+2013,NFC,South,New Orleans Saints,11,5,0,.688,414,304,8,0,0,3,5,0,5,1,0,9,3,0,y
+2013,NFC,South,Atlanta Falcons,4,12,0,.250,353,443,3,5,0,1,7,0,1,5,0,3,9,0,
+2013,NFC,South,Tampa Bay Buccaneers,4,12,0,.250,288,389,3,5,0,1,7,0,1,5,0,2,10,0,
+2013,NFC,West,Seattle Seahawks,13,3,0,.812,417,231,7,1,0,6,2,0,4,2,0,10,2,0,y
+2013,NFC,West,San Francisco 49ers,12,4,0,.750,406,272,6,2,0,6,2,0,5,1,0,9,3,0,y
+2013,NFC,West,Arizona Cardinals,10,6,0,.625,379,324,6,2,0,4,4,0,2,4,0,6,6,0,
+2013,NFC,West,St. Louis Rams,7,9,0,.438,348,364,5,3,0,2,6,0,1,5,0,4,8,0,
+2014,AFC,East,New England Patriots,12,4,0,.750,468,313,7,1,0,5,3,0,4,2,0,9,3,0,y
+2014,AFC,East,Buffalo Bills,9,7,0,.562,343,289,5,3,0,4,4,0,4,2,0,5,7,0,
+2014,AFC,East,Miami Dolphins,8,8,0,.500,388,373,4,4,0,4,4,0,3,3,0,6,6,0,
+2014,AFC,East,New York Jets,4,12,0,.250,283,401,2,6,0,2,6,0,1,5,0,4,8,0,
+2014,AFC,North,Pittsburgh Steelers,11,5,0,.688,436,368,6,2,0,5,3,0,4,2,0,9,3,0,y
+2014,AFC,North,Cincinnati Bengals,10,5,1,.656,365,344,5,2,1,5,3,0,3,3,0,7,5,0,y
+2014,AFC,North,Baltimore Ravens,10,6,0,.625,409,302,6,2,0,4,4,0,3,3,0,6,6,0,y
+2014,AFC,North,Cleveland Browns,7,9,0,.438,299,337,4,4,0,3,5,0,2,4,0,4,8,0,
+2014,AFC,South,Indianapolis Colts,11,5,0,.688,458,369,6,2,0,5,3,0,6,0,0,9,3,0,y
+2014,AFC,South,Houston Texans,9,7,0,.562,372,307,5,3,0,4,4,0,4,2,0,8,4,0,
+2014,AFC,South,Jacksonville Jaguars,3,13,0,.188,249,412,3,5,0,0,8,0,1,5,0,2,10,0,
+2014,AFC,South,Tennessee Titans,2,14,0,.125,254,438,1,7,0,1,7,0,1,5,0,2,10,0,
+2014,AFC,West,Denver Broncos,12,4,0,.750,482,354,8,0,0,4,4,0,6,0,0,10,2,0,y
+2014,AFC,West,Kansas City Chiefs,9,7,0,.562,353,281,6,2,0,3,5,0,3,3,0,7,5,0,
+2014,AFC,West,San Diego Chargers,9,7,0,.562,348,348,5,3,0,4,4,0,2,4,0,6,6,0,
+2014,AFC,West,Oakland Raiders,3,13,0,.188,253,452,3,5,0,0,8,0,1,5,0,2,10,0,
+2014,NFC,East,Dallas Cowboys,12,4,0,.750,467,352,4,4,0,8,0,0,4,2,0,8,4,0,y
+2014,NFC,East,Philadelphia Eagles,10,6,0,.625,474,400,6,2,0,4,4,0,4,2,0,6,6,0,
+2014,NFC,East,New York Giants,6,10,0,.375,380,400,3,5,0,3,5,0,2,4,0,4,8,0,
+2014,NFC,East,Washington Redskins,4,12,0,.250,301,438,3,5,0,1,7,0,2,4,0,2,10,0,
+2014,NFC,North,Green Bay Packers,12,4,0,.750,486,348,8,0,0,4,4,0,5,1,0,9,3,0,y
+2014,NFC,North,Detroit Lions,11,5,0,.688,321,282,7,1,0,4,4,0,5,1,0,9,3,0,y
+2014,NFC,North,Minnesota Vikings,7,9,0,.438,325,343,5,3,0,2,6,0,1,5,0,6,6,0,
+2014,NFC,North,Chicago Bears,5,11,0,.312,319,442,2,6,0,3,5,0,1,5,0,4,8,0,
+2014,NFC,South,Carolina Panthers,7,8,1,.469,339,374,4,4,0,3,4,1,4,2,0,6,6,0,y
+2014,NFC,South,New Orleans Saints,7,9,0,.438,401,424,3,5,0,4,4,0,3,3,0,6,6,0,
+2014,NFC,South,Atlanta Falcons,6,10,0,.375,381,417,3,5,0,3,5,0,5,1,0,6,6,0,
+2014,NFC,South,Tampa Bay Buccaneers,2,14,0,.125,277,410,0,8,0,2,6,0,0,6,0,1,11,0,
+2014,NFC,West,Seattle Seahawks,12,4,0,.750,394,254,7,1,0,5,3,0,5,1,0,10,2,0,y
+2014,NFC,West,Arizona Cardinals,11,5,0,.688,310,299,7,1,0,4,4,0,3,3,0,8,4,0,y
+2014,NFC,West,San Francisco 49ers,8,8,0,.500,306,340,4,4,0,4,4,0,2,4,0,7,5,0,
+2014,NFC,West,St. Louis Rams,6,10,0,.375,324,354,3,5,0,3,5,0,2,4,0,4,8,0,
+2015,AFC,East,New England Patriots,12,4,0,.750,465,315,7,1,0,5,3,0,4,2,0,9,3,0,y
+2015,AFC,East,New York Jets,10,6,0,.625,387,314,6,2,0,4,4,0,3,3,0,7,5,0,
+2015,AFC,East,Buffalo Bills,8,8,0,.500,379,359,5,3,0,3,5,0,4,2,0,7,5,0,
+2015,AFC,East,Miami Dolphins,6,10,0,.375,310,389,3,5,0,3,5,0,1,5,0,4,8,0,
+2015,AFC,North,Cincinnati Bengals,12,4,0,.750,419,279,6,2,0,6,2,0,5,1,0,9,3,0,y
+2015,AFC,North,Pittsburgh Steelers,10,6,0,.625,423,319,6,2,0,4,4,0,3,3,0,7,5,0,y
+2015,AFC,North,Baltimore Ravens,5,11,0,.312,328,401,3,5,0,2,6,0,3,3,0,4,8,0,
+2015,AFC,North,Cleveland Browns,3,13,0,.188,278,432,2,6,0,1,7,0,1,5,0,2,10,0,
+2015,AFC,South,Houston Texans,9,7,0,.562,339,313,5,3,0,4,4,0,5,1,0,7,5,0,y
+2015,AFC,South,Indianapolis Colts,8,8,0,.500,333,408,4,4,0,4,4,0,4,2,0,6,6,0,
+2015,AFC,South,Jacksonville Jaguars,5,11,0,.312,376,448,4,4,0,1,7,0,2,4,0,5,7,0,
+2015,AFC,South,Tennessee Titans,3,13,0,.188,299,423,1,7,0,2,6,0,1,5,0,1,11,0,
+2015,AFC,West,Denver Broncos,12,4,0,.750,355,296,6,2,0,6,2,0,4,2,0,8,4,0,y
+2015,AFC,West,Kansas City Chiefs,11,5,0,.688,405,287,6,2,0,5,3,0,5,1,0,10,2,0,y
+2015,AFC,West,Oakland Raiders,7,9,0,.438,359,399,3,5,0,4,4,0,3,3,0,7,5,0,
+2015,AFC,West,San Diego Chargers,4,12,0,.250,320,398,3,5,0,1,7,0,0,6,0,3,9,0,
+2015,NFC,East,Washington Redskins,9,7,0,.562,388,379,6,2,0,3,5,0,4,2,0,8,4,0,y
+2015,NFC,East,Philadelphia Eagles,7,9,0,.438,377,430,3,5,0,4,4,0,3,3,0,4,8,0,
+2015,NFC,East,New York Giants,6,10,0,.375,420,442,3,5,0,3,5,0,2,4,0,4,8,0,
+2015,NFC,East,Dallas Cowboys,4,12,0,.250,275,374,1,7,0,3,5,0,3,3,0,3,9,0,
+2015,NFC,North,Minnesota Vikings,11,5,0,.688,365,302,6,2,0,5,3,0,5,1,0,8,4,0,y
+2015,NFC,North,Green Bay Packers,10,6,0,.625,368,323,5,3,0,5,3,0,3,3,0,7,5,0,y
+2015,NFC,North,Detroit Lions,7,9,0,.438,358,400,4,4,0,3,5,0,3,3,0,6,6,0,
+2015,NFC,North,Chicago Bears,6,10,0,.375,335,397,1,7,0,5,3,0,1,5,0,3,9,0,
+2015,NFC,South,Carolina Panthers,15,1,0,.938,500,308,8,0,0,7,1,0,5,1,0,11,1,0,y
+2015,NFC,South,Atlanta Falcons,8,8,0,.500,339,345,4,4,0,4,4,0,1,5,0,5,7,0,
+2015,NFC,South,New Orleans Saints,7,9,0,.438,408,476,4,4,0,3,5,0,3,3,0,5,7,0,
+2015,NFC,South,Tampa Bay Buccaneers,6,10,0,.375,342,417,3,5,0,3,5,0,3,3,0,5,7,0,
+2015,NFC,West,Arizona Cardinals,13,3,0,.812,489,313,6,2,0,7,1,0,4,2,0,10,2,0,y
+2015,NFC,West,Seattle Seahawks,10,6,0,.625,423,277,5,3,0,5,3,0,3,3,0,7,5,0,y
+2015,NFC,West,St. Louis Rams,7,9,0,.438,280,330,5,3,0,2,6,0,4,2,0,6,6,0,
+2015,NFC,West,San Francisco 49ers,5,11,0,.312,238,387,4,4,0,1,7,0,1,5,0,4,8,0,
+2016,AFC,East,New England Patriots,14,2,0,.875,441,250,6,2,0,8,0,0,5,1,0,11,1,0,y
+2016,AFC,East,Miami Dolphins,10,6,0,.625,363,380,6,2,0,4,4,0,4,2,0,7,5,0,y
+2016,AFC,East,Buffalo Bills,7,9,0,.438,399,378,4,4,0,3,5,0,1,5,0,4,8,0,
+2016,AFC,East,New York Jets,5,11,0,.312,275,409,2,6,0,3,5,0,2,4,0,4,8,0,
+2016,AFC,North,Pittsburgh Steelers,11,5,0,.688,399,327,6,2,0,5,3,0,5,1,0,9,3,0,y
+2016,AFC,North,Baltimore Ravens,8,8,0,.500,343,321,6,2,0,2,6,0,4,2,0,7,5,0,
+2016,AFC,North,Cincinnati Bengals,6,9,1,.406,325,315,4,3,1,2,6,0,3,3,0,5,7,0,
+2016,AFC,North,Cleveland Browns,1,15,0,.062,264,452,1,7,0,0,8,0,0,6,0,1,11,0,
+2016,AFC,South,Houston Texans,9,7,0,.562,279,328,7,1,0,2,6,0,5,1,0,7,5,0,y
+2016,AFC,South,Tennessee Titans,9,7,0,.562,381,378,5,3,0,4,4,0,2,4,0,6,6,0,
+2016,AFC,South,Indianapolis Colts,8,8,0,.500,411,392,4,4,0,4,4,0,3,3,0,5,7,0,
+2016,AFC,South,Jacksonville Jaguars,3,13,0,.188,318,400,2,6,0,1,7,0,2,4,0,2,10,0,
+2016,AFC,West,Kansas City Chiefs,12,4,0,.750,389,311,6,2,0,6,2,0,6,0,0,9,3,0,y
+2016,AFC,West,Oakland Raiders,12,4,0,.750,416,385,6,2,0,6,2,0,3,3,0,9,3,0,y
+2016,AFC,West,Denver Broncos,9,7,0,.562,333,297,5,3,0,4,4,0,2,4,0,6,6,0,
+2016,AFC,West,San Diego Chargers,5,11,0,.312,410,423,3,5,0,2,6,0,1,5,0,4,8,0,
+2016,NFC,East,Dallas Cowboys,13,3,0,.812,421,306,7,1,0,6,2,0,3,3,0,9,3,0,y
+2016,NFC,East,New York Giants,11,5,0,.688,310,284,7,1,0,4,4,0,4,2,0,8,4,0,y
+2016,NFC,East,Washington Redskins,8,7,1,.531,396,383,4,4,0,4,3,1,3,3,0,6,6,0,
+2016,NFC,East,Philadelphia Eagles,7,9,0,.438,367,331,6,2,0,1,7,0,2,4,0,5,7,0,
+2016,NFC,North,Green Bay Packers,10,6,0,.625,432,388,6,2,0,4,4,0,5,1,0,8,4,0,y
+2016,NFC,North,Detroit Lions,9,7,0,.562,346,358,6,2,0,3,5,0,3,3,0,7,5,0,y
+2016,NFC,North,Minnesota Vikings,8,8,0,.500,327,307,5,3,0,3,5,0,2,4,0,5,7,0,
+2016,NFC,North,Chicago Bears,3,13,0,.188,279,399,3,5,0,0,8,0,2,4,0,3,9,0,
+2016,NFC,South,Atlanta Falcons,11,5,0,.688,540,406,5,3,0,6,2,0,5,1,0,9,3,0,y
+2016,NFC,South,Tampa Bay Buccaneers,9,7,0,.562,354,369,4,4,0,5,3,0,4,2,0,7,5,0,
+2016,NFC,South,New Orleans Saints,7,9,0,.438,469,454,4,4,0,3,5,0,2,4,0,6,6,0,
+2016,NFC,South,Carolina Panthers,6,10,0,.375,369,402,4,4,0,2,6,0,1,5,0,5,7,0,
+2016,NFC,West,Seattle Seahawks,10,5,1,.656,354,292,7,1,0,3,4,1,3,2,1,6,5,1,y
+2016,NFC,West,Arizona Cardinals,7,8,1,.469,418,362,4,3,1,3,5,0,4,1,1,6,5,1,
+2016,NFC,West,Los Angeles Rams,4,12,0,.250,224,394,1,7,0,3,5,0,2,4,0,3,9,0,
+2016,NFC,West,San Francisco 49ers,2,14,0,.125,309,480,1,7,0,1,7,0,2,4,0,2,10,0,
+2017,AFC,East,New England Patriots,13,3,0,.812,458,296,6,2,0,7,1,0,5,1,0,10,2,0,y
+2017,AFC,East,Buffalo Bills,9,7,0,.562,302,359,6,2,0,3,5,0,3,3,0,7,5,0,y
+2017,AFC,East,Miami Dolphins,6,10,0,.375,281,393,4,4,0,2,6,0,2,4,0,5,7,0,
+2017,AFC,East,New York Jets,5,11,0,.312,298,382,4,4,0,1,7,0,2,4,0,5,7,0,
+2017,AFC,North,Pittsburgh Steelers,13,3,0,.812,406,308,6,2,0,7,1,0,6,0,0,10,2,0,y
+2017,AFC,North,Baltimore Ravens,9,7,0,.562,395,303,5,3,0,4,4,0,3,3,0,7,5,0,
+2017,AFC,North,Cincinnati Bengals,7,9,0,.438,290,349,4,4,0,3,5,0,3,3,0,6,6,0,
+2017,AFC,North,Cleveland Browns,0,16,0,.000,234,410,0,8,0,0,8,0,0,6,0,0,12,0,
+2017,AFC,South,Jacksonville Jaguars,10,6,0,.625,417,268,6,2,0,4,4,0,4,2,0,9,3,0,y
+2017,AFC,South,Tennessee Titans,9,7,0,.562,334,356,6,2,0,3,5,0,5,1,0,8,4,0,y
+2017,AFC,South,Indianapolis Colts,4,12,0,.250,263,404,3,5,0,1,7,0,2,4,0,3,9,0,
+2017,AFC,South,Houston Texans,4,12,0,.250,338,436,3,5,0,1,7,0,1,5,0,3,9,0,
+2017,AFC,West,Kansas City Chiefs,10,6,0,.625,415,339,6,2,0,4,4,0,5,1,0,8,4,0,y
+2017,AFC,West,Los Angeles Chargers,9,7,0,.562,355,272,5,3,0,4,4,0,3,3,0,6,6,0,
+2017,AFC,West,Oakland Raiders,6,10,0,.375,301,373,4,4,0,2,6,0,2,4,0,5,7,0,
+2017,AFC,West,Denver Broncos,5,11,0,.312,289,382,4,4,0,1,7,0,2,4,0,4,8,0,
+2017,NFC,East,Philadelphia Eagles,13,3,0,.812,457,295,7,1,0,6,2,0,5,1,0,10,2,0,y
+2017,NFC,East,Dallas Cowboys,9,7,0,.562,354,332,3,5,0,6,2,0,5,1,0,7,5,0,
+2017,NFC,East,Washington Redskins,7,9,0,.438,342,388,5,3,0,2,6,0,1,5,0,5,7,0,
+2017,NFC,East,New York Giants,3,13,0,.188,246,388,2,6,0,1,7,0,1,5,0,1,11,0,
+2017,NFC,North,Minnesota Vikings,13,3,0,.812,382,252,7,1,0,6,2,0,5,1,0,10,2,0,y
+2017,NFC,North,Detroit Lions,9,7,0,.562,410,376,4,4,0,5,3,0,5,1,0,8,4,0,
+2017,NFC,North,Green Bay Packers,7,9,0,.438,320,384,4,4,0,3,5,0,2,4,0,5,7,0,
+2017,NFC,North,Chicago Bears,5,11,0,.312,264,320,3,5,0,2,6,0,0,6,0,1,11,0,
+2017,NFC,South,New Orleans Saints,11,5,0,.688,448,326,7,1,0,4,4,0,4,2,0,8,4,0,y
+2017,NFC,South,Carolina Panthers,11,5,0,.688,363,327,6,2,0,5,3,0,3,3,0,7,5,0,y
+2017,NFC,South,Atlanta Falcons,10,6,0,.625,353,315,5,3,0,5,3,0,4,2,0,9,3,0,y
+2017,NFC,South,Tampa Bay Buccaneers,5,11,0,.312,335,382,4,4,0,1,7,0,1,5,0,3,9,0,
+2017,NFC,West,Los Angeles Rams,11,5,0,.688,478,329,4,4,0,7,1,0,4,2,0,7,5,0,y
+2017,NFC,West,Seattle Seahawks,9,7,0,.562,366,332,4,4,0,5,3,0,4,2,0,7,5,0,
+2017,NFC,West,Arizona Cardinals,8,8,0,.500,295,361,5,3,0,3,5,0,3,3,0,5,7,0,
+2017,NFC,West,San Francisco 49ers,6,10,0,.375,331,383,3,5,0,3,5,0,1,5,0,3,9,0,
+2018,AFC,East,New England Patriots,11,5,0,.688,436,325,8,0,0,3,5,0,5,1,0,8,4,0,y
+2018,AFC,East,Miami Dolphins,7,9,0,.438,319,433,6,2,0,1,7,0,4,2,0,6,6,0,
+2018,AFC,East,Buffalo Bills,6,10,0,.375,269,374,4,4,0,2,6,0,2,4,0,4,8,0,
+2018,AFC,East,New York Jets,4,12,0,.250,333,441,2,6,0,2,6,0,1,5,0,3,9,0,
+2018,AFC,North,Baltimore Ravens,10,6,0,.625,389,287,6,2,0,4,4,0,3,3,0,8,4,0,y
+2018,AFC,North,Pittsburgh Steelers,9,6,1,.594,428,360,5,3,0,4,3,1,4,1,1,6,5,1,
+2018,AFC,North,Cleveland Browns,7,8,1,.469,359,392,5,2,1,2,6,0,3,2,1,5,6,1,
+2018,AFC,North,Cincinnati Bengals,6,10,0,.375,368,455,4,4,0,2,6,0,1,5,0,4,8,0,
+2018,AFC,South,Houston Texans,11,5,0,.688,402,316,6,2,0,5,3,0,4,2,0,9,3,0,y
+2018,AFC,South,Indianapolis Colts,10,6,0,.625,433,344,6,2,0,4,4,0,4,2,0,7,5,0,y
+2018,AFC,South,Tennessee Titans,9,7,0,.562,310,303,6,2,0,3,5,0,3,3,0,5,7,0,
+2018,AFC,South,Jacksonville Jaguars,5,11,0,.312,245,316,3,5,0,2,6,0,1,5,0,4,8,0,
+2018,AFC,West,Kansas City Chiefs,12,4,0,.750,565,421,7,1,0,5,3,0,5,1,0,10,2,0,y
+2018,AFC,West,Los Angeles Chargers,12,4,0,.750,428,329,5,3,0,7,1,0,4,2,0,9,3,0,y
+2018,AFC,West,Denver Broncos,6,10,0,.375,329,349,3,5,0,3,5,0,2,4,0,4,8,0,
+2018,AFC,West,Oakland Raiders,4,12,0,.250,290,467,3,5,0,1,7,0,1,5,0,3,9,0,
+2018,NFC,East,Dallas Cowboys,10,6,0,.625,339,324,7,1,0,3,5,0,5,1,0,9,3,0,y
+2018,NFC,East,Philadelphia Eagles,9,7,0,.562,367,348,5,3,0,4,4,0,4,2,0,6,6,0,y
+2018,NFC,East,Washington Redskins,7,9,0,.438,281,359,3,5,0,4,4,0,2,4,0,6,6,0,
+2018,NFC,East,New York Giants,5,11,0,.312,369,412,2,6,0,3,5,0,1,5,0,4,8,0,
+2018,NFC,North,Chicago Bears,12,4,0,.750,421,283,7,1,0,5,3,0,5,1,0,10,2,0,y
+2018,NFC,North,Minnesota Vikings,8,7,1,.531,360,341,5,3,0,3,4,1,3,2,1,6,5,1,
+2018,NFC,North,Green Bay Packers,6,9,1,.406,376,400,5,2,1,1,7,0,1,4,1,3,8,1,
+2018,NFC,North,Detroit Lions,6,10,0,.375,324,360,3,5,0,3,5,0,2,4,0,4,8,0,
+2018,NFC,South,New Orleans Saints,13,3,0,.812,504,353,6,2,0,7,1,0,4,2,0,9,3,0,y
+2018,NFC,South,Atlanta Falcons,7,9,0,.438,414,423,4,4,0,3,5,0,4,2,0,7,5,0,
+2018,NFC,South,Carolina Panthers,7,9,0,.438,376,382,5,3,0,2,6,0,2,4,0,5,7,0,
+2018,NFC,South,Tampa Bay Buccaneers,5,11,0,.312,396,464,4,4,0,1,7,0,2,4,0,4,8,0,
+2018,NFC,West,Los Angeles Rams,13,3,0,.812,527,384,7,1,0,6,2,0,6,0,0,9,3,0,y
+2018,NFC,West,Seattle Seahawks,10,6,0,.625,428,347,6,2,0,4,4,0,3,3,0,8,4,0,y
+2018,NFC,West,San Francisco 49ers,4,12,0,.250,342,435,4,4,0,0,8,0,1,5,0,2,10,0,
+2018,NFC,West,Arizona Cardinals,3,13,0,.188,225,425,1,7,0,2,6,0,2,4,0,3,9,0,
+2019,AFC,East,New England Patriots,12,4,0,.750,420,225,6,2,0,6,2,0,5,1,0,8,4,0,y
+2019,AFC,East,Buffalo Bills,10,6,0,.625,314,259,4,4,0,6,2,0,3,3,0,7,5,0,y
+2019,AFC,East,New York Jets,7,9,0,.438,276,359,5,3,0,2,6,0,2,4,0,4,8,0,
+2019,AFC,East,Miami Dolphins,5,11,0,.312,306,494,3,5,0,2,6,0,2,4,0,4,8,0,
+2019,AFC,North,Baltimore Ravens,14,2,0,.875,531,282,7,1,0,7,1,0,5,1,0,10,2,0,y
+2019,AFC,North,Pittsburgh Steelers,8,8,0,.500,289,303,5,3,0,3,5,0,3,3,0,6,6,0,
+2019,AFC,North,Cleveland Browns,6,10,0,.375,335,393,4,4,0,2,6,0,3,3,0,6,6,0,
+2019,AFC,North,Cincinnati Bengals,2,14,0,.125,279,420,2,6,0,0,8,0,1,5,0,2,10,0,
+2019,AFC,South,Houston Texans,10,6,0,.625,378,385,5,3,0,5,3,0,4,2,0,8,4,0,y
+2019,AFC,South,Tennessee Titans,9,7,0,.562,402,331,4,4,0,5,3,0,3,3,0,7,5,0,y
+2019,AFC,South,Indianapolis Colts,7,9,0,.438,361,373,5,3,0,2,6,0,3,3,0,5,7,0,
+2019,AFC,South,Jacksonville Jaguars,6,10,0,.375,300,397,3,5,0,3,5,0,2,4,0,6,6,0,
+2019,AFC,West,Kansas City Chiefs,12,4,0,.750,451,308,5,3,0,7,1,0,6,0,0,9,3,0,y
+2019,AFC,West,Denver Broncos,7,9,0,.438,282,316,5,3,0,2,6,0,3,3,0,6,6,0,
+2019,AFC,West,Oakland Raiders,7,9,0,.438,313,419,5,3,0,2,6,0,3,3,0,5,7,0,
+2019,AFC,West,Los Angeles Chargers,5,11,0,.312,337,345,2,6,0,3,5,0,0,6,0,3,9,0,
+2019,NFC,East,Philadelphia Eagles,9,7,0,.562,385,354,5,3,0,4,4,0,5,1,0,7,5,0,y
+2019,NFC,East,Dallas Cowboys,8,8,0,.500,434,321,5,3,0,3,5,0,5,1,0,7,5,0,
+2019,NFC,East,New York Giants,4,12,0,.250,341,451,2,6,0,2,6,0,2,4,0,3,9,0,
+2019,NFC,East,Washington Redskins,3,13,0,.188,266,435,1,7,0,2,6,0,0,6,0,2,10,0,
+2019,NFC,North,Green Bay Packers,13,3,0,.812,376,313,7,1,0,6,2,0,6,0,0,10,2,0,y
+2019,NFC,North,Minnesota Vikings,10,6,0,.625,407,303,6,2,0,4,4,0,2,4,0,7,5,0,y
+2019,NFC,North,Chicago Bears,8,8,0,.500,280,298,4,4,0,4,4,0,4,2,0,7,5,0,
+2019,NFC,North,Detroit Lions,3,12,1,.219,341,423,2,6,0,1,6,1,0,6,0,2,9,1,
+2019,NFC,South,New Orleans Saints,13,3,0,.812,458,341,6,2,0,7,1,0,5,1,0,9,3,0,y
+2019,NFC,South,Atlanta Falcons,7,9,0,.438,381,399,3,5,0,4,4,0,4,2,0,6,6,0,
+2019,NFC,South,Tampa Bay Buccaneers,7,9,0,.438,458,449,2,6,0,5,3,0,2,4,0,5,7,0,
+2019,NFC,South,Carolina Panthers,5,11,0,.312,340,470,2,6,0,3,5,0,1,5,0,2,10,0,
+2019,NFC,West,San Francisco 49ers,13,3,0,.812,479,310,6,2,0,7,1,0,5,1,0,10,2,0,y
+2019,NFC,West,Seattle Seahawks,11,5,0,.688,405,398,4,4,0,7,1,0,3,3,0,8,4,0,y
+2019,NFC,West,Los Angeles Rams,9,7,0,.562,394,364,5,3,0,4,4,0,3,3,0,7,5,0,
+2019,NFC,West,Arizona Cardinals,5,10,1,.344,361,442,2,5,1,3,5,0,1,5,0,3,8,1,
+2020,AFC,East,Buffalo Bills,13,3,0,.812,501,375,7,1,0,6,2,0,6,0,0,10,2,0,y
+2020,AFC,East,Miami Dolphins,10,6,0,.625,404,338,5,3,0,5,3,0,3,3,0,7,5,0,
+2020,AFC,East,New England Patriots,7,9,0,.438,326,353,5,3,0,2,6,0,3,3,0,6,6,0,
+2020,AFC,East,New York Jets,2,14,0,.125,243,457,1,7,0,1,7,0,0,6,0,1,11,0,
+2020,AFC,North,Pittsburgh Steelers,12,4,0,.750,416,312,7,1,0,5,3,0,4,2,0,9,3,0,y
+2020,AFC,North,Baltimore Ravens,11,5,0,.688,468,303,5,3,0,6,2,0,4,2,0,7,5,0,y
+2020,AFC,North,Cleveland Browns,11,5,0,.688,408,419,6,2,0,5,3,0,3,3,0,7,5,0,y
+2020,AFC,North,Cincinnati Bengals,4,11,1,.281,311,424,3,5,0,1,6,1,1,5,0,4,8,0,
+2020,AFC,South,Tennessee Titans,11,5,0,.688,491,439,5,3,0,6,2,0,5,1,0,8,4,0,y
+2020,AFC,South,Indianapolis Colts,11,5,0,.688,451,362,6,2,0,5,3,0,4,2,0,7,5,0,y
+2020,AFC,South,Houston Texans,4,12,0,.250,384,464,2,6,0,2,6,0,2,4,0,3,9,0,
+2020,AFC,South,Jacksonville Jaguars,1,15,0,.062,306,492,1,7,0,0,8,0,1,5,0,1,11,0,
+2020,AFC,West,Kansas City Chiefs,14,2,0,.875,473,362,6,2,0,8,0,0,4,2,0,10,2,0,y
+2020,AFC,West,Las Vegas Raiders,8,8,0,.500,434,478,2,6,0,6,2,0,4,2,0,6,6,0,
+2020,AFC,West,Los Angeles Chargers,7,9,0,.438,384,426,4,4,0,3,5,0,3,3,0,6,6,0,
+2020,AFC,West,Denver Broncos,5,11,0,.312,323,446,2,6,0,3,5,0,1,5,0,4,8,0,
+2020,NFC,East,Washington Football Team,7,9,0,.438,335,329,3,5,0,4,4,0,4,2,0,5,7,0,y
+2020,NFC,East,New York Giants,6,10,0,.375,280,357,3,5,0,3,5,0,4,2,0,5,7,0,
+2020,NFC,East,Dallas Cowboys,6,10,0,.375,395,473,4,4,0,2,6,0,2,4,0,5,7,0,
+2020,NFC,East,Philadelphia Eagles,4,11,1,.281,334,418,3,4,1,1,7,0,2,4,0,4,8,0,
+2020,NFC,North,Green Bay Packers,13,3,0,.812,509,369,7,1,0,6,2,0,5,1,0,10,2,0,y
+2020,NFC,North,Chicago Bears,8,8,0,.500,372,370,3,5,0,5,3,0,2,4,0,6,6,0,y
+2020,NFC,North,Minnesota Vikings,7,9,0,.438,430,475,3,5,0,4,4,0,4,2,0,5,7,0,
+2020,NFC,North,Detroit Lions,5,11,0,.312,377,519,1,7,0,4,4,0,1,5,0,4,8,0,
+2020,NFC,South,New Orleans Saints,12,4,0,.750,482,337,6,2,0,6,2,0,6,0,0,10,2,0,y
+2020,NFC,South,Tampa Bay Buccaneers,11,5,0,.688,492,355,5,3,0,6,2,0,4,2,0,8,4,0,y
+2020,NFC,South,Carolina Panthers,5,11,0,.312,350,402,2,6,0,3,5,0,1,5,0,4,8,0,
+2020,NFC,South,Atlanta Falcons,4,12,0,.250,396,414,2,6,0,2,6,0,1,5,0,2,10,0,
+2020,NFC,West,Seattle Seahawks,12,4,0,.750,459,371,7,1,0,5,3,0,4,2,0,9,3,0,y
+2020,NFC,West,Los Angeles Rams,10,6,0,.625,372,296,6,2,0,4,4,0,3,3,0,9,3,0,y
+2020,NFC,West,Arizona Cardinals,8,8,0,.500,410,367,4,4,0,4,4,0,2,4,0,6,6,0,
+2020,NFC,West,San Francisco 49ers,6,10,0,.375,376,390,1,7,0,5,3,0,3,3,0,4,8,0,
+2021,AFC,East,Buffalo Bills,11,6,0,.647,483,289,6,3,0,5,3,0,5,1,0,7,5,0,y
+2021,AFC,East,New England Patriots,10,7,0,.588,462,303,4,5,0,6,2,0,3,3,0,8,4,0,y
+2021,AFC,East,Miami Dolphins,9,8,0,.529,341,373,6,3,0,3,5,0,4,2,0,6,6,0,
+2021,AFC,East,New York Jets,4,13,0,.235,310,504,3,6,0,1,7,0,0,6,0,4,8,0,
+2021,AFC,North,Cincinnati Bengals,10,7,0,.588,460,376,5,4,0,5,3,0,4,2,0,8,4,0,y
+2021,AFC,North,Pittsburgh Steelers,9,7,1,.559,343,398,6,2,1,3,5,0,4,2,0,7,5,0,y
+2021,AFC,North,Cleveland Browns,8,9,0,.471,349,371,6,3,0,2,6,0,3,3,0,5,7,0,
+2021,AFC,North,Baltimore Ravens,8,9,0,.471,387,392,5,4,0,3,5,0,1,5,0,5,7,0,
+2021,AFC,South,Tennessee Titans,12,5,0,.706,419,354,7,2,0,5,3,0,5,1,0,8,4,0,y
+2021,AFC,South,Indianapolis Colts,9,8,0,.529,451,365,4,5,0,5,3,0,3,3,0,7,5,0,
+2021,AFC,South,Houston Texans,4,13,0,.235,280,452,2,7,0,2,6,0,3,3,0,4,8,0,
+2021,AFC,South,Jacksonville Jaguars,3,14,0,.176,253,457,3,6,0,0,8,0,1,5,0,3,9,0,
+2021,AFC,West,Kansas City Chiefs,12,5,0,.706,480,364,7,2,0,5,3,0,5,1,0,7,5,0,y
+2021,AFC,West,Las Vegas Raiders,10,7,0,.588,374,439,5,4,0,5,3,0,3,3,0,8,4,0,y
+2021,AFC,West,Los Angeles Chargers,9,8,0,.529,474,459,5,4,0,4,4,0,3,3,0,6,6,0,
+2021,AFC,West,Denver Broncos,7,10,0,.412,335,322,4,5,0,3,5,0,1,5,0,3,9,0,
+2021,NFC,East,Dallas Cowboys,12,5,0,.706,530,358,5,3,0,7,2,0,6,0,0,10,2,0,y
+2021,NFC,East,Philadelphia Eagles,9,8,0,.529,444,385,3,5,0,6,3,0,3,3,0,7,5,0,y
+2021,NFC,East,Washington Football Team,7,10,0,.412,335,434,3,5,0,4,5,0,2,4,0,6,6,0,
+2021,NFC,East,New York Giants,4,13,0,.235,258,416,3,5,0,1,8,0,1,5,0,3,9,0,
+2021,NFC,North,Green Bay Packers,13,4,0,.765,450,371,8,0,0,5,4,0,4,2,0,9,3,0,y
+2021,NFC,North,Minnesota Vikings,8,9,0,.471,425,426,5,3,0,3,6,0,4,2,0,6,6,0,
+2021,NFC,North,Chicago Bears,6,11,0,.353,311,407,3,5,0,3,6,0,2,4,0,4,8,0,
+2021,NFC,North,Detroit Lions,3,13,1,.206,325,467,3,5,0,0,8,1,2,4,0,3,9,0,
+2021,NFC,South,Tampa Bay Buccaneers,13,4,0,.765,511,353,7,1,0,6,3,0,4,2,0,8,4,0,y
+2021,NFC,South,New Orleans Saints,9,8,0,.529,364,335,3,5,0,6,3,0,4,2,0,7,5,0,
+2021,NFC,South,Atlanta Falcons,7,10,0,.412,313,459,2,6,0,5,4,0,2,4,0,4,8,0,
+2021,NFC,South,Carolina Panthers,5,12,0,.294,304,404,2,6,0,3,6,0,2,4,0,3,9,0,
+2021,NFC,West,Los Angeles Rams,12,5,0,.706,460,372,5,3,0,7,2,0,3,3,0,8,4,0,y
+2021,NFC,West,Arizona Cardinals,11,6,0,.647,449,366,3,5,0,8,1,0,4,2,0,7,5,0,y
+2021,NFC,West,San Francisco 49ers,10,7,0,.588,427,365,4,4,0,6,3,0,2,4,0,7,5,0,y
+2021,NFC,West,Seattle Seahawks,7,10,0,.412,395,366,3,5,0,4,5,0,3,3,0,4,8,0,
+2022,AFC,East,Buffalo Bills,13,3,0,.812,455,286,7,1,0,6,2,0,4,2,0,9,2,0,y
+2022,AFC,East,Miami Dolphins,9,8,0,.529,397,399,6,2,0,3,6,0,3,3,0,7,5,0,y
+2022,AFC,East,New England Patriots,8,9,0,.471,364,347,4,4,0,4,5,0,3,3,0,6,6,0,
+2022,AFC,East,New York Jets,7,10,0,.412,296,316,3,5,0,4,5,0,2,4,0,5,7,0,
+2022,AFC,North,Cincinnati Bengals,12,4,0,.750,418,322,6,1,0,6,3,0,3,3,0,8,3,0,y
+2022,AFC,North,Baltimore Ravens,10,7,0,.588,350,315,5,3,0,5,4,0,3,3,0,6,6,0,y
+2022,AFC,North,Pittsburgh Steelers,9,8,0,.529,308,346,4,4,0,5,4,0,3,3,0,5,7,0,
+2022,AFC,North,Cleveland Browns,7,10,0,.412,361,381,4,4,0,3,6,0,3,3,0,4,8,0,
+2022,AFC,South,Jacksonville Jaguars,9,8,0,.529,404,350,5,3,0,4,5,0,4,2,0,8,4,0,y
+2022,AFC,South,Tennessee Titans,7,10,0,.412,298,359,3,5,0,4,5,0,3,3,0,5,7,0,
+2022,AFC,South,Indianapolis Colts,4,12,1,.265,289,427,2,6,0,2,6,1,1,4,1,4,7,1,
+2022,AFC,South,Houston Texans,3,13,1,.206,289,420,0,7,1,3,6,0,3,2,1,3,8,1,
+2022,AFC,West,Kansas City Chiefs,14,3,0,.824,496,369,7,1,0,7,2,0,6,0,0,9,3,0,y
+2022,AFC,West,Los Angeles Chargers,10,7,0,.588,391,384,5,3,0,5,4,0,2,4,0,7,5,0,y
+2022,AFC,West,Las Vegas Raiders,6,11,0,.353,395,418,4,4,0,2,7,0,3,3,0,5,7,0,
+2022,AFC,West,Denver Broncos,5,12,0,.294,287,359,4,4,0,1,8,0,1,5,0,3,9,0,
+2022,NFC,East,Philadelphia Eagles,14,3,0,.824,477,344,7,2,0,7,1,0,4,2,0,9,3,0,y
+2022,NFC,East,Dallas Cowboys,12,5,0,.706,467,342,8,1,0,4,4,0,4,2,0,8,4,0,y
+2022,NFC,East,New York Giants,9,7,1,.559,365,371,5,3,1,4,4,0,1,4,1,4,7,1,y
+2022,NFC,East,Washington Commanders,8,8,1,.500,321,343,4,5,0,4,3,1,2,3,1,5,6,1,
+2022,NFC,North,Minnesota Vikings,13,4,0,.765,424,427,8,1,0,5,3,0,4,2,0,8,4,0,y
+2022,NFC,North,Detroit Lions,9,8,0,.529,453,427,5,4,0,4,4,0,5,1,0,7,5,0,
+2022,NFC,North,Green Bay Packers,8,9,0,.471,370,371,5,4,0,3,5,0,3,3,0,6,6,0,
+2022,NFC,North,Chicago Bears,3,14,0,.176,326,463,2,7,0,1,7,0,0,6,0,1,11,0,
+2022,NFC,South,Tampa Bay Buccaneers,8,9,0,.471,313,358,5,4,0,3,5,0,4,2,0,8,4,0,y
+2022,NFC,South,Carolina Panthers,7,10,0,.412,347,374,5,4,0,2,6,0,4,2,0,6,6,0,
+2022,NFC,South,New Orleans Saints,7,10,0,.412,330,345,4,5,0,3,5,0,2,4,0,5,7,0,
+2022,NFC,South,Atlanta Falcons,7,10,0,.412,365,386,6,3,0,1,7,0,2,4,0,6,6,0,
+2022,NFC,West,San Francisco 49ers,13,4,0,.765,450,277,8,1,0,5,3,0,6,0,0,10,2,0,y
+2022,NFC,West,Seattle Seahawks,9,8,0,.529,407,401,5,4,0,4,4,0,4,2,0,6,6,0,y
+2022,NFC,West,Los Angeles Rams,5,12,0,.294,307,384,4,5,0,1,7,0,1,5,0,3,9,0,
+2022,NFC,West,Arizona Cardinals,4,13,0,.235,340,449,1,8,0,3,5,0,1,5,0,3,9,0,
+2023,AFC,East,Buffalo Bills,11,6,0,.647,451,311,7,2,0,4,4,0,4,2,0,7,5,0,y
+2023,AFC,East,Miami Dolphins,11,6,0,.647,496,391,7,2,0,4,4,0,4,2,0,7,5,0,y
+2023,AFC,East,New York Jets,7,10,0,.412,268,355,4,5,0,3,5,0,2,4,0,4,8,0,
+2023,AFC,East,New England Patriots,4,13,0,.235,236,366,1,8,0,3,5,0,2,4,0,4,8,0,
+2023,AFC,North,Baltimore Ravens,13,4,0,.765,483,280,6,3,0,7,1,0,3,3,0,8,4,0,y
+2023,AFC,North,Cleveland Browns,11,6,0,.647,396,362,8,1,0,3,5,0,3,3,0,8,4,0,y
+2023,AFC,North,Pittsburgh Steelers,10,7,0,.588,304,324,5,4,0,5,3,0,5,1,0,7,5,0,y
+2023,AFC,North,Cincinnati Bengals,9,8,0,.529,366,384,6,3,0,3,5,0,1,5,0,4,8,0,
+2023,AFC,South,Houston Texans,10,7,0,.588,377,353,6,3,0,4,4,0,4,2,0,7,5,0,y
+2023,AFC,South,Jacksonville Jaguars,9,8,0,.529,377,371,4,5,0,5,3,0,4,2,0,6,6,0,
+2023,AFC,South,Indianapolis Colts,9,8,0,.529,396,415,4,5,0,5,3,0,3,3,0,7,5,0,
+2023,AFC,South,Tennessee Titans,6,11,0,.353,305,367,5,4,0,1,7,0,1,5,0,4,8,0,
+2023,AFC,West,Kansas City Chiefs,11,6,0,.647,371,294,5,4,0,6,2,0,4,2,0,9,3,0,y
+2023,AFC,West,Las Vegas Raiders,8,9,0,.471,332,331,6,3,0,2,6,0,4,2,0,6,6,0,
+2023,AFC,West,Denver Broncos,8,9,0,.471,357,413,5,4,0,3,5,0,3,3,0,5,7,0,
+2023,AFC,West,Los Angeles Chargers,5,12,0,.294,346,398,2,7,0,3,5,0,1,5,0,3,9,0,
+2023,NFC,East,Dallas Cowboys,12,5,0,.706,509,315,8,0,0,4,5,0,5,1,0,9,3,0,y
+2023,NFC,East,Philadelphia Eagles,11,6,0,.647,433,428,6,2,0,5,4,0,4,2,0,7,5,0,y
+2023,NFC,East,New York Giants,6,11,0,.353,266,407,4,4,0,2,7,0,3,3,0,5,7,0,
+2023,NFC,East,Washington Commanders,4,13,0,.235,329,518,1,7,0,3,6,0,0,6,0,2,10,0,
+2023,NFC,North,Detroit Lions,12,5,0,.706,461,395,6,2,0,6,3,0,4,2,0,8,4,0,y
+2023,NFC,North,Green Bay Packers,9,8,0,.529,383,350,5,3,0,4,5,0,4,2,0,7,5,0,y
+2023,NFC,North,Minnesota Vikings,7,10,0,.412,344,362,2,6,0,5,4,0,2,4,0,6,6,0,
+2023,NFC,North,Chicago Bears,7,10,0,.412,360,379,5,3,0,2,7,0,2,4,0,6,6,0,
+2023,NFC,South,Tampa Bay Buccaneers,9,8,0,.529,348,325,4,4,0,5,4,0,4,2,0,7,5,0,y
+2023,NFC,South,New Orleans Saints,9,8,0,.529,402,327,5,3,0,4,5,0,4,2,0,6,6,0,
+2023,NFC,South,Atlanta Falcons,7,10,0,.412,321,373,5,3,0,2,7,0,3,3,0,4,8,0,
+2023,NFC,South,Carolina Panthers,2,15,0,.118,236,416,2,6,0,0,9,0,1,5,0,1,11,0,
+2023,NFC,West,San Francisco 49ers,12,5,0,.706,491,298,5,3,0,7,2,0,5,1,0,10,2,0,y
+2023,NFC,West,Los Angeles Rams,10,7,0,.588,404,377,5,3,0,5,4,0,5,1,0,8,4,0,y
+2023,NFC,West,Seattle Seahawks,9,8,0,.529,364,402,5,3,0,4,5,0,2,4,0,7,5,0,
+2023,NFC,West,Arizona Cardinals,4,13,0,.235,330,455,2,6,0,2,7,0,0,6,0,3,9,0,
+2024,AFC,East,Buffalo Bills,13,4,0,.765,525,368,8,0,0,5,4,0,5,1,0,9,3,0,y
+2024,AFC,East,Miami Dolphins,8,9,0,.471,345,364,5,3,0,3,6,0,3,3,0,6,6,0,
+2024,AFC,East,New York Jets,5,12,0,.294,338,404,3,5,0,2,7,0,2,4,0,5,7,0,
+2024,AFC,East,New England Patriots,4,13,0,.235,289,417,2,6,0,2,7,0,2,4,0,3,9,0,
+2024,AFC,North,Baltimore Ravens,12,5,0,.706,518,361,6,2,0,6,3,0,4,2,0,8,4,0,y
+2024,AFC,North,Pittsburgh Steelers,10,7,0,.588,380,347,5,3,0,5,4,0,3,3,0,7,5,0,y
+2024,AFC,North,Cincinnati Bengals,9,8,0,.529,472,434,3,5,0,6,3,0,3,3,0,6,6,0,
+2024,AFC,North,Cleveland Browns,3,14,0,.176,258,435,2,6,0,1,8,0,2,4,0,3,9,0,
+2024,AFC,South,Houston Texans,10,7,0,.588,372,372,5,3,0,5,4,0,5,1,0,8,4,0,y
+2024,AFC,South,Indianapolis Colts,8,9,0,.471,377,427,5,3,0,3,6,0,3,3,0,7,5,0,
+2024,AFC,South,Jacksonville Jaguars,4,13,0,.235,320,435,3,5,0,1,8,0,3,3,0,4,8,0,
+2024,AFC,South,Tennessee Titans,3,14,0,.176,311,460,1,7,0,2,7,0,1,5,0,3,9,0,
+2024,AFC,West,Kansas City Chiefs,15,2,0,.882,385,326,8,0,0,7,2,0,5,1,0,10,2,0,y
+2024,AFC,West,Los Angeles Chargers,11,6,0,.647,402,301,5,3,0,6,3,0,4,2,0,8,4,0,y
+2024,AFC,West,Denver Broncos,10,7,0,.588,425,311,6,2,0,4,5,0,3,3,0,6,6,0,y
+2024,AFC,West,Las Vegas Raiders,4,13,0,.235,309,434,2,6,0,2,7,0,0,6,0,3,9,0,
+2024,NFC,East,Philadelphia Eagles,14,3,0,.824,463,303,8,1,0,6,2,0,5,1,0,9,3,0,y
+2024,NFC,East,Washington Commanders,12,5,0,.706,485,391,7,2,0,5,3,0,4,2,0,9,3,0,y
+2024,NFC,East,Dallas Cowboys,7,10,0,.412,350,468,2,7,0,5,3,0,3,3,0,5,7,0,
+2024,NFC,East,New York Giants,3,14,0,.176,273,415,1,8,0,2,6,0,0,6,0,1,11,0,
+2024,NFC,North,Detroit Lions,15,2,0,.882,564,342,7,2,0,8,0,0,6,0,0,11,1,0,y
+2024,NFC,North,Minnesota Vikings,14,3,0,.824,432,332,8,1,0,6,2,0,4,2,0,9,3,0,y
+2024,NFC,North,Green Bay Packers,11,6,0,.647,460,338,6,3,0,5,3,0,1,5,0,6,6,0,y
+2024,NFC,North,Chicago Bears,5,12,0,.294,310,370,4,5,0,1,7,0,1,5,0,3,9,0,
+2024,NFC,South,Tampa Bay Buccaneers,10,7,0,.588,502,385,5,4,0,5,3,0,4,2,0,8,4,0,y
+2024,NFC,South,Atlanta Falcons,8,9,0,.471,389,423,4,5,0,4,4,0,4,2,0,7,5,0,
+2024,NFC,South,Carolina Panthers,5,12,0,.294,341,534,3,6,0,2,6,0,2,4,0,4,8,0,
+2024,NFC,South,New Orleans Saints,5,12,0,.294,338,398,3,6,0,2,6,0,2,4,0,4,8,0,
+2024,NFC,West,Los Angeles Rams,10,7,0,.588,367,386,5,4,0,5,3,0,4,2,0,6,6,0,y
+2024,NFC,West,Seattle Seahawks,10,7,0,.588,375,368,3,6,0,7,1,0,4,2,0,6,6,0,
+2024,NFC,West,Arizona Cardinals,8,9,0,.471,400,379,6,3,0,2,6,0,3,3,0,4,8,0,
+2024,NFC,West,San Francisco 49ers,6,11,0,.353,389,436,4,5,0,2,6,0,1,5,0,4,8,0,
+2025,AFC,East,New England Patriots,14,3,0,.824,490,320,6,3,0,8,0,0,5,1,0,9,3,0,y
+2025,AFC,East,Buffalo Bills,12,5,0,.706,481,365,7,2,0,5,3,0,4,2,0,9,3,0,y
+2025,AFC,East,Miami Dolphins,7,10,0,.412,347,424,5,4,0,2,6,0,3,3,0,3,9,0,
+2025,AFC,East,New York Jets,3,14,0,.176,300,503,2,7,0,1,7,0,0,6,0,2,10,0,
+2025,AFC,North,Pittsburgh Steelers,10,7,0,.588,397,387,6,3,0,4,4,0,4,2,0,8,4,0,y
+2025,AFC,North,Baltimore Ravens,8,9,0,.471,424,398,3,6,0,5,3,0,3,3,0,5,7,0,
+2025,AFC,North,Cincinnati Bengals,6,11,0,.353,414,492,3,6,0,3,5,0,3,3,0,5,7,0,
+2025,AFC,North,Cleveland Browns,5,12,0,.294,279,379,3,6,0,2,6,0,2,4,0,4,8,0,
+2025,AFC,South,Jacksonville Jaguars,13,4,0,.765,474,336,7,2,0,6,2,0,5,1,0,10,2,0,y
+2025,AFC,South,Houston Texans,12,5,0,.706,404,295,7,2,0,5,3,0,5,1,0,10,2,0,y
+2025,AFC,South,Indianapolis Colts,8,9,0,.471,466,412,6,3,0,2,6,0,2,4,0,6,6,0,
+2025,AFC,South,Tennessee Titans,3,14,0,.176,284,478,1,8,0,2,6,0,0,6,0,2,10,0,
+2025,AFC,West,Denver Broncos,14,3,0,.824,401,311,8,1,0,6,2,0,5,1,0,9,3,0,y
+2025,AFC,West,Los Angeles Chargers,11,6,0,.647,368,340,6,3,0,5,3,0,5,1,0,8,4,0,y
+2025,AFC,West,Kansas City Chiefs,6,11,0,.353,362,328,5,4,0,1,7,0,1,5,0,3,9,0,
+2025,AFC,West,Las Vegas Raiders,3,14,0,.176,241,432,2,7,0,1,7,0,1,5,0,3,9,0,
+2025,NFC,East,Philadelphia Eagles,11,6,0,.647,379,325,5,3,0,6,3,0,3,3,0,8,4,0,y
+2025,NFC,East,Dallas Cowboys,7,9,1,.441,471,511,4,3,1,3,6,0,4,2,0,4,7,1,
+2025,NFC,East,Washington Commanders,5,12,0,.294,356,451,2,6,0,3,6,0,3,3,0,3,9,0,
+2025,NFC,East,New York Giants,4,13,0,.235,381,439,3,5,0,1,8,0,2,4,0,2,10,0,
+2025,NFC,North,Chicago Bears,11,6,0,.647,441,415,6,2,0,5,4,0,2,4,0,7,5,0,y
+2025,NFC,North,Green Bay Packers,9,7,1,.559,391,360,5,3,0,4,4,1,4,2,0,7,4,1,y
+2025,NFC,North,Minnesota Vikings,9,8,0,.529,344,333,4,4,0,5,4,0,4,2,0,7,5,0,
+2025,NFC,North,Detroit Lions,9,8,0,.529,481,413,5,3,0,4,5,0,2,4,0,6,6,0,
+2025,NFC,South,Carolina Panthers,8,9,0,.471,311,380,5,3,0,3,6,0,3,3,0,6,6,0,y
+2025,NFC,South,Tampa Bay Buccaneers,8,9,0,.471,380,411,4,4,0,4,5,0,3,3,0,6,6,0,
+2025,NFC,South,Atlanta Falcons,8,9,0,.471,353,401,4,4,0,4,5,0,3,3,0,7,5,0,
+2025,NFC,South,New Orleans Saints,6,11,0,.353,306,383,3,5,0,3,6,0,3,3,0,4,8,0,
+2025,NFC,West,Seattle Seahawks,14,3,0,.824,483,292,6,2,0,8,1,0,4,2,0,9,3,0,y
+2025,NFC,West,Los Angeles Rams,12,5,0,.706,518,346,7,1,0,5,4,0,4,2,0,7,5,0,y
+2025,NFC,West,San Francisco 49ers,12,5,0,.706,437,371,5,3,0,7,2,0,4,2,0,9,3,0,y
+2025,NFC,West,Arizona Cardinals,3,14,0,.176,355,488,1,7,0,2,7,0,0,6,0,3,9,0,
