@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fourth &amp; Infinite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">4<span class="logo-amp">&</span>∞</span>
+        <div class="logo-text">
+          <span class="logo-title">Fourth <span class="amp">&</span> Infinite</span>
+          <span class="logo-sub">NFL Draft Intelligence</span>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <span class="nav-label">Platform</span>
+        <a href="#" class="nav-item active" data-view="dashboard">
+          <i class="fas fa-chart-line"></i><span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-view="draftboard">
+          <i class="fas fa-table-list"></i><span>Draft Board</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Analytics</span>
+        <a href="#" class="nav-item" data-view="teams">
+          <i class="fas fa-shield-halved"></i><span>Team Hub</span>
+        </a>
+        <a href="#" class="nav-item" data-view="positions">
+          <i class="fas fa-arrow-trend-up"></i><span>Position Trends</span>
+        </a>
+        <a href="#" class="nav-item" data-view="colleges">
+          <i class="fas fa-graduation-cap"></i><span>College Pipeline</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Engines</span>
+        <a href="#" class="nav-item engine-item" data-view="sage">
+          <i class="fas fa-brain"></i>
+          <span>SAGE</span>
+          <span class="engine-badge sage-badge">BETA</span>
+        </a>
+        <a href="#" class="nav-item engine-item" data-view="ghost">
+          <i class="fas fa-ghost"></i>
+          <span>GHOST</span>
+          <span class="engine-badge ghost-badge">SOON</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>Data: 1994–2025</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="view-title" id="viewTitle">Dashboard</h1>
+        <span class="view-sub" id="viewSub">32 seasons · 8,116 picks · all NFL teams</span>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" id="globalSearch" placeholder="Search player, team, college…" autocomplete="off" />
+        </div>
+        <div class="data-badge">
+          <i class="fas fa-database"></i>
+          <span id="pickCount">8,116 picks</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─── DASHBOARD VIEW ─── -->
+    <section class="view active" id="view-dashboard">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-calendar"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value" id="kpi-years">32</span>
+            <span class="kpi-label">Draft Seasons</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-user-check"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value" id="kpi-picks">8,116</span>
+            <span class="kpi-label">Total Picks</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-shield-halved"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value" id="kpi-teams">40</span>
+            <span class="kpi-label">Franchises</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-graduation-cap"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value" id="kpi-colleges">398</span>
+            <span class="kpi-label">Colleges</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Picks Per Draft Year</h3>
+              <p>Total selections across all rounds, 1994–2025</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-picksPerYear"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>All-Time Position Mix</h3>
+              <p>Share of picks by position group</p>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--donut"><canvas id="chart-positionDonut"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Round 1 Position Breakdown</h3>
+              <p>Which positions go in the first round by year</p>
+            </div>
+            <select id="r1year-select" class="filter-select">
+              <!-- populated by JS -->
+            </select>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-r1positions"></canvas></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Top 20 Colleges by Draft Picks</h3>
+              <p>All-time pipeline leaders, 1994–2025</p>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar"><canvas id="chart-topColleges"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── DRAFT BOARD VIEW ─── -->
+    <section class="view" id="view-draftboard">
+      <div class="filter-bar">
+        <select id="db-year" class="filter-select"><option value="">All Years</option></select>
+        <select id="db-round" class="filter-select">
+          <option value="">All Rounds</option>
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option><option>7</option>
+        </select>
+        <select id="db-team" class="filter-select"><option value="">All Teams</option></select>
+        <select id="db-pos" class="filter-select"><option value="">All Positions</option></select>
+        <input type="text" id="db-search" class="filter-input" placeholder="Search player…" />
+        <button class="btn-clear" id="db-clear"><i class="fas fa-xmark"></i> Clear</button>
+      </div>
+      <div class="table-wrap">
+        <table class="draft-table" id="draftTable">
+          <thead>
+            <tr>
+              <th data-sort="year">Year <i class="fas fa-sort"></i></th>
+              <th data-sort="round">Rnd <i class="fas fa-sort"></i></th>
+              <th data-sort="pick">Pick <i class="fas fa-sort"></i></th>
+              <th data-sort="team">Team <i class="fas fa-sort"></i></th>
+              <th data-sort="player">Player <i class="fas fa-sort"></i></th>
+              <th data-sort="pos">Pos <i class="fas fa-sort"></i></th>
+              <th data-sort="pos_group">Group <i class="fas fa-sort"></i></th>
+              <th data-sort="college">College <i class="fas fa-sort"></i></th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="draftTableBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="db-count">— picks</span>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+
+    <!-- ─── TEAM HUB VIEW ─── -->
+    <section class="view" id="view-teams">
+      <div class="filter-bar">
+        <select id="team-select" class="filter-select filter-select--lg">
+          <option value="">Select a team…</option>
+        </select>
+      </div>
+      <div class="kpi-row" id="team-kpis">
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-user-check"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-picks">—</span><span class="kpi-label">Total Picks</span></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-trophy"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-r1">—</span><span class="kpi-label">Round 1 Picks</span></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-school"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-colleges">—</span><span class="kpi-label">Colleges Drafted</span></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-bullseye"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-pos">—</span><span class="kpi-label">Top Position</span></div></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header"><div><h3>Picks Per Year</h3><p>Draft volume over time for selected team</p></div></div>
+          <div class="chart-wrap"><canvas id="chart-teamPicksYear"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Position Distribution</h3><p>All-time picks by position group</p></div></div>
+          <div class="chart-wrap chart-wrap--donut"><canvas id="chart-teamPosDonut"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Draft Round Distribution</h3><p>How many picks per round</p></div></div>
+          <div class="chart-wrap"><canvas id="chart-teamRoundBar"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── POSITION TRENDS VIEW ─── -->
+    <section class="view" id="view-positions">
+      <div class="filter-bar">
+        <label class="filter-label">Show position groups:</label>
+        <div class="pos-toggle-group" id="posToggleGroup"></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header"><div><h3>Position Group Share Over Time</h3><p>% of total picks per year, by position group</p></div></div>
+          <div class="chart-wrap"><canvas id="chart-posTrends"></canvas></div>
+        </div>
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div><h3>Round 1 Position Concentration</h3><p>Which groups dominate the first round each year</p></div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-r1concentration"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── COLLEGE PIPELINE VIEW ─── -->
+    <section class="view" id="view-colleges">
+      <div class="filter-bar">
+        <select id="col-posgroup" class="filter-select"><option value="">All Positions</option></select>
+        <select id="col-team" class="filter-select"><option value="">All Teams</option></select>
+        <select id="col-yearfrom" class="filter-select"><option value="">From Year</option></select>
+        <select id="col-yearto" class="filter-select"><option value="">To Year</option></select>
+        <button class="btn-apply" id="col-apply"><i class="fas fa-filter"></i> Apply</button>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header"><div><h3>Top 25 Colleges by Draft Picks</h3><p>Filtered results</p></div></div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-collegePipeline"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SAGE VIEW ─── -->
+    <section class="view" id="view-sage">
+      <div class="engine-hero sage-hero">
+        <div class="engine-hero-badge">SAGE</div>
+        <h2>Smart Analytics &amp; Grade Engine</h2>
+        <p>SAGE will provide deep statistical grading across all 32 years of draft data — team efficiency scores, positional value curves, draft capital analysis, and comparative player grades relative to pick position.</p>
+        <div class="engine-roadmap">
+          <div class="roadmap-item done"><i class="fas fa-check"></i> 32-year dataset built (8,116 picks)</div>
+          <div class="roadmap-item done"><i class="fas fa-check"></i> Position group classification engine</div>
+          <div class="roadmap-item active"><i class="fas fa-spinner fa-spin"></i> Team draft efficiency scoring</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Pick value curves by round &amp; position</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Draft capital trade analysis</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Career outcome integration (AV / Pro Bowls)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── GHOST VIEW ─── -->
+    <section class="view" id="view-ghost">
+      <div class="engine-hero ghost-hero">
+        <div class="engine-hero-badge ghost-badge-hero">GHOST</div>
+        <h2>Grading Hidden Opportunity &amp; Sleeper Tracker</h2>
+        <p>GHOST surfaces what the draft overlooks — late-round players who outperformed their slot, college programs punching above their weight, teams consistently finding value outside Round 1, and ML-powered sleeper identification before the next draft.</p>
+        <div class="engine-roadmap">
+          <div class="roadmap-item done"><i class="fas fa-check"></i> Data pipeline established</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Late-round value identification model</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Sleeper scoring algorithm</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Hidden gem college pipeline detector</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> ML predictive model integration</div>
+          <div class="roadmap-item"><i class="fas fa-circle"></i> Pre-draft sleeper rankings (annual)</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
