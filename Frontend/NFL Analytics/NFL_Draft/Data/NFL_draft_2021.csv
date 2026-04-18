@@ -1,0 +1,260 @@
+Rnd.,Pick #,NFL Team,Player,Pos.,College,Conf.,Notes
+1,1,Jacksonville Jaguars,Trevor Lawrence,QB,Clemson,,
+1,2,New York Jets,Zach Wilson,QB,Brigham Young,,
+1,3,San Francisco 49ers,Trey Lance,QB,North Dakota State,,From HOU through MIA
+1,4,Atlanta Falcons,Kyle Pitts,TE,Florida,,
+1,5,Cincinnati Bengals,Ja'Marr Chase,WR,Louisiana State,,
+1,6,Miami Dolphins,Jaylen Waddle,WR,Alabama,,From PHI
+1,7,Detroit Lions,Penei Sewell,OT,Oregon,,
+1,8,Carolina Panthers,Jaycee Horn,DB,South Carolina,,
+1,9,Denver Broncos,Patrick Surtain,DB,Alabama,,
+1,10,Philadelphia Eagles,DeVonta Smith,WR,Alabama,,From DAL
+1,11,Chicago Bears,Justin Fields,QB,Ohio State,,From NYG
+1,12,Dallas Cowboys,Micah Parsons,DE,Penn State,,From SF through MIA and PHI
+1,13,Los Angeles Chargers,Rashawn Slater,OT,Northwestern,,
+1,14,New York Jets,Alijah Vera-Tucker,OG,Southern California,,From MIN
+1,15,New England Patriots,Mac Jones,QB,Alabama,,
+1,16,Arizona Cardinals,Zaven Collins,LB,Tulsa,,
+1,17,Las Vegas Raiders,Alex Leatherwood,OG,Alabama,,
+1,18,Miami Dolphins,Jaelan Phillips,LB,Miami,,
+1,19,Washington Football Team,Jamin Davis,LB,Kentucky,,
+1,20,New York Giants,Kadarius Toney,WR,Florida,,From CHI
+1,21,Indianapolis Colts,Kwity Paye,DE,Michigan,,
+1,22,Tennessee Titans,Caleb Farley,DB,Virginia Tech,,
+1,23,Minnesota Vikings,Christian Darrisaw,OT,Virginia Tech,,From SEA through NYJ
+1,24,Pittsburgh Steelers,Najee Harris,RB,Alabama,,
+1,25,Jacksonville Jaguars,Travis Etienne,RB,Clemson,,From LA
+1,26,Cleveland Browns,Greg Newsome,DB,Northwestern,,
+1,27,Baltimore Ravens,Rashod Bateman,WR,Minnesota,,
+1,28,New Orleans Saints,Payton Turner,DE,Houston,,
+1,29,Green Bay Packers,Eric Stokes,DB,Georgia,,
+1,30,Buffalo Bills,Gregory Rousseau,LB,Miami,,
+1,31,Baltimore Ravens,Jayson Oweh,LB,Penn State,,From KC
+1,32,Tampa Bay Buccaneers,Joe Tryon-Shoyinka,LB,Washington,,
+2,33,Jacksonville Jaguars,Tyson Campbell,DB,Georgia,,
+2,34,New York Jets,Elijah Moore,WR,Mississippi,,
+2,35,Denver Broncos,Javonte Williams,RB,North Carolina,,From ATL
+2,36,Miami Dolphins,Jevon Holland,DB,Oregon,,From HOU
+2,37,Philadelphia Eagles,Landon Dickerson,OG,Alabama,,
+2,38,New England Patriots,Christian Barmore,DT,Alabama,,From CIN
+2,39,Chicago Bears,Teven Jenkins,OG,Oklahoma State,,From CAR
+2,40,Atlanta Falcons,Richie Grant,DB,Central Florida,,From DEN
+2,41,Detroit Lions,Levi Onwuzurike,DE,Washington,,
+2,42,Miami Dolphins,Liam Eichenberg,OG,Notre Dame,,From NYG
+2,43,Las Vegas Raiders,Tre'von Moehrig,DB,Texas Christian,,From SF
+2,44,Dallas Cowboys,Kelvin Joseph,DB,Kentucky,,
+2,45,Jacksonville Jaguars,Walker Little,OT,Stanford,,From MIN
+2,46,Cincinnati Bengals,Jackson Carman,OT,Clemson,,From NE
+2,47,Los Angeles Chargers,Asante Samuel,DB,Florida State,,
+2,48,San Francisco 49ers,Aaron Banks,OG,Notre Dame,,From LV
+2,49,Arizona Cardinals,Rondale Moore,WR,Purdue,,
+2,50,New York Giants,Azeez Ojulari,LB,Georgia,,From MIA
+2,51,Washington Football Team,Samuel Cosmi,OG,Texas,,
+2,52,Cleveland Browns,Jeremiah Owusu-Koramoah,LB,Notre Dame,,From CHI through CAR
+2,53,Tennessee Titans,Dillon Radunz,OT,North Dakota State,,
+2,54,Indianapolis Colts,Dayo Odeyingbo,DE,Vanderbilt,,
+2,55,Pittsburgh Steelers,Pat Freiermuth,TE,Penn State,,
+2,56,Seattle Seahawks,D'Wayne Eskridge,WR,Western Michigan,,
+2,57,Los Angeles Rams,Chatarius Atwell,WR,Louisville,,
+2,58,Kansas City Chiefs,Nick Bolton,LB,Missouri,,From BAL
+2,59,Carolina Panthers,Terrace Marshall,WR,Louisiana State,,From CLE
+2,60,New Orleans Saints,Pete Werner,LB,Ohio State,,
+2,61,Buffalo Bills,Carlos Basham,LB,Wake Forest,,
+2,62,Green Bay Packers,Josh Myers,C,Ohio State,,
+2,63,Kansas City Chiefs,Creed Humphrey,C,Oklahoma,,
+2,64,Tampa Bay Buccaneers,Kyle Trask,QB,Florida,,
+3,65,Jacksonville Jaguars,Andre Cisco,DB,Syracuse,,
+3,66,Minnesota Vikings,Kellen Mond,QB,Texas A&M,,From NYJ
+3,67,Houston Texans,Davis Mills,QB,Stanford,,
+3,68,Atlanta Falcons,Jalen Mayfield,OG,Michigan,,
+3,69,Cincinnati Bengals,Joseph Ossai,DE,Texas,,
+3,70,Carolina Panthers,Brady Christensen,OG,Brigham Young,,From PHI
+3,71,New York Giants,Aaron Robinson,DB,Central Florida,,From DEN
+3,72,Detroit Lions,Alim McNeill,DT,North Carolina State,,
+3,73,Philadelphia Eagles,Milton Williams,DT,Louisiana Tech,,From CAR
+3,74,Washington Football Team,Benjamin St-Juste,DB,Minnesota,,From SF
+3,75,Dallas Cowboys,Osa Odighizuwa,DT,UCLA,,
+3,76,New Orleans Saints,Paulson Adebo,DB,Stanford,,From NYG through DEN
+3,77,Los Angeles Chargers,Josh Palmer,WR,Tennessee,,
+3,78,Minnesota Vikings,Chazz Surratt,LB,North Carolina,,
+3,79,Las Vegas Raiders,Malcolm Koonce,DE,Buffalo,,From ARI
+3,80,Las Vegas Raiders,Divine Deablo,LB,Virginia Tech,,
+3,81,Miami Dolphins,Hunter Long,TE,Boston College,,
+3,82,Washington Football Team,Dyami Brown,WR,North Carolina,,
+3,83,Carolina Panthers,Tommy Tremble,TE,Notre Dame,,From CHI
+3,84,Dallas Cowboys,Chauncey Golston,DE,Iowa,,From IND through PHI
+3,85,Green Bay Packers,Amari Rodgers,WR,Clemson,,From TEN
+3,86,Minnesota Vikings,Wyatt Davis,OG,Ohio State,,From SEA through NYJ
+3,87,Pittsburgh Steelers,Kendrick Green,OG,Illinois,,
+3,88,San Francisco 49ers,Trey Sermon,RB,Ohio State,,From LA
+3,89,Houston Texans,Nico Collins,WR,Michigan,,From CLE through CAR
+3,90,Minnesota Vikings,Patrick Jones,LB,Pittsburgh,,From BAL
+3,91,Cleveland Browns,Anthony Schwartz,WR,Auburn,,From NO
+3,92,Tennessee Titans,Monty Rice,LB,Georgia,,From GB
+3,93,Buffalo Bills,Spencer Brown,OT,Northern Iowa,,
+3,94,Baltimore Ravens,Ben Cleveland,OG,Georgia,,From KC
+3,95,Tampa Bay Buccaneers,Robert Hainsey,C,Notre Dame,,
+3,96,New England Patriots,Ronnie Perkins,DE,Oklahoma,,Compensatory Selection
+3,97,Los Angeles Chargers,Tre' McKitty,TE,Georgia,,Compensatory Selection
+3,98,Denver Broncos,Quinn Meinerz,OG,Wisconsin-Whitewater,,From NOCompensatory Selection
+3,99,Dallas Cowboys,Nahshon Wright,DB,Oregon State,,Compensatory Selection
+3,100,Tennessee Titans,Elijah Molden,DB,Washington,,Compensatory Selection
+3,101,Detroit Lions,Ifeatu Melifonwu,DB,Syracuse,,From LACompensatory Selection
+3,102,San Francisco 49ers,Ambry Thomas,DB,Michigan,,Compensatory Selection
+3,103,Los Angeles Rams,Ernest Jones,LB,South Carolina,,Compensatory Selection
+3,104,Baltimore Ravens,Brandon Stephens,DB,Southern Methodist,,Compensatory Selection
+3,105,Denver Broncos,Baron Browning,LB,Ohio State,,From NOCompensatory Selection
+4,106,Jacksonville Jaguars,Jay Tufele,DT,Southern California,,
+4,107,New York Jets,Michael Carter,RB,North Carolina,,
+4,108,Atlanta Falcons,Darren Hall,DB,San Diego State,,
+4,109,Tennessee Titans,Dez Fitzpatrick,WR,Louisville,,From HOU through CAR
+4,110,Cleveland Browns,James Hudson,OT,Cincinnati,,From PHI
+4,111,Cincinnati Bengals,Cameron Sample,DE,Tulane,,
+4,112,Detroit Lions,Amon-Ra St. Brown,WR,Southern California,,
+4,113,Detroit Lions,Derrick Barnes,LB,Purdue,,From CAR through CLE
+4,114,Atlanta Falcons,Drew Dalman,C,Stanford,,From DEN
+4,115,Dallas Cowboys,Jabril Cox,LB,Louisiana State,,
+4,116,New York Giants,Elerson Smith,LB,Northern Iowa,,
+4,117,Los Angeles Rams,Bobby Brown,DT,Texas A&M,,From SF
+4,118,Los Angeles Chargers,Chris Rumph,DE,Duke,,
+4,119,Minnesota Vikings,Kene Nwangwu,RB,Iowa State,,
+4,120,New England Patriots,Rhamondre Stevenson,RB,Oklahoma,,
+4,121,Jacksonville Jaguars,Jordan Smith,DE,Alabama-Birmingham,,From LV through SF and LA
+4,122,Cincinnati Bengals,Tyler Shelvin,DT,Louisiana State,,From ARI through HOU and NE
+4,123,Philadelphia Eagles,Zech McPhearson,DB,Texas Tech,,From MIA
+4,124,Washington Football Team,John Bates,TE,Boise State,,
+4,125,Minnesota Vikings,Camryn Bynum,DB,California,,From CHI
+4,126,Carolina Panthers,Chuba Hubbard,RB,Oklahoma State,,From TEN
+4,127,Indianapolis Colts,Kylen Granson,TE,Southern Methodist,,
+4,128,Pittsburgh Steelers,Dan Moore,OT,Texas A&M,,
+4,129,Tampa Bay Buccaneers,Jaelon Darden,WR,North Texas,,From SEA
+4,130,Los Angeles Rams,Robert Rochell,DB,Central Arkansas,,Reacquired through JAX
+4,131,Baltimore Ravens,Tylan Wallace,WR,Oklahoma State,,
+4,132,Cleveland Browns,Tommy Togiai,DT,Ohio State,,
+4,133,New Orleans Saints,Ian Book,QB,Notre Dame,,
+4,134,Minnesota Vikings,Janarius Robinson,DE,Florida State,,From BUF
+4,135,Tennessee Titans,Rashad Weaver,LB,Pittsburgh,,From GB
+4,136,Arizona Cardinals,Marco Wilson,DB,Florida,,From KC through BAL
+4,137,Seattle Seahawks,Tre Brown,DB,Oklahoma,,From TB
+4,138,Dallas Cowboys,Josh Ball,OT,Marshall,,Compensatory Selection
+4,139,Cincinnati Bengals,D'Ante Smith,OT,East Carolina,,From NECompensatory Selection
+4,140,Pittsburgh Steelers,Buddy Johnson,LB,Texas A&M,,Compensatory Selection
+4,141,Los Angeles Rams,Jacob Harris,WR,Central Florida,,Compensatory Selection
+4,142,Green Bay Packers,Royce Newman,OG,Mississippi,,Compensatory Selection
+4,143,Las Vegas Raiders,Tyree Gillespie,DB,Missouri,,From MIN through NYJCompensatory Selection
+4,144,Kansas City Chiefs,Joshua Kaindoh,DE,Florida State,,Compensatory Selection
+5,145,Jacksonville Jaguars,Luke Farrell,TE,Ohio State,,
+5,146,New York Jets,Jamien Sherwood,LB,Auburn,,
+5,147,Houston Texans,Brevin Jordan,TE,Miami,,
+5,148,Atlanta Falcons,Ta'Quon Graham,DE,Texas,,
+5,149,Cincinnati Bengals,Evan McPherson,K,Florida,,
+5,150,Philadelphia Eagles,Kenny Gainwell,RB,Memphis,,
+5,151,Chicago Bears,Larry Borom,OT,Missouri,,From CAR
+5,152,Denver Broncos,Caden Sterns,DB,Texas,,
+5,153,Cleveland Browns,Tony Fields,LB,West Virginia,,From DET
+5,154,New York Jets,Michael Carter,DB,Duke,,From NYG
+5,155,San Francisco 49ers,Jaylon Moore,OT,Western Michigan,,
+5,156,Pittsburgh Steelers,Isaiahh Loudermilk,DT,Wisconsin,,From DAL through PHI and MIA
+5,157,Minnesota Vikings,Ihmir Smith-Marsette,WR,Iowa,,
+5,158,Carolina Panthers,Daviyon Nixon,DT,Iowa,,From NE through HOU
+5,159,Los Angeles Chargers,Brenden Jaimes,OG,Nebraska,,
+5,160,Baltimore Ravens,Shaun Wade,DB,Ohio State,,From ARI
+5,161,Buffalo Bills,Tommy Doyle,OT,Miami (OH),,From LV
+5,162,Kansas City Chiefs,Noah Gray,TE,Duke,,From MIA through LV and NYJ
+5,163,Washington Football Team,Darrick Forrest,DB,Cincinnati,,
+5,164,Denver Broncos,Jamar Johnson,DB,Indiana,,From CHI through NYG
+5,165,Indianapolis Colts,Shawn Davis,DB,Florida,,
+5,166,Carolina Panthers,Keith Taylor,DB,Washington,,From TEN
+5,167,Las Vegas Raiders,Nate Hobbs,DB,Illinois,,From SEA
+5,168,Minnesota Vikings,Zach Davidson,TE,Central Missouri State,,From PIT through BAL
+5,169,Cleveland Browns,Richard LeCounte,DB,Georgia,,From LA
+5,170,Houston Texans,Garret Wallow,LB,Texas Christian,,From CLE through JAX and LA
+5,171,Baltimore Ravens,Daelin Hayes,LB,Notre Dame,,
+5,172,San Francisco 49ers,Deommodore Lenoir,DB,Oregon,,From NO
+5,173,Green Bay Packers,Tedarrell Slaton,DT,Florida,,
+5,174,Los Angeles Rams,Earnest Brown,DE,Northwestern,,From BUF through HOU
+5,175,New York Jets,Jason Pinnock,DB,Pittsburgh,,From KC
+5,176,Tampa Bay Buccaneers,K.J. Britt,LB,Auburn,,
+5,177,New England Patriots,Cameron McGrone,LB,Michigan,,Compensatory Selection
+5,178,Green Bay Packers,Shemar Jean-Charles,DB,Appalachian State,,Compensatory Selection
+5,179,Dallas Cowboys,Simi Fehoko,WR,Stanford,,Compensatory Selection
+5,180,San Francisco 49ers,Talanoa Hufanga,DB,Southern California,,Compensatory Selection
+5,181,Kansas City Chiefs,Cornell Powell,WR,Clemson,,Compensatory Selection
+5,182,Atlanta Falcons,Adetokunbo Ogundeji,LB,Notre Dame,,Compensatory Selection
+5,183,Atlanta Falcons,Avery Williams,RB,Boise State,,Compensatory Selection
+5,184,Baltimore Ravens,Ben Mason,TE,Michigan,,Compensatory Selection
+6,185,Los Angeles Chargers,Nick Niemann,LB,Iowa,,From JAX through TEN
+6,186,New York Jets,Hamsah Nasirildeen,LB,Florida State,,
+6,187,Atlanta Falcons,Frank Darby,WR,Arizona State,,
+6,188,New England Patriots,Joshuah Bledsoe,DB,Missouri,,From HOU
+6,189,Philadelphia Eagles,Marlon Tuipulotu,DT,Southern California,,
+6,190,Cincinnati Bengals,Trey Hill,C,Georgia,,
+6,191,Philadelphia Eagles,Tarron Jackson,DE,Coastal Carolina,,From DEN through CAR
+6,192,Dallas Cowboys,Quinton Bohanna,DT,Kentucky,,From DET
+6,193,Carolina Panthers,Deonte Brown,OG,Alabama,,
+6,194,San Francisco 49ers,Elijah Mitchell,RB,Louisiana-Lafayette,,
+6,195,Houston Texans,Roy Lopez,DT,Arizona,,From DAL through NE
+6,196,New York Giants,Gary Brightwell,RB,Arizona,,
+6,197,New England Patriots,William Sherman,OG,Colorado,,
+6,198,Los Angeles Chargers,Larry Rountree,RB,Missouri,,
+6,199,Minnesota Vikings,Jaylen Twyman,DT,Pittsburgh,,
+6,200,New York Jets,Brandin Echols,DB,Kentucky,,From LV
+6,201,New York Giants,Rodarius Williams,DB,Oklahoma State,,From ARI
+6,202,Cincinnati Bengals,Chris Evans,RB,Michigan,,From MIA through HOU
+6,203,Buffalo Bills,Marquez Stevenson,WR,Houston,,From WAS through LV and MIA and HOU
+6,204,Carolina Panthers,Shi Smith,WR,South Carolina,,From CHI
+6,205,Tennessee Titans,Racey McMath,WR,Louisiana State,,
+6,206,New Orleans Saints,Landon Young,OT,Kentucky,,From IND
+6,207,New York Jets,Jonathan Marshall,DT,Arkansas,,From PIT through MIA and KC
+6,208,Seattle Seahawks,Stone Forsythe,OT,Florida,,Reacquired through MIA and CHI
+6,209,Jacksonville Jaguars,Jalen Camp,WR,Georgia Tech,,From LA
+6,210,Arizona Cardinals,Victor Dimukeje,LB,Duke,,From BAL
+6,211,Cleveland Browns,Demetric Felton,RB,UCLA,,
+6,212,Buffalo Bills,Damar Hamlin,DB,Pittsburgh,,From NO through HOU
+6,213,Buffalo Bills,Rachad Wildgoose,DB,Wisconsin,,
+6,214,Green Bay Packers,Cole Van Lanen,OG,Wisconsin,,
+6,215,Tennessee Titans,Brady Breeze,DB,Oregon,,From KC
+6,216,Pittsburgh Steelers,Quincy Roche,LB,Miami,,From TB
+6,217,Chicago Bears,Khalil Herbert,RB,Virginia Tech,,From TB through SEACompensatory Selection
+6,218,Indianapolis Colts,Sam Ehlinger,QB,Texas,,From NOCompensatory Selection
+6,219,Denver Broncos,Seth Williams,WR,Auburn,,From ATLCompensatory Selection
+6,220,Green Bay Packers,Isaiah McDuffie,LB,Boston College,,Compensatory Selection
+6,221,Chicago Bears,Dazz Newsome,WR,North Carolina,,Compensatory Selection
+6,222,Carolina Panthers,Thomas Fletcher,LS,Alabama,,Compensatory Selection
+6,223,Arizona Cardinals,Tay Gowan,DB,Central Florida,,From MINCompensatory Selection
+6,224,Philadelphia Eagles,JaCoby Stevens,LB,Louisiana State,,Compensatory Selection
+6,225,Washington Football Team,Camaron Cheeseman,LS,Michigan,,From PHICompensatory Selection
+6,226,Kansas City Chiefs,Trey Smith,OG,Tennessee,,From CAR through NYJCompensatory Selection
+6,227,Dallas Cowboys,Israel Mukuamu,DB,South Carolina,,Compensatory Selection
+6,228,Chicago Bears,Thomas Graham,DB,Oregon,,Compensatory Selection
+7,229,Indianapolis Colts,Mike Strachan,WR,Charleston,,From JAX through NO
+7,230,Las Vegas Raiders,Jimmy Morrissey,C,Pittsburgh,,From NYJ through SF
+7,231,Miami Dolphins,Larnel Coleman,OT,Massachusetts,,From HOU
+7,232,Carolina Panthers,Phil Hoskins,DT,Kentucky,,From ATL through MIA and TEN
+7,233,Los Angeles Rams,Jake Funk,RB,Maryland,,From CIN through HOU
+7,234,Philadelphia Eagles,Patrick Johnson,LB,Tulane,,
+7,235,Cincinnati Bengals,Wyatt Hubert,DE,Kansas State,,From DET through SEA
+7,236,Buffalo Bills,Jack Anderson,OG,Texas Tech,,From CAR
+7,237,Denver Broncos,Kary Vincent Jr.,DB,Louisiana State,,
+7,238,Dallas Cowboys,Matt Farniok,OT,Nebraska,,
+7,239,Denver Broncos,Jonathon Cooper,LB,Ohio State,,From NYG
+7,240,Washington Football Team,William Bradley-King,LB,Baylor,,From SF through PHI
+7,241,Los Angeles Chargers,Mark Webb,DB,Georgia,,
+7,242,New England Patriots,Tre Nixon,WR,Central Florida,,
+7,243,Arizona Cardinals,James Wiggins,DB,Cincinnati,,
+7,244,Miami Dolphins,Gerrid Doaks,RB,Cincinnati,,From LV through WAS
+7,245,Pittsburgh Steelers,Tre Norwood,DB,Oklahoma,,From MIA
+7,246,Washington Football Team,Shaka Toney,DE,Penn State,,
+7,247,Arizona Cardinals,Michal Menet,C,Penn State,,From CHI through LV
+7,248,Indianapolis Colts,Will Fries,OG,Penn State,,
+7,249,Los Angeles Rams,Ben Skowronek,WR,Notre Dame,,From TEN through JAX
+7,250,Chicago Bears,Khyiris Tonga,DT,Brigham Young,,From SEA
+7,251,Tampa Bay Buccaneers,Chris Wilcox,DB,Brigham Young,,From PIT
+7,252,Los Angeles Rams,Chris Garrett,LB,Concordia-St. Paul,,
+7,253,Denver Broncos,Marquiss Spencer,DE,Mississippi State,,From CLE
+7,254,Pittsburgh Steelers,Pressley Harvin,P,Georgia Tech,,From BAL
+7,255,New Orleans Saints,Kawaan Baker,WR,South Alabama,,
+7,256,Green Bay Packers,Kylin Hill,RB,Mississippi State,,
+7,257,Detroit Lions,Jermar Jefferson,RB,Oregon State,,From BUF through CLE
+7,258,Washington Football Team,Dax Milne,WR,Brigham Young,,From KC through MIA
+7,259,Tampa Bay Buccaneers,Grant Stuard,LB,Houston,,
