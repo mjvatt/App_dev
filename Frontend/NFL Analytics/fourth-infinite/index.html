@@ -287,15 +287,35 @@
       <div class="engine-hero sage-hero">
         <div class="engine-hero-badge">SAGE</div>
         <h2>Smart Analytics &amp; Grade Engine</h2>
-        <p>SAGE will provide deep statistical grading across all 32 years of draft data — team efficiency scores, positional value curves, draft capital analysis, and comparative player grades relative to pick position.</p>
-        <div class="engine-roadmap">
-          <div class="roadmap-item done"><i class="fas fa-check"></i> 32-year dataset built (8,116 picks)</div>
-          <div class="roadmap-item done"><i class="fas fa-check"></i> Position group classification engine</div>
-          <div class="roadmap-item active"><i class="fas fa-spinner fa-spin"></i> Team draft efficiency scoring</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Pick value curves by round &amp; position</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Draft capital trade analysis</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Career outcome integration (AV / Pro Bowls)</div>
+        <p>Deep statistical grading across 32 years of draft data — team efficiency scores, positional value curves, draft capital analysis, and comparative player grades relative to pick position.</p>
+      </div>
+
+      <div class="filter-bar">
+        <label class="filter-label">Analyze team:</label>
+        <select id="sage-team" class="filter-select filter-select--lg">
+          <option value="">Select a team…</option>
+        </select>
+      </div>
+
+      <div class="chart-grid" id="sage-chart-grid" style="display:none">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Draft Picks → Next-Season Wins</h3>
+              <p id="sage-scatter-sub">Picks in draft year Y vs. wins in season Y+1 · dashed line = trend</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-sageScatter"></canvas></div>
         </div>
+      </div>
+
+      <div class="engine-roadmap" style="margin-top:2rem">
+        <div class="roadmap-item done"><i class="fas fa-check"></i> 32-year dataset built (8,116 picks)</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Position group classification engine</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Team draft efficiency scoring</div>
+        <div class="roadmap-item"><i class="fas fa-circle"></i> Pick value curves by round &amp; position</div>
+        <div class="roadmap-item"><i class="fas fa-circle"></i> Draft capital trade analysis</div>
+        <div class="roadmap-item"><i class="fas fa-circle"></i> Career outcome integration (AV / Pro Bowls)</div>
       </div>
     </section>
 

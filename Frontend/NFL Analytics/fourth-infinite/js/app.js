@@ -35,6 +35,7 @@
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
     if (id === 'draftboard') renderDraftTable();
+    if (id === 'sage')       initSAGE();
   }
 
   document.querySelectorAll('.nav-item').forEach(el => {
@@ -330,6 +331,27 @@
       yearTo:    document.getElementById('col-yearto').value   || undefined,
     };
     DraftCharts.hbar('chart-collegePipeline', DraftData.topColleges(25, filter));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SAGE
+  ═══════════════════════════════════════════════════════════════════ */
+  function initSAGE() {
+    const sel = document.getElementById('sage-team');
+    if (sel.options.length === 1) {
+      meta.teams.forEach(t => sel.add(new Option(t, t)));
+    }
+    sel.addEventListener('change', () => renderSageScatter(sel.value));
+    if (sel.value) renderSageScatter(sel.value);
+  }
+
+  function renderSageScatter(team) {
+    const grid = document.getElementById('sage-chart-grid');
+    if (!team) { grid.style.display = 'none'; return; }
+
+    const points = DraftData.draftToWinsScatter(team);
+    grid.style.display = '';
+    DraftCharts.scatter('chart-sageScatter', points);
   }
 
   /* ── Boot sequence ────────────────────────────────────────────────── */

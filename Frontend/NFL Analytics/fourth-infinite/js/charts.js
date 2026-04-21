@@ -192,6 +192,86 @@ const DraftCharts = (() => {
     };
   }
 
+  /* ── Scatter with linear trend line ────────────────────────────── */
+  function scatter(canvasId, points) {
+    _destroy(canvasId);
+    if (!points.length) return;
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const n     = points.length;
+    const sumX  = points.reduce((s, p) => s + p.x, 0);
+    const sumY  = points.reduce((s, p) => s + p.y, 0);
+    const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+    const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+    const denom = n * sumX2 - sumX * sumX;
+    const m = denom ? (n * sumXY - sumX * sumY) / denom : 0;
+    const b = (sumY - m * sumX) / n;
+    const xMin = Math.min(...points.map(p => p.x));
+    const xMax = Math.max(...points.map(p => p.x));
+    const trend = [
+      { x: xMin, y: +(m * xMin + b).toFixed(2) },
+      { x: xMax, y: +(m * xMax + b).toFixed(2) },
+    ];
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Season',
+            data: points,
+            backgroundColor: ACCENT + 'cc',
+            borderColor: ACCENT,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+          },
+          {
+            label: 'Trend',
+            data: trend,
+            type: 'line',
+            borderColor: '#3b82f6',
+            borderWidth: 1.5,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              label: item => {
+                const p = item.raw;
+                return p.year
+                  ? `${p.year}: ${p.x} picks → ${p.y}W next season`
+                  : `(${p.x}, ${(+p.y).toFixed(1)})`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Picks in Draft Year', color: TICK_COLOR, font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins — Following Season', color: TICK_COLOR, font: { size: 11 } },
+            suggestedMin: 0,
+            suggestedMax: 17,
+          },
+        },
+      },
+    });
+  }
+
   /* ── Wins per season line (playoff years highlighted) ───────────── */
   function winsPerYear(canvasId, data) {
     _destroy(canvasId);
@@ -251,5 +331,5 @@ const DraftCharts = (() => {
     c.update('active');
   }
 
-  return { picksPerYear, winsPerYear, donut, hbar, vbar, multiLine, update };
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, update };
 })();
