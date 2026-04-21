@@ -1,8 +1,9 @@
 /* data.js — loads draft_data.json and exposes aggregation helpers */
 
 const DraftData = (() => {
-  let _picks = [];
-  let _meta  = {};
+  let _picks     = [];
+  let _standings = [];
+  let _meta      = {};
 
   const POS_COLORS = {
     QB:    '#3b82f6',
@@ -20,8 +21,9 @@ const DraftData = (() => {
   async function load() {
     const resp = await fetch('data/draft_data.json');
     const json = await resp.json();
-    _picks = json.picks;
-    _meta  = json.meta;
+    _picks     = json.picks;
+    _standings = json.standings || [];
+    _meta      = json.meta;
     return json;
   }
 
@@ -135,5 +137,48 @@ const DraftData = (() => {
     return { labels: rounds.map(r => `Rnd ${r}`), values: rounds.map(r => counts[r]) };
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound };
+  /* standings — generic filter (year, team, conf, div, playoff) */
+  function standings(filter = {}) {
+    return _standings.filter(s => {
+      if (filter.year    && s.year    !== +filter.year)  return false;
+      if (filter.team    && s.team    !== filter.team)   return false;
+      if (filter.conf    && s.conf    !== filter.conf)   return false;
+      if (filter.div     && s.div     !== filter.div)    return false;
+      if (filter.playoff !== undefined && s.playoff !== filter.playoff) return false;
+      return true;
+    });
+  }
+
+  /* all season rows for one team, sorted by year */
+  function teamStandings(team) {
+    return standings({ team }).sort((a, b) => a.year - b.year);
+  }
+
+  /* wins per year for one team — {labels, values, playoffs} */
+  function winsByYear(team) {
+    const rows = teamStandings(team);
+    return {
+      labels:  rows.map(r => r.year),
+      values:  rows.map(r => r.w),
+      playoffs: rows.map(r => r.playoff),
+    };
+  }
+
+  /* picks made in year Y correlated with wins in year Y+1, for scatter */
+  function draftToWinsScatter(team) {
+    const rows = teamStandings(team);
+    const byYear = {};
+    rows.forEach(r => { byYear[r.year] = r; });
+
+    const points = [];
+    teamStandings(team).forEach(r => {
+      const nextSeason = byYear[r.year + 1];
+      if (!nextSeason) return;
+      const pickCount = picks({ team, year: r.year }).length;
+      points.push({ x: pickCount, y: nextSeason.w, year: r.year });
+    });
+    return points;
+  }
+
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter };
 })();
