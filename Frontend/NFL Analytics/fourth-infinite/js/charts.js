@@ -192,6 +192,52 @@ const DraftCharts = (() => {
     };
   }
 
+  /* ── Wins per season line (playoff years highlighted) ───────────── */
+  function winsPerYear(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const pointColors = data.playoffs.map(p => p ? ACCENT : '#3b82f6');
+    const pointRadii  = data.playoffs.map(p => p ? 5 : 3);
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Wins',
+          data: data.values,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,.1)',
+          borderWidth: 2.5,
+          pointBackgroundColor: pointColors,
+          pointRadius: pointRadii,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: .3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: _baseLegend(false), tooltip: _tooltip() },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
+            title: { display: true, text: 'Year', color: TICK_COLOR, font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins', color: TICK_COLOR, font: { size: 11 } },
+            suggestedMin: 0,
+            suggestedMax: 17,
+          },
+        },
+      },
+    });
+  }
+
   /* update helpers — replace dataset in place */
   function update(canvasId, newData) {
     const c = _charts[canvasId];
@@ -205,5 +251,5 @@ const DraftCharts = (() => {
     c.update('active');
   }
 
-  return { picksPerYear, donut, hbar, vbar, multiLine, update };
+  return { picksPerYear, winsPerYear, donut, hbar, vbar, multiLine, update };
 })();

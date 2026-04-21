@@ -221,8 +221,15 @@
         <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-trophy"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-r1">—</span><span class="kpi-label">Round 1 Picks</span></div></div>
         <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-school"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-colleges">—</span><span class="kpi-label">Colleges Drafted</span></div></div>
         <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-bullseye"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-pos">—</span><span class="kpi-label">Top Position</span></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-percent"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-winpct">—</span><span class="kpi-label">Win %</span></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-star"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-playoffs">—</span><span class="kpi-label">Playoff Seasons</span></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-crown"></i></div><div class="kpi-body"><span class="kpi-value" id="t-kpi-best">—</span><span class="kpi-label">Best Season</span></div></div>
       </div>
       <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header"><div><h3>Wins Per Season</h3><p>Regular season wins 1994–2025 · amber = playoff year</p></div></div>
+          <div class="chart-wrap"><canvas id="chart-teamWins"></canvas></div>
+        </div>
         <div class="chart-card wide">
           <div class="chart-card-header"><div><h3>Picks Per Year</h3><p>Draft volume over time for selected team</p></div></div>
           <div class="chart-wrap"><canvas id="chart-teamPicksYear"></canvas></div>

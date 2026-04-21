@@ -215,15 +215,27 @@
     const r1        = teamPicks.filter(p => p.round === 1).length;
     const colleges  = new Set(teamPicks.map(p => p.college)).size;
 
-    const posCount  = {};
+    const posCount = {};
     teamPicks.forEach(p => posCount[p.pos_group] = (posCount[p.pos_group] || 0) + 1);
     const topPos = Object.entries(posCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
 
-    document.getElementById('t-kpi-picks').textContent   = teamPicks.length;
-    document.getElementById('t-kpi-r1').textContent      = r1;
+    const rows     = DraftData.teamStandings(team);
+    const totalW   = rows.reduce((s, r) => s + r.w, 0);
+    const totalL   = rows.reduce((s, r) => s + r.l, 0);
+    const winPct   = rows.length ? ((totalW / (totalW + totalL)) * 100).toFixed(1) + '%' : '—';
+    const playoffs = rows.filter(r => r.playoff).length;
+    const bestRow  = rows.slice().sort((a, b) => b.w - a.w)[0];
+    const bestSeason = bestRow ? `${bestRow.year} (${bestRow.w}W)` : '—';
+
+    document.getElementById('t-kpi-picks').textContent    = teamPicks.length;
+    document.getElementById('t-kpi-r1').textContent       = r1;
     document.getElementById('t-kpi-colleges').textContent = colleges;
     document.getElementById('t-kpi-pos').textContent      = topPos;
+    document.getElementById('t-kpi-winpct').textContent   = winPct;
+    document.getElementById('t-kpi-playoffs').textContent = playoffs;
+    document.getElementById('t-kpi-best').textContent     = bestSeason;
 
+    DraftCharts.winsPerYear('chart-teamWins', DraftData.winsByYear(team));
     DraftCharts.picksPerYear('chart-teamPicksYear', DraftData.picksPerYear({ team }));
     DraftCharts.donut('chart-teamPosDonut', DraftData.byPosGroup({ team }), 'Picks');
     DraftCharts.vbar('chart-teamRoundBar', DraftData.teamByRound(team), null);
