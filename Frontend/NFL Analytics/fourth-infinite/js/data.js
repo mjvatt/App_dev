@@ -180,5 +180,13 @@ const DraftData = (() => {
     return points;
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter };
+  /* power-law pick value curve — V(pick) = 100 * (1/pick)^0.66, normalized to pick #1 = 100 */
+  function pickValueCurve() {
+    const labels = Array.from({ length: 256 }, (_, i) => i + 1);
+    const raw    = labels.map(p => Math.pow(p, -0.66));
+    const scale  = 100 / raw[0];
+    return labels.map((p, i) => ({ x: p, y: +(raw[i] * scale).toFixed(1) }));
+  }
+
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve };
 })();

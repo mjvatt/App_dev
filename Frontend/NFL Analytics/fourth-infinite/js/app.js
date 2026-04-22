@@ -336,7 +336,14 @@
   /* ═══════════════════════════════════════════════════════════════════
      SAGE
   ═══════════════════════════════════════════════════════════════════ */
+  let _sageInited = false;
+
   function initSAGE() {
+    if (!_sageInited) {
+      DraftCharts.pickValueLine('chart-pickValueCurve', DraftData.pickValueCurve());
+      _sageInited = true;
+    }
+
     const sel = document.getElementById('sage-team');
     if (sel.options.length === 1) {
       meta.teams.forEach(t => sel.add(new Option(t, t)));

@@ -331,5 +331,100 @@ const DraftCharts = (() => {
     c.update('active');
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, update };
+  /* ── Pick value decay curve ─────────────────────────────────────── */
+  function pickValueLine(canvasId, points) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, 'rgba(59,130,246,.28)');
+    gradient.addColorStop(1, 'rgba(59,130,246,0)');
+
+    const ROUND_STARTS = [1, 33, 65, 97, 129, 161, 193];
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'Pick Value',
+          data: points,
+          borderColor: '#3b82f6',
+          backgroundColor: gradient,
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: true,
+          tension: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        parsing: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            mode: 'nearest',
+            intersect: false,
+            callbacks: {
+              title: items => {
+                const pick = items[0]?.parsed?.x;
+                if (!pick) return '';
+                const round = ROUND_STARTS.filter(s => pick >= s).length;
+                return `Pick #${pick} — Round ${round}`;
+              },
+              label: item => `Relative Value: ${item.parsed.y}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 1,
+            max: 256,
+            grid: { color: GRID_COLOR },
+            afterBuildTicks: scale => {
+              scale.ticks = ROUND_STARTS.map(v => ({ value: v }));
+            },
+            ticks: {
+              color: TICK_COLOR,
+              font: { family: FONT_FAMILY, size: 11 },
+              callback: val => {
+                const ri = ROUND_STARTS.indexOf(val);
+                return ri !== -1 ? `R${ri + 1}` : null;
+              },
+            },
+            title: { display: true, text: 'Overall Pick Number', color: TICK_COLOR, font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Relative Value (pick #1 = 100)', color: TICK_COLOR, font: { size: 11 } },
+            suggestedMin: 0,
+            suggestedMax: 105,
+          },
+        },
+      },
+      plugins: [{
+        id: 'roundDividers',
+        afterDraw(chart) {
+          const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+          c.save();
+          c.strokeStyle = 'rgba(255,255,255,0.07)';
+          c.lineWidth = 1;
+          c.setLineDash([4, 4]);
+          [33, 65, 97, 129, 161, 193].forEach(pick => {
+            const xPos = x.getPixelForValue(pick);
+            c.beginPath();
+            c.moveTo(xPos, top);
+            c.lineTo(xPos, bottom);
+            c.stroke();
+          });
+          c.setLineDash([]);
+          c.restore();
+        },
+      }],
+    });
+  }
+
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, update };
 })();
