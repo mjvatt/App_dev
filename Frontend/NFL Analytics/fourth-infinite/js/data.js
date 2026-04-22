@@ -180,6 +180,21 @@ const DraftData = (() => {
     return points;
   }
 
+  /* total draft capital score for every team in a given year — sum of V(pick) per team */
+  function teamCapitalByYear(year) {
+    const yearPicks = picks({ year: +year });
+    const scores = {};
+    yearPicks.forEach(p => {
+      if (!p.pick) return;
+      scores[p.team] = (scores[p.team] || 0) + 100 * Math.pow(p.pick, -0.66);
+    });
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    return {
+      labels: sorted.map(e => e[0]),
+      values: sorted.map(e => +e[1].toFixed(1)),
+    };
+  }
+
   /* power-law pick value curve — V(pick) = 100 * (1/pick)^0.66, normalized to pick #1 = 100 */
   function pickValueCurve() {
     const labels = Array.from({ length: 256 }, (_, i) => i + 1);
@@ -188,5 +203,5 @@ const DraftData = (() => {
     return labels.map((p, i) => ({ x: p, y: +(raw[i] * scale).toFixed(1) }));
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear };
 })();

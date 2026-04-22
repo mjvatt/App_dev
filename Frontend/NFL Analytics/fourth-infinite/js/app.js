@@ -341,6 +341,17 @@
   function initSAGE() {
     if (!_sageInited) {
       DraftCharts.pickValueLine('chart-pickValueCurve', DraftData.pickValueCurve());
+
+      const capYearSel = document.getElementById('capital-year');
+      meta.years.slice().reverse().forEach(y => capYearSel.add(new Option(y, y)));
+
+      function renderCapitalRanking(year) {
+        DraftCharts.hbar('chart-capitalRanking', DraftData.teamCapitalByYear(year), '#3b82f6', 'Draft Capital');
+      }
+
+      capYearSel.addEventListener('change', () => renderCapitalRanking(+capYearSel.value));
+      renderCapitalRanking(+capYearSel.value);
+
       _sageInited = true;
     }
 

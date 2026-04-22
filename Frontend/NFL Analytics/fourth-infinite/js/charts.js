@@ -94,7 +94,7 @@ const DraftCharts = (() => {
   }
 
   /* ── Horizontal bar ─────────────────────────────────────────────── */
-  function hbar(canvasId, data, color = ACCENT) {
+  function hbar(canvasId, data, color = ACCENT, label = 'Picks') {
     _destroy(canvasId);
     const ctx = document.getElementById(canvasId).getContext('2d');
     _charts[canvasId] = new Chart(ctx, {
@@ -102,7 +102,7 @@ const DraftCharts = (() => {
       data: {
         labels: data.labels,
         datasets: [{
-          label: 'Picks',
+          label,
           data: data.values,
           backgroundColor: typeof color === 'string'
             ? data.labels.map(() => color + 'cc')
