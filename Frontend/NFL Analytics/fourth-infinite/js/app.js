@@ -352,6 +352,16 @@
       capYearSel.addEventListener('change', () => renderCapitalRanking(+capYearSel.value));
       renderCapitalRanking(+capYearSel.value);
 
+      const effYearSel = document.getElementById('efficiency-year');
+      meta.years.slice().reverse().forEach(y => effYearSel.add(new Option(y, y)));
+
+      function renderRoundEfficiency(year) {
+        DraftCharts.roundCapitalBar('chart-roundEfficiency', DraftData.teamRoundCapitalSplit(year));
+      }
+
+      effYearSel.addEventListener('change', () => renderRoundEfficiency(+effYearSel.value));
+      renderRoundEfficiency(+effYearSel.value);
+
       _sageInited = true;
     }
 

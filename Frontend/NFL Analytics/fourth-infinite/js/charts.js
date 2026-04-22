@@ -331,6 +331,70 @@ const DraftCharts = (() => {
     c.update('active');
   }
 
+  /* ── Round capital split — stacked 100% hbar ────────────────────── */
+  function roundCapitalBar(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Round 1',
+            data: data.r1,
+            backgroundColor: '#3b82f6bb',
+            borderWidth: 0,
+          },
+          {
+            label: 'Rounds 2–3',
+            data: data.r23,
+            backgroundColor: '#f59e0bbb',
+            borderWidth: 0,
+          },
+          {
+            label: 'Rounds 4–7',
+            data: data.r47,
+            backgroundColor: '#3d5070cc',
+            borderWidth: 0,
+          },
+        ],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              label: item => `${item.dataset.label}: ${item.raw}%`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            max: 100,
+            grid: { color: GRID_COLOR },
+            ticks: {
+              color: TICK_COLOR,
+              font: { family: FONT_FAMILY, size: 11 },
+              callback: val => `${val}%`,
+            },
+            title: { display: true, text: '% of Draft Capital', color: TICK_COLOR, font: { size: 11 } },
+          },
+          y: {
+            stacked: true,
+            grid: { display: false },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
   /* ── Pick value decay curve ─────────────────────────────────────── */
   function pickValueLine(canvasId, points) {
     _destroy(canvasId);
@@ -426,5 +490,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, update };
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, update };
 })();

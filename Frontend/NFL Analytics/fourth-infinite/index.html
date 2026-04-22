@@ -315,6 +315,19 @@
         </div>
       </div>
 
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Round Efficiency</h3>
+              <p>% of each team's draft capital by round tier · sorted by R1 concentration</p>
+            </div>
+            <select id="efficiency-year" class="filter-select"></select>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-roundEfficiency"></canvas></div>
+        </div>
+      </div>
+
       <div class="filter-bar">
         <label class="filter-label">Analyze team:</label>
         <select id="sage-team" class="filter-select filter-select--lg">
@@ -340,6 +353,7 @@
         <div class="roadmap-item done"><i class="fas fa-check"></i> Team draft efficiency scoring</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Pick value curves by round &amp; position</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Team draft capital ranking by year</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Round efficiency — capital split by round tier</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> Draft capital trade analysis</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> Career outcome integration (AV / Pro Bowls)</div>
       </div>

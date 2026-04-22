@@ -180,6 +180,35 @@ const DraftData = (() => {
     return points;
   }
 
+  /* round capital split — % of each team's pick value from R1 / R2-3 / R4-7 for a given year */
+  function teamRoundCapitalSplit(year) {
+    const yearPicks = picks({ year: +year });
+    const buckets = {};
+    yearPicks.forEach(p => {
+      if (!p.pick) return;
+      const val = 100 * Math.pow(p.pick, -0.66);
+      if (!buckets[p.team]) buckets[p.team] = { r1: 0, r23: 0, r47: 0 };
+      if (p.round === 1)      buckets[p.team].r1  += val;
+      else if (p.round <= 3)  buckets[p.team].r23 += val;
+      else                    buckets[p.team].r47 += val;
+    });
+    const rows = Object.entries(buckets).map(([team, b]) => {
+      const total = b.r1 + b.r23 + b.r47 || 1;
+      return {
+        team,
+        r1:  +(b.r1  / total * 100).toFixed(1),
+        r23: +(b.r23 / total * 100).toFixed(1),
+        r47: +(b.r47 / total * 100).toFixed(1),
+      };
+    }).sort((a, b) => b.r1 - a.r1);
+    return {
+      labels: rows.map(r => r.team),
+      r1:    rows.map(r => r.r1),
+      r23:   rows.map(r => r.r23),
+      r47:   rows.map(r => r.r47),
+    };
+  }
+
   /* total draft capital score for every team in a given year — sum of V(pick) per team */
   function teamCapitalByYear(year) {
     const yearPicks = picks({ year: +year });
@@ -203,5 +232,5 @@ const DraftData = (() => {
     return labels.map((p, i) => ({ x: p, y: +(raw[i] * scale).toFixed(1) }));
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit };
 })();
