@@ -3,32 +3,46 @@
 const DraftCharts = (() => {
   const _charts = {};
 
-  const GRID_COLOR  = 'rgba(26,37,64,.8)';
-  const TICK_COLOR  = '#7a8caa';
+  const _css        = prop => getComputedStyle(document.documentElement).getPropertyValue(prop).trim();
+  const GRID_COLOR  = () => _css('--chart-grid');
+  const TICK_COLOR  = () => _css('--chart-tick');
   const FONT_FAMILY = 'Inter, system-ui, sans-serif';
   const ACCENT      = '#f59e0b';
 
   function _baseScales(xLabel = '', yLabel = '') {
     return {
       x: {
-        grid: { color: GRID_COLOR },
-        ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
-        title: xLabel ? { display: true, text: xLabel, color: TICK_COLOR, font: { size: 11 } } : undefined,
+        grid: { color: GRID_COLOR() },
+        ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
+        title: xLabel ? { display: true, text: xLabel, color: TICK_COLOR(), font: { size: 11 } } : undefined,
       },
       y: {
-        grid: { color: GRID_COLOR },
-        ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
-        title: yLabel ? { display: true, text: yLabel, color: TICK_COLOR, font: { size: 11 } } : undefined,
+        grid: { color: GRID_COLOR() },
+        ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+        title: yLabel ? { display: true, text: yLabel, color: TICK_COLOR(), font: { size: 11 } } : undefined,
       },
     };
   }
 
   function _baseLegend(display = false) {
-    return { display, labels: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 }, boxWidth: 12, padding: 16 } };
+    return { display, labels: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 }, boxWidth: 12, padding: 16 } };
   }
 
   function _destroy(id) {
     if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
+  }
+
+  function _tooltip() {
+    return {
+      backgroundColor: _css('--chart-tooltip-bg'),
+      borderColor:     _css('--chart-tooltip-bdr'),
+      borderWidth: 1,
+      titleColor:  _css('--chart-tooltip-title'),
+      bodyColor:   _css('--chart-tooltip-body'),
+      padding: 10,
+      titleFont: { family: FONT_FAMILY, size: 12, weight: '600' },
+      bodyFont:  { family: FONT_FAMILY, size: 12 },
+    };
   }
 
   /* ── Picks per year line chart ──────────────────────────────────── */
@@ -76,7 +90,7 @@ const DraftCharts = (() => {
           label,
           data: data.values,
           backgroundColor: data.colors,
-          borderColor: '#111827',
+          borderColor: _css('--card'),
           borderWidth: 2,
           hoverOffset: 6,
         }],
@@ -120,8 +134,8 @@ const DraftCharts = (() => {
         maintainAspectRatio: false,
         plugins: { legend: _baseLegend(false), tooltip: _tooltip() },
         scales: {
-          x: { grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } } },
-          y: { grid: { display: false }, ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } } },
+          x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } } },
+          y: { grid: { display: false }, ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } } },
         },
       },
     });
@@ -176,20 +190,6 @@ const DraftCharts = (() => {
         scales: _baseScales('Year', '% of Picks'),
       },
     });
-  }
-
-  /* ── Tooltip defaults ───────────────────────────────────────────── */
-  function _tooltip() {
-    return {
-      backgroundColor: '#0d1220',
-      borderColor: '#1a2540',
-      borderWidth: 1,
-      titleColor: '#e2e8f4',
-      bodyColor: '#7a8caa',
-      padding: 10,
-      titleFont: { family: FONT_FAMILY, size: 12, weight: '600' },
-      bodyFont:  { family: FONT_FAMILY, size: 12 },
-    };
   }
 
   /* ── Scatter with linear trend line ────────────────────────────── */
@@ -256,14 +256,14 @@ const DraftCharts = (() => {
         },
         scales: {
           x: {
-            grid: { color: GRID_COLOR },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Picks in Draft Year', color: TICK_COLOR, font: { size: 11 } },
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Picks in Draft Year', color: TICK_COLOR(), font: { size: 11 } },
           },
           y: {
-            grid: { color: GRID_COLOR },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Wins — Following Season', color: TICK_COLOR, font: { size: 11 } },
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins — Following Season', color: TICK_COLOR(), font: { size: 11 } },
             suggestedMin: 0,
             suggestedMax: 17,
           },
@@ -302,126 +302,19 @@ const DraftCharts = (() => {
         plugins: { legend: _baseLegend(false), tooltip: _tooltip() },
         scales: {
           x: {
-            grid: { color: GRID_COLOR },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
-            title: { display: true, text: 'Year', color: TICK_COLOR, font: { size: 11 } },
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
+            title: { display: true, text: 'Year', color: TICK_COLOR(), font: { size: 11 } },
           },
           y: {
-            grid: { color: GRID_COLOR },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Wins', color: TICK_COLOR, font: { size: 11 } },
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins', color: TICK_COLOR(), font: { size: 11 } },
             suggestedMin: 0,
             suggestedMax: 17,
           },
         },
       },
-    });
-  }
-
-  /* ── Player vs slot grade scatter ──────────────────────────────── */
-  function slotGradeChart(canvasId, data, visibleGroups) {
-    _destroy(canvasId);
-    const ctx = document.getElementById(canvasId).getContext('2d');
-
-    const ROUND_STARTS = [1, 33, 65, 97, 129, 161, 193];
-
-    const datasets = visibleGroups
-      .filter(g => data.byGroup[g]?.points.length)
-      .map(g => ({
-        label: g,
-        type: 'scatter',
-        data: data.byGroup[g].points,
-        backgroundColor: data.byGroup[g].colorAlpha,
-        borderColor: 'transparent',
-        pointRadius: 2.5,
-        pointHoverRadius: 5,
-        order: 1,
-      }));
-
-    datasets.push({
-      label: 'Expected',
-      type: 'line',
-      data: data.curve,
-      borderColor: 'rgba(255,255,255,0.25)',
-      borderWidth: 2,
-      borderDash: [5, 4],
-      pointRadius: 0,
-      fill: false,
-      order: -1,
-    });
-
-    _charts[canvasId] = new Chart(ctx, {
-      type: 'scatter',
-      data: { datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        parsing: false,
-        animation: false,
-        plugins: {
-          legend: _baseLegend(true),
-          tooltip: {
-            ..._tooltip(),
-            filter: item => item.dataset.label !== 'Expected',
-            callbacks: {
-              title: () => '',
-              label: item => {
-                const p = item.raw;
-                return [
-                  `${p.player}  (${p.team}, ${p.year})`,
-                  `Pick #${p.x}  ·  Draft AV: ${p.y}`,
-                  `Pos: ${p.pos}`,
-                ];
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            type: 'linear',
-            min: 1,
-            max: 256,
-            grid: { color: GRID_COLOR },
-            afterBuildTicks: scale => {
-              scale.ticks = ROUND_STARTS.map(v => ({ value: v }));
-            },
-            ticks: {
-              color: TICK_COLOR,
-              font: { family: FONT_FAMILY, size: 11 },
-              callback: val => {
-                const ri = ROUND_STARTS.indexOf(val);
-                return ri !== -1 ? `R${ri + 1}` : null;
-              },
-            },
-            title: { display: true, text: 'Overall Pick', color: TICK_COLOR, font: { size: 11 } },
-          },
-          y: {
-            grid: { color: GRID_COLOR },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Draft AV', color: TICK_COLOR, font: { size: 11 } },
-            suggestedMin: 0,
-          },
-        },
-      },
-      plugins: [{
-        id: 'roundDividers',
-        afterDraw(chart) {
-          const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
-          c.save();
-          c.strokeStyle = 'rgba(255,255,255,0.07)';
-          c.lineWidth = 1;
-          c.setLineDash([4, 4]);
-          [33, 65, 97, 129, 161, 193].forEach(pick => {
-            const xPos = x.getPixelForValue(pick);
-            c.beginPath();
-            c.moveTo(xPos, top);
-            c.lineTo(xPos, bottom);
-            c.stroke();
-          });
-          c.setLineDash([]);
-          c.restore();
-        },
-      }],
     });
   }
 
@@ -447,24 +340,9 @@ const DraftCharts = (() => {
       data: {
         labels: data.labels,
         datasets: [
-          {
-            label: 'Round 1',
-            data: data.r1,
-            backgroundColor: '#3b82f6bb',
-            borderWidth: 0,
-          },
-          {
-            label: 'Rounds 2–3',
-            data: data.r23,
-            backgroundColor: '#f59e0bbb',
-            borderWidth: 0,
-          },
-          {
-            label: 'Rounds 4–7',
-            data: data.r47,
-            backgroundColor: '#3d5070cc',
-            borderWidth: 0,
-          },
+          { label: 'Round 1',     data: data.r1,  backgroundColor: '#3b82f6bb', borderWidth: 0 },
+          { label: 'Rounds 2–3', data: data.r23, backgroundColor: '#f59e0bbb', borderWidth: 0 },
+          { label: 'Rounds 4–7', data: data.r47, backgroundColor: '#6b7280bb', borderWidth: 0 },
         ],
       },
       options: {
@@ -475,27 +353,25 @@ const DraftCharts = (() => {
           legend: _baseLegend(true),
           tooltip: {
             ..._tooltip(),
-            callbacks: {
-              label: item => `${item.dataset.label}: ${item.raw}%`,
-            },
+            callbacks: { label: item => `${item.dataset.label}: ${item.raw}%` },
           },
         },
         scales: {
           x: {
             stacked: true,
             max: 100,
-            grid: { color: GRID_COLOR },
+            grid: { color: GRID_COLOR() },
             ticks: {
-              color: TICK_COLOR,
+              color: TICK_COLOR(),
               font: { family: FONT_FAMILY, size: 11 },
               callback: val => `${val}%`,
             },
-            title: { display: true, text: '% of Draft Capital', color: TICK_COLOR, font: { size: 11 } },
+            title: { display: true, text: '% of Draft Capital', color: TICK_COLOR(), font: { size: 11 } },
           },
           y: {
             stacked: true,
             grid: { display: false },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
           },
         },
       },
@@ -511,6 +387,7 @@ const DraftCharts = (() => {
     gradient.addColorStop(1, 'rgba(59,130,246,0)');
 
     const ROUND_STARTS = [1, 33, 65, 97, 129, 161, 193];
+    const dividerColor = _css('--chart-divider');
 
     _charts[canvasId] = new Chart(ctx, {
       type: 'line',
@@ -552,24 +429,24 @@ const DraftCharts = (() => {
             type: 'linear',
             min: 1,
             max: 256,
-            grid: { color: GRID_COLOR },
+            grid: { color: GRID_COLOR() },
             afterBuildTicks: scale => {
               scale.ticks = ROUND_STARTS.map(v => ({ value: v }));
             },
             ticks: {
-              color: TICK_COLOR,
+              color: TICK_COLOR(),
               font: { family: FONT_FAMILY, size: 11 },
               callback: val => {
                 const ri = ROUND_STARTS.indexOf(val);
                 return ri !== -1 ? `R${ri + 1}` : null;
               },
             },
-            title: { display: true, text: 'Overall Pick Number', color: TICK_COLOR, font: { size: 11 } },
+            title: { display: true, text: 'Overall Pick Number', color: TICK_COLOR(), font: { size: 11 } },
           },
           y: {
-            grid: { color: GRID_COLOR },
-            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Relative Value (pick #1 = 100)', color: TICK_COLOR, font: { size: 11 } },
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Relative Value (pick #1 = 100)', color: TICK_COLOR(), font: { size: 11 } },
             suggestedMin: 0,
             suggestedMax: 105,
           },
@@ -580,7 +457,115 @@ const DraftCharts = (() => {
         afterDraw(chart) {
           const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
           c.save();
-          c.strokeStyle = 'rgba(255,255,255,0.07)';
+          c.strokeStyle = dividerColor;
+          c.lineWidth = 1;
+          c.setLineDash([4, 4]);
+          [33, 65, 97, 129, 161, 193].forEach(pick => {
+            const xPos = x.getPixelForValue(pick);
+            c.beginPath();
+            c.moveTo(xPos, top);
+            c.lineTo(xPos, bottom);
+            c.stroke();
+          });
+          c.setLineDash([]);
+          c.restore();
+        },
+      }],
+    });
+  }
+
+  /* ── Player vs slot grade scatter ──────────────────────────────── */
+  function slotGradeChart(canvasId, data, visibleGroups) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const ROUND_STARTS = [1, 33, 65, 97, 129, 161, 193];
+    const dividerColor = _css('--chart-divider');
+
+    const datasets = visibleGroups
+      .filter(g => data.byGroup[g]?.points.length)
+      .map(g => ({
+        label: g,
+        type: 'scatter',
+        data: data.byGroup[g].points,
+        backgroundColor: data.byGroup[g].colorAlpha,
+        borderColor: 'transparent',
+        pointRadius: 2.5,
+        pointHoverRadius: 5,
+        order: 1,
+      }));
+
+    datasets.push({
+      label: 'Expected',
+      type: 'line',
+      data: data.curve,
+      borderColor: _css('--chart-expected-line'),
+      borderWidth: 2,
+      borderDash: [5, 4],
+      pointRadius: 0,
+      fill: false,
+      order: -1,
+    });
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        parsing: false,
+        animation: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            filter: item => item.dataset.label !== 'Expected',
+            callbacks: {
+              title: () => '',
+              label: item => {
+                const p = item.raw;
+                return [
+                  `${p.player}  (${p.team}, ${p.year})`,
+                  `Pick #${p.x}  ·  Draft AV: ${p.y}`,
+                  `Pos: ${p.pos}`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 1,
+            max: 256,
+            grid: { color: GRID_COLOR() },
+            afterBuildTicks: scale => {
+              scale.ticks = ROUND_STARTS.map(v => ({ value: v }));
+            },
+            ticks: {
+              color: TICK_COLOR(),
+              font: { family: FONT_FAMILY, size: 11 },
+              callback: val => {
+                const ri = ROUND_STARTS.indexOf(val);
+                return ri !== -1 ? `R${ri + 1}` : null;
+              },
+            },
+            title: { display: true, text: 'Overall Pick', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Draft AV', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0,
+          },
+        },
+      },
+      plugins: [{
+        id: 'roundDividers',
+        afterDraw(chart) {
+          const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+          c.save();
+          c.strokeStyle = dividerColor;
           c.lineWidth = 1;
           c.setLineDash([4, 4]);
           [33, 65, 97, 129, 161, 193].forEach(pick => {
