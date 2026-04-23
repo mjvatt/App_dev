@@ -353,6 +353,23 @@
         </div>
       </div>
 
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Team Outcome Efficiency</h3>
+              <p>Career AV generated per unit of draft capital invested · amber = top quartile · hover for detail</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="eff2-yfrom" class="filter-select"></select>
+              <span style="color:var(--text-muted);font-size:12px">–</span>
+              <select id="eff2-yto" class="filter-select"></select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-teamOutcomeEff"></canvas></div>
+        </div>
+      </div>
+
       <div class="filter-bar">
         <label class="filter-label">Analyze team:</label>
         <select id="sage-team" class="filter-select filter-select--lg">
@@ -381,6 +398,7 @@
         <div class="roadmap-item done"><i class="fas fa-check"></i> Round efficiency — capital split by round tier</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Career outcome integration (Draft AV · nflverse)</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Player vs. Slot Grade — Draft AV vs. pick expectation</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Team Outcome Efficiency — Career AV per draft capital unit</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> Draft capital trade analysis</div>
       </div>
     </section>

@@ -582,5 +582,69 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, update };
+  /* ── Team outcome efficiency — ranked hbar with quartile coloring ── */
+  function efficiencyBar(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const sorted = [...data.values].sort((a, b) => a - b);
+    const q1 = sorted[Math.floor(sorted.length * 0.25)];
+    const q3 = sorted[Math.floor(sorted.length * 0.75)];
+
+    const barColors = data.values.map(v => {
+      if (v >= q3) return '#f59e0bdd';
+      if (v <= q1) return '#6b7280aa';
+      return '#3b82f6cc';
+    });
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'AV / Capital',
+          data: data.values,
+          backgroundColor: barColors,
+          borderWidth: 0,
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              title: items => items[0]?.label || '',
+              label: item => {
+                const m = data.meta[item.dataIndex];
+                return [
+                  `Efficiency: ${m.efficiency} AV / capital unit`,
+                  `Career AV: ${m.totalAV.toLocaleString()}`,
+                  `Draft capital: ${m.capital}`,
+                  `Picks: ${m.picks}`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Career AV per draft capital unit', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, update };
 })();

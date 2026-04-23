@@ -389,6 +389,28 @@
       [slotYfrom, slotYto, slotPos].forEach(el => el.addEventListener('change', renderSlotGrade));
       renderSlotGrade();
 
+      // P2.2 — team outcome efficiency
+      const eff2Yfrom = document.getElementById('eff2-yfrom');
+      const eff2Yto   = document.getElementById('eff2-yto');
+
+      meta.years.forEach(y => {
+        eff2Yfrom.add(new Option(y, y));
+        eff2Yto.add(new Option(y, y));
+      });
+      eff2Yfrom.value = String(meta.years[0]);
+      eff2Yto.value   = String(Math.min(2018, meta.years[meta.years.length - 1]));
+
+      function renderTeamOutcomeEff() {
+        const filter = {
+          yearFrom: +eff2Yfrom.value || undefined,
+          yearTo:   +eff2Yto.value   || undefined,
+        };
+        DraftCharts.efficiencyBar('chart-teamOutcomeEff', DraftData.teamOutcomeEfficiency(filter));
+      }
+
+      [eff2Yfrom, eff2Yto].forEach(el => el.addEventListener('change', renderTeamOutcomeEff));
+      renderTeamOutcomeEff();
+
       _sageInited = true;
     }
 

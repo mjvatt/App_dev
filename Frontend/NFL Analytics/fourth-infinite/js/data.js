@@ -275,5 +275,33 @@ const DraftData = (() => {
     return { byGroup, curve };
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter };
+  /* team outcome efficiency — career AV generated per unit of draft capital spent */
+  function teamOutcomeEfficiency(filter = {}) {
+    const byTeam = {};
+    picks(filter).filter(p => p.pick > 0).forEach(p => {
+      if (!byTeam[p.team]) byTeam[p.team] = { capSum: 0, avSum: 0, n: 0 };
+      byTeam[p.team].capSum += 100 * Math.pow(p.pick, -0.66);
+      byTeam[p.team].avSum  += p.career_av;
+      byTeam[p.team].n++;
+    });
+
+    const rows = Object.entries(byTeam)
+      .filter(([, t]) => t.capSum > 0 && t.n >= 5)
+      .map(([team, t]) => ({
+        team,
+        efficiency: +(t.avSum / t.capSum).toFixed(2),
+        totalAV:    t.avSum,
+        capital:    +t.capSum.toFixed(1),
+        picks:      t.n,
+      }))
+      .sort((a, b) => b.efficiency - a.efficiency);
+
+    return {
+      labels: rows.map(r => r.team),
+      values: rows.map(r => r.efficiency),
+      meta:   rows,
+    };
+  }
+
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency };
 })();
