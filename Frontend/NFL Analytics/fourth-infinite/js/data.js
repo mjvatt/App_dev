@@ -232,5 +232,48 @@ const DraftData = (() => {
     return labels.map((p, i) => ({ x: p, y: +(raw[i] * scale).toFixed(1) }));
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit };
+  /* player-vs-slot grade scatter
+     Expected curve: rolling avg draft_av per pick slot, calibrated on drafts ≤ 2020.
+     Scatter points: filtered via filter arg. */
+  function slotGradeScatter(filter = {}) {
+    const slots = {};
+    _picks.filter(p => p.pick > 0 && p.year <= 2020).forEach(p => {
+      if (!slots[p.pick]) slots[p.pick] = { sum: 0, n: 0 };
+      slots[p.pick].sum += p.draft_av;
+      slots[p.pick].n++;
+    });
+
+    const WINDOW = 12;
+    const curve = [];
+    for (let pick = 1; pick <= 256; pick++) {
+      let sum = 0, n = 0;
+      for (let j = Math.max(1, pick - WINDOW); j <= Math.min(256, pick + WINDOW); j++) {
+        if (slots[j]) { sum += slots[j].sum; n += slots[j].n; }
+      }
+      if (n > 0) curve.push({ x: pick, y: +(sum / n).toFixed(1) });
+    }
+
+    const byGroup = {};
+    picks(filter).filter(p => p.pick > 0).forEach(p => {
+      if (!byGroup[p.pos_group]) {
+        byGroup[p.pos_group] = {
+          points: [],
+          color: posColor(p.pos_group),
+          colorAlpha: posColorAlpha(p.pos_group, 0.5),
+        };
+      }
+      byGroup[p.pos_group].points.push({
+        x: p.pick,
+        y: p.draft_av,
+        player: p.player,
+        team: p.team,
+        year: p.year,
+        pos: p.pos,
+      });
+    });
+
+    return { byGroup, curve };
+  }
+
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter };
 })();

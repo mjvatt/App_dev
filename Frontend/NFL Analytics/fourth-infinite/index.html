@@ -328,6 +328,28 @@
         </div>
       </div>
 
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Player vs. Slot Grade</h3>
+              <p>Draft AV produced by pick slot · dashed line = historical avg (1994–2020) · hover for player detail</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="slot-grade-yfrom" class="filter-select"></select>
+              <span style="color:#7a8caa;font-size:12px">–</span>
+              <select id="slot-grade-yto" class="filter-select"></select>
+              <select id="slot-grade-pos" class="filter-select">
+                <option value="">All Positions</option>
+                <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+                <option>OL</option><option>DL</option><option>LB</option><option>DB</option><option>ST</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-slotGrade"></canvas></div>
+        </div>
+      </div>
+
       <div class="filter-bar">
         <label class="filter-label">Analyze team:</label>
         <select id="sage-team" class="filter-select filter-select--lg">
@@ -354,8 +376,9 @@
         <div class="roadmap-item done"><i class="fas fa-check"></i> Pick value curves by round &amp; position</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Team draft capital ranking by year</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Round efficiency — capital split by round tier</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Career outcome integration (Draft AV · nflverse)</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Player vs. Slot Grade — Draft AV vs. pick expectation</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> Draft capital trade analysis</div>
-        <div class="roadmap-item"><i class="fas fa-circle"></i> Career outcome integration (AV / Pro Bowls)</div>
       </div>
     </section>
 

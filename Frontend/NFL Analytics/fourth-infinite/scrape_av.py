@@ -1,21 +1,11 @@
 import csv
 import time
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 from pathlib import Path
 
 OUT_FILE = Path(__file__).parent / "data" / "av_data.csv"
 BASE_URL = "https://www.pro-football-reference.com/years/{year}/draft.htm"
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept": "text/html,application/xhtml+xml,application/xhtml+xml,*/*;q=0.8",
-    "Referer": "https://www.pro-football-reference.com/",
-}
 YEARS = range(1994, 2026)
 DELAY = 4.0  # PFR rate-limits aggressively — keep this at 4+
 
@@ -37,7 +27,7 @@ def cell_text(tr, stat):
 
 def fetch_year(session, year):
     url = BASE_URL.format(year=year)
-    resp = session.get(url, headers=HEADERS, timeout=20)
+    resp = session.get(url, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -77,7 +67,7 @@ def fetch_year(session, year):
 
 def main():
     OUT_FILE.parent.mkdir(exist_ok=True)
-    session = requests.Session()
+    session = cloudscraper.create_scraper()
     all_rows = []
 
     for year in YEARS:

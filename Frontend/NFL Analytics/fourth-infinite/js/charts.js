@@ -318,6 +318,113 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── Player vs slot grade scatter ──────────────────────────────── */
+  function slotGradeChart(canvasId, data, visibleGroups) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const ROUND_STARTS = [1, 33, 65, 97, 129, 161, 193];
+
+    const datasets = visibleGroups
+      .filter(g => data.byGroup[g]?.points.length)
+      .map(g => ({
+        label: g,
+        type: 'scatter',
+        data: data.byGroup[g].points,
+        backgroundColor: data.byGroup[g].colorAlpha,
+        borderColor: 'transparent',
+        pointRadius: 2.5,
+        pointHoverRadius: 5,
+        order: 1,
+      }));
+
+    datasets.push({
+      label: 'Expected',
+      type: 'line',
+      data: data.curve,
+      borderColor: 'rgba(255,255,255,0.25)',
+      borderWidth: 2,
+      borderDash: [5, 4],
+      pointRadius: 0,
+      fill: false,
+      order: -1,
+    });
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        parsing: false,
+        animation: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            filter: item => item.dataset.label !== 'Expected',
+            callbacks: {
+              title: () => '',
+              label: item => {
+                const p = item.raw;
+                return [
+                  `${p.player}  (${p.team}, ${p.year})`,
+                  `Pick #${p.x}  ·  Draft AV: ${p.y}`,
+                  `Pos: ${p.pos}`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 1,
+            max: 256,
+            grid: { color: GRID_COLOR },
+            afterBuildTicks: scale => {
+              scale.ticks = ROUND_STARTS.map(v => ({ value: v }));
+            },
+            ticks: {
+              color: TICK_COLOR,
+              font: { family: FONT_FAMILY, size: 11 },
+              callback: val => {
+                const ri = ROUND_STARTS.indexOf(val);
+                return ri !== -1 ? `R${ri + 1}` : null;
+              },
+            },
+            title: { display: true, text: 'Overall Pick', color: TICK_COLOR, font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR },
+            ticks: { color: TICK_COLOR, font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Draft AV', color: TICK_COLOR, font: { size: 11 } },
+            suggestedMin: 0,
+          },
+        },
+      },
+      plugins: [{
+        id: 'roundDividers',
+        afterDraw(chart) {
+          const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+          c.save();
+          c.strokeStyle = 'rgba(255,255,255,0.07)';
+          c.lineWidth = 1;
+          c.setLineDash([4, 4]);
+          [33, 65, 97, 129, 161, 193].forEach(pick => {
+            const xPos = x.getPixelForValue(pick);
+            c.beginPath();
+            c.moveTo(xPos, top);
+            c.lineTo(xPos, bottom);
+            c.stroke();
+          });
+          c.setLineDash([]);
+          c.restore();
+        },
+      }],
+    });
+  }
+
   /* update helpers — replace dataset in place */
   function update(canvasId, newData) {
     const c = _charts[canvasId];
@@ -490,5 +597,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, update };
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, update };
 })();

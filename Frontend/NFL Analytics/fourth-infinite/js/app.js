@@ -362,6 +362,33 @@
       effYearSel.addEventListener('change', () => renderRoundEfficiency(+effYearSel.value));
       renderRoundEfficiency(+effYearSel.value);
 
+      // P2.1 — player vs slot grade
+      const slotYfrom = document.getElementById('slot-grade-yfrom');
+      const slotYto   = document.getElementById('slot-grade-yto');
+      const slotPos   = document.getElementById('slot-grade-pos');
+
+      meta.years.forEach(y => {
+        slotYfrom.add(new Option(y, y));
+        slotYto.add(new Option(y, y));
+      });
+      slotYfrom.value = String(meta.years[0]);
+      slotYto.value   = String(Math.min(2022, meta.years[meta.years.length - 1]));
+
+      const ALL_POS_GROUPS = ['QB','RB','WR','TE','OL','DL','LB','DB','ST'];
+
+      function renderSlotGrade() {
+        const filter = {
+          yearFrom:  +slotYfrom.value || undefined,
+          yearTo:    +slotYto.value   || undefined,
+          pos_group: slotPos.value    || undefined,
+        };
+        const groups = slotPos.value ? [slotPos.value] : ALL_POS_GROUPS;
+        DraftCharts.slotGradeChart('chart-slotGrade', DraftData.slotGradeScatter(filter), groups);
+      }
+
+      [slotYfrom, slotYto, slotPos].forEach(el => el.addEventListener('change', renderSlotGrade));
+      renderSlotGrade();
+
       _sageInited = true;
     }
 
