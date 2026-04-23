@@ -646,5 +646,69 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, update };
+  /* ── Pro Bowl rate by round — vertical bar ──────────────────────── */
+  function proBowlBar(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const maxRate = Math.max(...data.values);
+    const barColors = data.values.map(v => {
+      const t = maxRate > 0 ? v / maxRate : 0;
+      if (t >= 0.66) return '#f59e0bdd';
+      if (t >= 0.33) return '#3b82f6cc';
+      return '#6b7280aa';
+    });
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Pro Bowl rate',
+          data: data.values,
+          backgroundColor: barColors,
+          borderWidth: 0,
+          borderRadius: 5,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              title: items => items[0]?.label || '',
+              label: item => {
+                const m = data.meta[item.dataIndex];
+                return [
+                  `Pro Bowl rate: ${m.rate}%`,
+                  `Pro Bowlers: ${m.pb} of ${m.total} picks`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 12, weight: '600' } },
+          },
+          y: {
+            grid: { color: GRID_COLOR() },
+            ticks: {
+              color: TICK_COLOR(),
+              font: { family: FONT_FAMILY, size: 11 },
+              callback: val => `${val}%`,
+            },
+            title: { display: true, text: '% of picks with ≥1 Pro Bowl', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0,
+          },
+        },
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, update };
 })();

@@ -411,6 +411,30 @@
       [eff2Yfrom, eff2Yto].forEach(el => el.addEventListener('change', renderTeamOutcomeEff));
       renderTeamOutcomeEff();
 
+      // P2.3 — pro bowl rate by round
+      const pbYfrom = document.getElementById('pb-yfrom');
+      const pbYto   = document.getElementById('pb-yto');
+      const pbPos   = document.getElementById('pb-pos');
+
+      meta.years.forEach(y => {
+        pbYfrom.add(new Option(y, y));
+        pbYto.add(new Option(y, y));
+      });
+      pbYfrom.value = String(meta.years[0]);
+      pbYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
+
+      function renderProBowlRate() {
+        const filter = {
+          yearFrom:  +pbYfrom.value || undefined,
+          yearTo:    +pbYto.value   || undefined,
+          pos_group: pbPos.value    || undefined,
+        };
+        DraftCharts.proBowlBar('chart-proBowlRate', DraftData.proBowlRateByRound(filter));
+      }
+
+      [pbYfrom, pbYto, pbPos].forEach(el => el.addEventListener('change', renderProBowlRate));
+      renderProBowlRate();
+
       _sageInited = true;
     }
 

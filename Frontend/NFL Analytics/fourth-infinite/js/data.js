@@ -303,5 +303,28 @@ const DraftData = (() => {
     };
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency };
+  /* pro bowl rate by round — % of picks with ≥1 pro bowl, by round 1-7 */
+  function proBowlRateByRound(filter = {}) {
+    const buckets = {};
+    for (let r = 1; r <= 7; r++) buckets[r] = { total: 0, pb: 0 };
+
+    picks(filter).filter(p => p.round >= 1 && p.round <= 7).forEach(p => {
+      buckets[p.round].total++;
+      if (p.pro_bowls > 0) buckets[p.round].pb++;
+    });
+
+    const rows = [];
+    for (let r = 1; r <= 7; r++) {
+      const { total, pb } = buckets[r];
+      if (total > 0) rows.push({ round: r, rate: +(pb / total * 100).toFixed(1), pb, total });
+    }
+
+    return {
+      labels: rows.map(r => `Round ${r.round}`),
+      values: rows.map(r => r.rate),
+      meta:   rows,
+    };
+  }
+
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound };
 })();
