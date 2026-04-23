@@ -535,27 +535,26 @@
   }
 
   /* ── Theme toggle ─────────────────────────────────────────────────── */
-  const themeToggle = document.getElementById('themeToggle');
-  const themeIcon   = document.getElementById('themeIcon');
-
   function applyTheme(theme) {
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
-      themeIcon.className = 'fas fa-sun';
     } else {
       document.documentElement.removeAttribute('data-theme');
-      themeIcon.className = 'fas fa-moon';
     }
+    document.querySelectorAll('.theme-switch-opt').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.t === theme);
+    });
     localStorage.setItem('fi-theme', theme);
   }
 
   applyTheme(localStorage.getItem('fi-theme') || 'dark');
 
-  themeToggle.addEventListener('click', () => {
-    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-    applyTheme(isLight ? 'dark' : 'light');
-    _sageInited = false;
-    showView(_currentView);
+  document.querySelectorAll('.theme-switch-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyTheme(btn.dataset.t);
+      _sageInited = false;
+      showView(_currentView);
+    });
   });
 
   /* ── Boot sequence ────────────────────────────────────────────────── */
