@@ -1,18 +1,18 @@
 /* ── Custom properties — dark mode (default) ───────────────────── */
 :root {
-  --bg:          #080808;
-  --surface:     #0f0f0f;
-  --card:        #141414;
-  --card-hover:  #1a1a1a;
-  --border:      #242424;
-  --border-light:#303030;
+  --bg:          #000000;
+  --surface:     #080808;
+  --card:        #0d0d0d;
+  --card-hover:  #111111;
+  --border:      #1c1c1c;
+  --border-light:#282828;
 
   --text:        #f0f0f0;
   --text-sub:    #888888;
   --text-muted:  #444444;
 
   --accent:      #f59e0b;
-  --accent-dim:  rgba(245,158,11,.12);
+  --accent-dim:  rgba(255,255,255,.05);
   --accent-glow: rgba(245,158,11,.25);
 
   --sage:        #10b981;
@@ -22,8 +22,8 @@
 
   --chart-grid:          rgba(255,255,255,0.06);
   --chart-tick:          #777777;
-  --chart-tooltip-bg:    #0a0a0a;
-  --chart-tooltip-bdr:   #242424;
+  --chart-tooltip-bg:    #050505;
+  --chart-tooltip-bdr:   #1c1c1c;
   --chart-tooltip-title: #ededed;
   --chart-tooltip-body:  #888888;
   --chart-divider:       rgba(255,255,255,0.07);
