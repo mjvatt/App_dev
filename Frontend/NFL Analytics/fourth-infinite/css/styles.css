@@ -578,6 +578,61 @@ body { display: flex; overflow: hidden; }
 .roadmap-item.active i { color: var(--accent); }
 .roadmap-item i { width: 14px; }
 
+/* ── Trade analysis ────────────────────────────────────────────── */
+.trade-list { display: flex; flex-direction: column; gap: 6px; max-height: 640px; overflow-y: auto; }
+.trade-empty { color: var(--text-muted); font-size: 12px; padding: 16px 4px; }
+
+.trade-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.trade-date { color: var(--text-muted); min-width: 44px; flex-shrink: 0; font-size: 11px; }
+
+.trade-body { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; flex-wrap: wrap; }
+
+.trade-side { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+
+.trade-team { font-weight: 700; font-size: 12px; min-width: 32px; color: var(--text); flex-shrink: 0; }
+
+.trade-assets { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
+
+.trade-asset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.trade-asset.pick { background: var(--accent-dim); color: var(--accent); }
+.trade-asset.pick em { font-style: normal; opacity: .7; }
+.trade-asset.player { background: var(--border); color: var(--text-sub); }
+
+.trade-val { font-size: 12px; font-weight: 600; color: var(--text-sub); min-width: 36px; text-align: right; flex-shrink: 0; }
+
+.trade-arrow { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
+
+.trade-surplus {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  min-width: 80px;
+  text-align: center;
+  flex-shrink: 0;
+  letter-spacing: .2px;
+}
+.trade-surplus.even   { background: var(--border); color: var(--text-muted); }
+.trade-surplus.slight { background: var(--accent-dim); color: var(--accent); }
+.trade-surplus.large  { background: var(--accent); color: #000; }
+
 /* ── Scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

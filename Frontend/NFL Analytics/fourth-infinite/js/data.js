@@ -4,6 +4,7 @@ const DraftData = (() => {
   let _picks     = [];
   let _standings = [];
   let _meta      = {};
+  let _trades    = null;
 
   const POS_COLORS = {
     QB:    '#3b82f6',
@@ -326,5 +327,19 @@ const DraftData = (() => {
     };
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound };
+  async function loadTrades() {
+    if (_trades !== null) return;
+    try {
+      const resp = await fetch('data/trades.json');
+      _trades = await resp.json();
+    } catch (_) {
+      _trades = [];
+    }
+  }
+
+  function tradesForYear(year) {
+    return (_trades || []).filter(t => t.season === +year);
+  }
+
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, loadTrades, tradesForYear };
 })();

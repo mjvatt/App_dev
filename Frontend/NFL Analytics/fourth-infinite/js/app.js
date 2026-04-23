@@ -435,6 +435,85 @@
       [pbYfrom, pbYto, pbPos].forEach(el => el.addEventListener('change', renderProBowlRate));
       renderProBowlRate();
 
+      // Draft pick trade analysis
+      const tradeYearSel = document.getElementById('trade-year');
+      for (let y = 2026; y >= 2002; y--) tradeYearSel.add(new Option(y, y));
+      tradeYearSel.value = '2026';
+
+      const ROUND_MED = { 1:17, 2:49, 3:81, 4:113, 5:145, 6:177, 7:215 };
+      const pickVal   = pick => +(100 * Math.pow(pick, -0.66)).toFixed(1);
+
+      function tradeAssetHtml(asset, tradeSeason) {
+        if (asset.type === 'pick') {
+          const p     = asset.pick || ROUND_MED[asset.round] || 100;
+          const v     = pickVal(p);
+          const est   = asset.pick ? '' : '~';
+          const cond  = asset.cond ? '?' : '';
+          const diff  = asset.pick_season !== tradeSeason ? `${asset.pick_season} ` : '';
+          return `<span class="trade-asset pick">${diff}R${asset.round}${asset.pick ? ` #${asset.pick}` : ''}${cond} <em>${est}${v}</em></span>`;
+        }
+        return `<span class="trade-asset player">${asset.player}</span>`;
+      }
+
+      function renderTradeCards(trades) {
+        const list = document.getElementById('trade-list');
+        if (!trades.length) {
+          list.innerHTML = '<div class="trade-empty">No pick trades found for this year.</div>';
+          return;
+        }
+
+        const html = trades.map(trade => {
+          const teams = [...new Set(trade.assets.flatMap(a => [a.frm, a.to]))];
+          if (teams.length !== 2) return '';
+          const [tA, tB] = teams;
+          const aAssets = trade.assets.filter(a => a.frm === tA);
+          const bAssets = trade.assets.filter(a => a.frm === tB);
+
+          const sideVal = assets => assets
+            .filter(a => a.type === 'pick')
+            .reduce((s, a) => s + +pickVal(a.pick || ROUND_MED[a.round] || 100), 0);
+
+          const aVal   = +sideVal(aAssets).toFixed(1);
+          const bVal   = +sideVal(bAssets).toFixed(1);
+          const surplus = +(aVal - bVal).toFixed(1);
+          const absS   = Math.abs(surplus);
+          const winner = surplus > 0.5 ? tB : surplus < -0.5 ? tA : null;
+          const cls    = absS < 5 ? 'even' : absS < 15 ? 'slight' : 'large';
+          const badge  = winner ? `${winner} +${absS}` : 'EVEN';
+          const mm     = trade.date ? trade.date.slice(5, 10).replace('-', '/') : '';
+
+          return `<div class="trade-card">
+            <span class="trade-date">${mm}</span>
+            <div class="trade-body">
+              <div class="trade-side">
+                <span class="trade-team">${tA}</span>
+                <div class="trade-assets">${aAssets.map(a => tradeAssetHtml(a, trade.season)).join('')}</div>
+                <span class="trade-val">${aVal}</span>
+              </div>
+              <span class="trade-arrow">&#8644;</span>
+              <div class="trade-side">
+                <span class="trade-team">${tB}</span>
+                <div class="trade-assets">${bAssets.map(a => tradeAssetHtml(a, trade.season)).join('')}</div>
+                <span class="trade-val">${bVal}</span>
+              </div>
+            </div>
+            <span class="trade-surplus ${cls}">${badge}</span>
+          </div>`;
+        }).join('');
+
+        list.innerHTML = html || '<div class="trade-empty">No 2-team pick trades found.</div>';
+      }
+
+      async function renderTrades(year) {
+        const list = document.getElementById('trade-list');
+        list.innerHTML = '<div class="trade-empty">Loading…</div>';
+        await DraftData.loadTrades();
+        renderTradeCards(DraftData.tradesForYear(+year));
+      }
+
+      tradeYearSel.addEventListener('change', () => renderTrades(+tradeYearSel.value));
+      renderTrades(2026);
+
       _sageInited = true;
     }
 
