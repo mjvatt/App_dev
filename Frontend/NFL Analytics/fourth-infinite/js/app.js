@@ -554,6 +554,10 @@
     const hgYto      = document.getElementById('ghost-hg-yto');
     const hgMinPicks = document.getElementById('ghost-hg-minpicks');
 
+    const teYfrom    = document.getElementById('ghost-te-yfrom');
+    const teYto      = document.getElementById('ghost-te-yto');
+    const teMinPicks = document.getElementById('ghost-te-minpicks');
+
     meta.years.forEach(y => {
       lrYfrom.add(new Option(y, y));
       lrYto.add(new Option(y, y));
@@ -561,6 +565,8 @@
       ssYto.add(new Option(y, y));
       hgYfrom.add(new Option(y, y));
       hgYto.add(new Option(y, y));
+      teYfrom.add(new Option(y, y));
+      teYto.add(new Option(y, y));
     });
 
     lrYfrom.value = String(meta.years[0]);
@@ -569,6 +575,8 @@
     ssYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
     hgYfrom.value = String(meta.years[0]);
     hgYto.value   = String(meta.years[meta.years.length - 1]);
+    teYfrom.value = String(meta.years[0]);
+    teYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
 
     function renderLateRoundSteals() {
       const filter = {
@@ -642,13 +650,34 @@
       });
     }
 
+    function renderTeamLateRoundEff() {
+      const filter = {
+        yearFrom: +teYfrom.value || undefined,
+        yearTo:   +teYto.value   || undefined,
+      };
+      const teams = DraftData.teamLateRoundEfficiency(filter, +teMinPicks.value || 10);
+      DraftCharts.ghostLeaderboard('chart-teamLateRoundEff', {
+        labels:      teams.map(t => t.team),
+        values:      teams.map(t => t.avgSurplus),
+        colors:      teams.map(t => t.avgSurplus >= 0 ? 'rgba(245,158,11,0.75)' : 'rgba(107,114,128,0.45)'),
+        metricLabel: 'Avg AV Surplus / Pick',
+        xLabel:      'Avg Draft AV above slot expectation per R4–R7 pick',
+        meta:        teams.map(t => ({
+          totalPicks: t.totalPicks,
+          totalAV:    t.totalAV,
+        })),
+      });
+    }
+
     [lrYfrom, lrYto, lrPos].forEach(el => el.addEventListener('change', renderLateRoundSteals));
     [ssYfrom, ssYto, ssPos].forEach(el => el.addEventListener('change', renderSleeperScores));
     [hgYfrom, hgYto, hgMinPicks].forEach(el => el.addEventListener('change', renderHiddenGemColleges));
+    [teYfrom, teYto, teMinPicks].forEach(el => el.addEventListener('change', renderTeamLateRoundEff));
 
     renderLateRoundSteals();
     renderSleeperScores();
     renderHiddenGemColleges();
+    renderTeamLateRoundEff();
 
     _ghostInited = true;
   }

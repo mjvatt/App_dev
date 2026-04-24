@@ -384,6 +384,30 @@ const DraftData = (() => {
       .slice(0, topN);
   }
 
+  /* G1.4 — teams ranked by avg Draft AV surplus per R4–R7 pick */
+  function teamLateRoundEfficiency(filter = {}, minPicks = 10) {
+    const expAv = _buildExpectedAv();
+    const byTeam = {};
+    picks(filter)
+      .filter(p => p.round >= 4 && p.pick > 0)
+      .forEach(p => {
+        const surplus = p.draft_av - (expAv[p.pick] || 0);
+        if (!byTeam[p.team]) byTeam[p.team] = { surplusSum: 0, n: 0, totalAV: 0 };
+        byTeam[p.team].surplusSum += surplus;
+        byTeam[p.team].n++;
+        byTeam[p.team].totalAV += p.draft_av;
+      });
+    return Object.entries(byTeam)
+      .filter(([, c]) => c.n >= minPicks)
+      .map(([team, c]) => ({
+        team,
+        avgSurplus: +(c.surplusSum / c.n).toFixed(2),
+        totalPicks: c.n,
+        totalAV:    c.totalAV,
+      }))
+      .sort((a, b) => b.avgSurplus - a.avgSurplus);
+  }
+
   async function loadTrades() {
     if (_trades !== null) return;
     try {
@@ -398,5 +422,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, lateRoundSteals, sleeperScores, hiddenGemColleges, loadTrades, tradesForYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, lateRoundSteals, sleeperScores, hiddenGemColleges, teamLateRoundEfficiency, loadTrades, tradesForYear };
 })();

@@ -517,11 +517,35 @@
         </div>
       </div>
 
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Team Late-Round Efficiency</h3>
+              <p>Franchises ranked by avg Draft AV surplus per R4–R7 pick · amber = above average · gray = below</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="ghost-te-yfrom" class="filter-select"></select>
+              <span style="color:var(--text-muted);font-size:12px">–</span>
+              <select id="ghost-te-yto" class="filter-select"></select>
+              <select id="ghost-te-minpicks" class="filter-select">
+                <option value="5">Min 5 picks</option>
+                <option value="10" selected>Min 10 picks</option>
+                <option value="15">Min 15 picks</option>
+                <option value="20">Min 20 picks</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-teamLateRoundEff"></canvas></div>
+        </div>
+      </div>
+
       <div class="engine-roadmap" style="margin-top:2rem">
         <div class="roadmap-item done"><i class="fas fa-check"></i> Data pipeline established (Draft AV · career stats)</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Late-round value identification — R4–R7 AV surplus by slot</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Sleeper scoring — AV surplus + Pro Bowl composite</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Hidden gem college detector — avg career AV per pick</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Team late-round efficiency — franchise ranking by R4–R7 value added</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> ML predictive model integration</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> Pre-draft sleeper rankings (annual)</div>
       </div>
