@@ -61,7 +61,7 @@
         <a href="#" class="nav-item engine-item" data-view="ghost">
           <i class="fas fa-ghost"></i>
           <span>GHOST</span>
-          <span class="engine-badge ghost-badge">SOON</span>
+          <span class="engine-badge ghost-badge">BETA</span>
         </a>
       </div>
     </nav>
@@ -445,15 +445,85 @@
       <div class="engine-hero ghost-hero">
         <div class="engine-hero-badge ghost-badge-hero">GHOST</div>
         <h2>Grading Hidden Opportunity &amp; Sleeper Tracker</h2>
-        <p>GHOST surfaces what the draft overlooks — late-round players who outperformed their slot, college programs punching above their weight, teams consistently finding value outside Round 1, and ML-powered sleeper identification before the next draft.</p>
-        <div class="engine-roadmap">
-          <div class="roadmap-item done"><i class="fas fa-check"></i> Data pipeline established</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Late-round value identification model</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Sleeper scoring algorithm</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Hidden gem college pipeline detector</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> ML predictive model integration</div>
-          <div class="roadmap-item"><i class="fas fa-circle"></i> Pre-draft sleeper rankings (annual)</div>
+        <p>GHOST surfaces what the draft overlooks — late-round players who outperformed their slot, college programs punching above their weight, and teams consistently finding value outside Round 1.</p>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Late-Round Value Steals</h3>
+              <p>R4–R7 picks ranked by Draft AV above slot expectation · top 30 · color = position group</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="ghost-lr-yfrom" class="filter-select"></select>
+              <span style="color:var(--text-muted);font-size:12px">–</span>
+              <select id="ghost-lr-yto" class="filter-select"></select>
+              <select id="ghost-lr-pos" class="filter-select">
+                <option value="">All Positions</option>
+                <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+                <option>OL</option><option>DL</option><option>LB</option><option>DB</option><option>ST</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-lateRoundSteals"></canvas></div>
         </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Sleeper Score Rankings</h3>
+              <p>R3–R7 picks ranked by AV surplus + Pro Bowl bonus (×10) · top 30 · color = position group</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="ghost-ss-yfrom" class="filter-select"></select>
+              <span style="color:var(--text-muted);font-size:12px">–</span>
+              <select id="ghost-ss-yto" class="filter-select"></select>
+              <select id="ghost-ss-pos" class="filter-select">
+                <option value="">All Positions</option>
+                <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+                <option>OL</option><option>DL</option><option>LB</option><option>DB</option><option>ST</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-sleeperScores"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Hidden Gem Colleges</h3>
+              <p>Programs ranked by avg career AV per drafted player · minimum pick threshold applied · top 30</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="ghost-hg-yfrom" class="filter-select"></select>
+              <span style="color:var(--text-muted);font-size:12px">–</span>
+              <select id="ghost-hg-yto" class="filter-select"></select>
+              <select id="ghost-hg-minpicks" class="filter-select">
+                <option value="10">Min 10 picks</option>
+                <option value="15">Min 15 picks</option>
+                <option value="20" selected>Min 20 picks</option>
+                <option value="30">Min 30 picks</option>
+                <option value="40">Min 40 picks</option>
+                <option value="50">Min 50 picks</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-hiddenGemColleges"></canvas></div>
+        </div>
+      </div>
+
+      <div class="engine-roadmap" style="margin-top:2rem">
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Data pipeline established (Draft AV · career stats)</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Late-round value identification — R4–R7 AV surplus by slot</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Sleeper scoring — AV surplus + Pro Bowl composite</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Hidden gem college detector — avg career AV per pick</div>
+        <div class="roadmap-item"><i class="fas fa-circle"></i> ML predictive model integration</div>
+        <div class="roadmap-item"><i class="fas fa-circle"></i> Pre-draft sleeper rankings (annual)</div>
       </div>
     </section>
 

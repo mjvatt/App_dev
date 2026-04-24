@@ -36,6 +36,7 @@
     if (id === 'colleges')   renderCollegePipeline();
     if (id === 'draftboard') renderDraftTable();
     if (id === 'sage')       initSAGE();
+    if (id === 'ghost')      initGHOST();
   }
 
   document.querySelectorAll('.nav-item').forEach(el => {
@@ -336,7 +337,8 @@
   /* ═══════════════════════════════════════════════════════════════════
      SAGE
   ═══════════════════════════════════════════════════════════════════ */
-  let _sageInited = false;
+  let _sageInited  = false;
+  let _ghostInited = false;
 
   function initSAGE() {
     if (!_sageInited) {
@@ -534,6 +536,123 @@
     DraftCharts.scatter('chart-sageScatter', points);
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     GHOST
+  ═══════════════════════════════════════════════════════════════════ */
+  function initGHOST() {
+    if (_ghostInited) return;
+
+    const lrYfrom = document.getElementById('ghost-lr-yfrom');
+    const lrYto   = document.getElementById('ghost-lr-yto');
+    const lrPos   = document.getElementById('ghost-lr-pos');
+
+    const ssYfrom = document.getElementById('ghost-ss-yfrom');
+    const ssYto   = document.getElementById('ghost-ss-yto');
+    const ssPos   = document.getElementById('ghost-ss-pos');
+
+    const hgYfrom    = document.getElementById('ghost-hg-yfrom');
+    const hgYto      = document.getElementById('ghost-hg-yto');
+    const hgMinPicks = document.getElementById('ghost-hg-minpicks');
+
+    meta.years.forEach(y => {
+      lrYfrom.add(new Option(y, y));
+      lrYto.add(new Option(y, y));
+      ssYfrom.add(new Option(y, y));
+      ssYto.add(new Option(y, y));
+      hgYfrom.add(new Option(y, y));
+      hgYto.add(new Option(y, y));
+    });
+
+    lrYfrom.value = String(meta.years[0]);
+    lrYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
+    ssYfrom.value = String(meta.years[0]);
+    ssYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
+    hgYfrom.value = String(meta.years[0]);
+    hgYto.value   = String(meta.years[meta.years.length - 1]);
+
+    function renderLateRoundSteals() {
+      const filter = {
+        yearFrom:  +lrYfrom.value || undefined,
+        yearTo:    +lrYto.value   || undefined,
+        pos_group: lrPos.value    || undefined,
+      };
+      const steals = DraftData.lateRoundSteals(filter, 30);
+      DraftCharts.ghostLeaderboard('chart-lateRoundSteals', {
+        labels:      steals.map(p => `${p.player} (${p.year})`),
+        values:      steals.map(p => p.surplus),
+        colors:      steals.map(p => DraftData.posColorAlpha(p.pos_group, 0.75)),
+        metricLabel: 'AV Surplus vs Slot',
+        xLabel:      'Draft AV above slot expectation',
+        meta:        steals.map(p => ({
+          team:      p.team,
+          year:      p.year,
+          pos:       p.pos,
+          round:     p.round,
+          pick:      p.pick,
+          draft_av:  p.draft_av,
+          career_av: p.career_av,
+          surplus:   p.surplus,
+        })),
+      });
+    }
+
+    function renderSleeperScores() {
+      const filter = {
+        yearFrom:  +ssYfrom.value || undefined,
+        yearTo:    +ssYto.value   || undefined,
+        pos_group: ssPos.value    || undefined,
+      };
+      const sleepers = DraftData.sleeperScores(filter, 30);
+      DraftCharts.ghostLeaderboard('chart-sleeperScores', {
+        labels:      sleepers.map(p => `${p.player} (${p.year})`),
+        values:      sleepers.map(p => p.score),
+        colors:      sleepers.map(p => DraftData.posColorAlpha(p.pos_group, 0.75)),
+        metricLabel: 'Sleeper Score',
+        xLabel:      'AV surplus + Pro Bowl bonus (×10)',
+        meta:        sleepers.map(p => ({
+          team:      p.team,
+          year:      p.year,
+          pos:       p.pos,
+          round:     p.round,
+          pick:      p.pick,
+          draft_av:  p.draft_av,
+          career_av: p.career_av,
+          pro_bowls: p.pro_bowls,
+          surplus:   p.surplus,
+        })),
+      });
+    }
+
+    function renderHiddenGemColleges() {
+      const filter = {
+        yearFrom: +hgYfrom.value || undefined,
+        yearTo:   +hgYto.value   || undefined,
+      };
+      const colleges = DraftData.hiddenGemColleges(filter, +hgMinPicks.value || 20, 30);
+      DraftCharts.ghostLeaderboard('chart-hiddenGemColleges', {
+        labels:      colleges.map(c => c.college),
+        values:      colleges.map(c => c.avgAV),
+        metricLabel: 'Avg Career AV / Pick',
+        xLabel:      'Career AV per pick',
+        meta:        colleges.map(c => ({
+          totalPicks: c.totalPicks,
+          totalAV:    c.totalAV,
+          avgPB:      c.avgPB,
+        })),
+      });
+    }
+
+    [lrYfrom, lrYto, lrPos].forEach(el => el.addEventListener('change', renderLateRoundSteals));
+    [ssYfrom, ssYto, ssPos].forEach(el => el.addEventListener('change', renderSleeperScores));
+    [hgYfrom, hgYto, hgMinPicks].forEach(el => el.addEventListener('change', renderHiddenGemColleges));
+
+    renderLateRoundSteals();
+    renderSleeperScores();
+    renderHiddenGemColleges();
+
+    _ghostInited = true;
+  }
+
   /* ── Theme toggle ─────────────────────────────────────────────────── */
   function applyTheme(theme) {
     if (theme === 'light') {
@@ -552,7 +671,8 @@
   document.querySelectorAll('.theme-switch-opt').forEach(btn => {
     btn.addEventListener('click', () => {
       applyTheme(btn.dataset.t);
-      _sageInited = false;
+      _sageInited  = false;
+      _ghostInited = false;
       showView(_currentView);
     });
   });

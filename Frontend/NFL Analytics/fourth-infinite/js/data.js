@@ -1,10 +1,11 @@
 /* data.js — loads draft_data.json and exposes aggregation helpers */
 
 const DraftData = (() => {
-  let _picks     = [];
-  let _standings = [];
-  let _meta      = {};
-  let _trades    = null;
+  let _picks       = [];
+  let _standings   = [];
+  let _meta        = {};
+  let _trades      = null;
+  let _expectedAv  = null;
 
   const POS_COLORS = {
     QB:    '#3b82f6',
@@ -225,6 +226,27 @@ const DraftData = (() => {
     };
   }
 
+  /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2020) */
+  function _buildExpectedAv() {
+    if (_expectedAv) return _expectedAv;
+    const slots = {};
+    _picks.filter(p => p.pick > 0 && p.year <= 2020).forEach(p => {
+      if (!slots[p.pick]) slots[p.pick] = { sum: 0, n: 0 };
+      slots[p.pick].sum += p.draft_av;
+      slots[p.pick].n++;
+    });
+    const WINDOW = 12;
+    _expectedAv = {};
+    for (let pick = 1; pick <= 256; pick++) {
+      let sum = 0, n = 0;
+      for (let j = Math.max(1, pick - WINDOW); j <= Math.min(256, pick + WINDOW); j++) {
+        if (slots[j]) { sum += slots[j].sum; n += slots[j].n; }
+      }
+      if (n > 0) _expectedAv[pick] = +(sum / n).toFixed(1);
+    }
+    return _expectedAv;
+  }
+
   /* power-law pick value curve — V(pick) = 100 * (1/pick)^0.66, normalized to pick #1 = 100 */
   function pickValueCurve() {
     const labels = Array.from({ length: 256 }, (_, i) => i + 1);
@@ -237,22 +259,10 @@ const DraftData = (() => {
      Expected curve: rolling avg draft_av per pick slot, calibrated on drafts ≤ 2020.
      Scatter points: filtered via filter arg. */
   function slotGradeScatter(filter = {}) {
-    const slots = {};
-    _picks.filter(p => p.pick > 0 && p.year <= 2020).forEach(p => {
-      if (!slots[p.pick]) slots[p.pick] = { sum: 0, n: 0 };
-      slots[p.pick].sum += p.draft_av;
-      slots[p.pick].n++;
-    });
-
-    const WINDOW = 12;
-    const curve = [];
-    for (let pick = 1; pick <= 256; pick++) {
-      let sum = 0, n = 0;
-      for (let j = Math.max(1, pick - WINDOW); j <= Math.min(256, pick + WINDOW); j++) {
-        if (slots[j]) { sum += slots[j].sum; n += slots[j].n; }
-      }
-      if (n > 0) curve.push({ x: pick, y: +(sum / n).toFixed(1) });
-    }
+    const expAv = _buildExpectedAv();
+    const curve = Object.entries(expAv)
+      .map(([p, v]) => ({ x: +p, y: v }))
+      .sort((a, b) => a.x - b.x);
 
     const byGroup = {};
     picks(filter).filter(p => p.pick > 0).forEach(p => {
@@ -327,6 +337,53 @@ const DraftData = (() => {
     };
   }
 
+  /* G1.1 — R4-R7 picks with highest Draft AV above slot expectation */
+  function lateRoundSteals(filter = {}, topN = 30) {
+    const expAv = _buildExpectedAv();
+    return picks(filter)
+      .filter(p => p.round >= 4 && p.pick > 0 && p.draft_av > 0)
+      .map(p => ({ ...p, expected: expAv[p.pick] || 0, surplus: +(p.draft_av - (expAv[p.pick] || 0)).toFixed(1) }))
+      .filter(p => p.surplus > 0)
+      .sort((a, b) => b.surplus - a.surplus)
+      .slice(0, topN);
+  }
+
+  /* G1.2 — R3-R7 picks ranked by sleeper score (AV surplus + Pro Bowl bonus) */
+  function sleeperScores(filter = {}, topN = 30) {
+    const expAv = _buildExpectedAv();
+    return picks(filter)
+      .filter(p => p.round >= 3 && p.pick > 0 && p.draft_av > 0)
+      .map(p => {
+        const surplus = p.draft_av - (expAv[p.pick] || 0);
+        return { ...p, surplus: +surplus.toFixed(1), score: +(surplus + p.pro_bowls * 10).toFixed(1) };
+      })
+      .filter(p => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topN);
+  }
+
+  /* G1.3 — colleges ranked by avg career AV per pick (min picks threshold) */
+  function hiddenGemColleges(filter = {}, minPicks = 20, topN = 30) {
+    const byCollege = {};
+    picks(filter).filter(p => p.college).forEach(p => {
+      if (!byCollege[p.college]) byCollege[p.college] = { avSum: 0, pbSum: 0, n: 0 };
+      byCollege[p.college].avSum += p.career_av;
+      byCollege[p.college].pbSum += p.pro_bowls;
+      byCollege[p.college].n++;
+    });
+    return Object.entries(byCollege)
+      .filter(([, c]) => c.n >= minPicks)
+      .map(([college, c]) => ({
+        college,
+        avgAV:     +(c.avSum / c.n).toFixed(1),
+        totalPicks: c.n,
+        totalAV:    c.avSum,
+        avgPB:      +(c.pbSum / c.n).toFixed(2),
+      }))
+      .sort((a, b) => b.avgAV - a.avgAV)
+      .slice(0, topN);
+  }
+
   async function loadTrades() {
     if (_trades !== null) return;
     try {
@@ -341,5 +398,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, loadTrades, tradesForYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, lateRoundSteals, sleeperScores, hiddenGemColleges, loadTrades, tradesForYear };
 })();

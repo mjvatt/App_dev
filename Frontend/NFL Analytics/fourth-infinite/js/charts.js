@@ -710,5 +710,63 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, update };
+  /* ── GHOST leaderboard — ranked hbar for player/college lists ──── */
+  function ghostLeaderboard(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: data.metricLabel || 'Score',
+          data:  data.values,
+          backgroundColor: data.colors || (ACCENT + 'cc'),
+          borderWidth: 0,
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              title: items => items[0]?.label || '',
+              label: item => {
+                const m = data.meta[item.dataIndex];
+                if (!m) return String(item.raw);
+                const lines = [`${data.metricLabel || 'Score'}: ${item.raw}`];
+                if (m.team)       lines.push(`${m.team}  ·  ${m.year}  ·  ${m.pos || ''}`);
+                if (m.round)      lines.push(`Round ${m.round}, Pick #${m.pick}`);
+                if (m.draft_av !== undefined) lines.push(`Draft AV: ${m.draft_av}  ·  Career AV: ${m.career_av}`);
+                if (m.pro_bowls)  lines.push(`Pro Bowls: ${m.pro_bowls}`);
+                if (m.surplus !== undefined)  lines.push(`AV surplus vs slot: ${m.surplus}`);
+                if (m.totalPicks) lines.push(`Picks: ${m.totalPicks}  ·  Total AV: ${m.totalAV}`);
+                if (m.avgPB !== undefined)    lines.push(`Avg Pro Bowls/pick: ${m.avgPB}`);
+                return lines;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: data.xLabel ? { display: true, text: data.xLabel, color: TICK_COLOR(), font: { size: 11 } } : undefined,
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 10 } },
+          },
+        },
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, ghostLeaderboard, update };
 })();
