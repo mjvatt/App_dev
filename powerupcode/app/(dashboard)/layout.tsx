@@ -1,18 +1,21 @@
 import Link from "next/link";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-black flex">
-      <aside className="w-56 border-r border-zinc-900 p-6 flex flex-col gap-1 shrink-0">
-        <Link href="/dashboard" className="text-lg font-bold text-white mb-6 block">
-          PowerUpCode
-        </Link>
-        <NavLink href="/dashboard">Dashboard</NavLink>
-        <NavLink href="/arcade">Arcade</NavLink>
-        <NavLink href="/leaderboard">Leaderboard</NavLink>
-      </aside>
-      <div className="flex-1 overflow-auto">{children}</div>
-    </div>
+    <AuthGuard>
+      <div className="min-h-screen bg-black flex">
+        <aside className="w-56 border-r border-zinc-900 p-6 flex flex-col gap-1 shrink-0">
+          <Link href="/dashboard" className="text-lg font-bold text-white mb-6 block">
+            PowerUpCode
+          </Link>
+          <NavLink href="/dashboard">Dashboard</NavLink>
+          <NavLink href="/arcade">Arcade</NavLink>
+          <NavLink href="/leaderboard">Leaderboard</NavLink>
+        </aside>
+        <div className="flex-1 overflow-auto">{children}</div>
+      </div>
+    </AuthGuard>
   );
 }
 

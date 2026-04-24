@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { setToken } from "@/lib/auth";
+import type { TokenResponse } from "@/lib/types";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +27,9 @@ export default function LoginPage() {
         const data = await res.json();
         throw new Error(data.detail ?? "Login failed");
       }
-      // TODO: store token and redirect to dashboard
+      const data: TokenResponse = await res.json();
+      setToken(data.access_token);
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
