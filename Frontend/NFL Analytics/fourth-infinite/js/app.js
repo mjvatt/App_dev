@@ -440,6 +440,8 @@
       [pbYfrom, pbYto, pbPos].forEach(el => el.addEventListener('change', renderProBowlRate));
       renderProBowlRate();
 
+      DraftCharts.draftClassBar('chart-draftClassGrades', DraftData.draftClassGrades());
+
       // Draft pick trade analysis
       const tradeYearSel = document.getElementById('trade-year');
       for (let y = 2026; y >= 2002; y--) tradeYearSel.add(new Option(y, y));

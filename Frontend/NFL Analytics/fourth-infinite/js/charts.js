@@ -710,6 +710,62 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── Draft class grades — vertical bar by year ─────────────────── */
+  function draftClassBar(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const complete = data.filter(d => !d.incomplete).map(d => d.grade).sort((a, b) => a - b);
+    const q1 = complete[Math.floor(complete.length * 0.25)];
+    const q3 = complete[Math.floor(complete.length * 0.75)];
+
+    const colors = data.map(d => {
+      if (d.incomplete)  return 'rgba(107,114,128,0.3)';
+      if (d.grade >= q3) return '#f59e0bdd';
+      if (d.grade <= q1) return '#6b728099';
+      return '#3b82f6cc';
+    });
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.map(d => d.year),
+        datasets: [{
+          label: 'Draft Class Grade',
+          data:  data.map(d => d.grade),
+          backgroundColor: colors,
+          borderWidth: 0,
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              title: items => `${items[0]?.label} Draft Class`,
+              label: item => {
+                const d = data[item.dataIndex];
+                const lines = [
+                  `Grade: ${d.grade} AV / capital unit`,
+                  `Career AV: ${d.totalAV.toLocaleString()}`,
+                  `Draft capital: ${d.capital}`,
+                  `Picks: ${d.picks}`,
+                ];
+                if (d.incomplete) lines.push('Note: career data incomplete');
+                return lines;
+              },
+            },
+          },
+        },
+        scales: _baseScales('Draft Year', 'Career AV per capital unit'),
+      },
+    });
+  }
+
   /* ── GHOST leaderboard — ranked hbar for player/college lists ──── */
   function ghostLeaderboard(canvasId, data) {
     _destroy(canvasId);
@@ -768,5 +824,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, ghostLeaderboard, update };
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, ghostLeaderboard, update };
 })();

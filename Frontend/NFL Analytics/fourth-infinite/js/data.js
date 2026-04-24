@@ -384,6 +384,32 @@ const DraftData = (() => {
       .slice(0, topN);
   }
 
+  /* SAGE — career AV generated per unit of draft capital, by draft year */
+  function draftClassGrades() {
+    const INCOMPLETE_YEAR = 2021;
+    const pickVal = pick => 100 * Math.pow(pick, -0.66);
+
+    const byYear = {};
+    _picks.filter(p => p.pick > 0).forEach(p => {
+      if (!byYear[p.year]) byYear[p.year] = { avSum: 0, capital: 0, n: 0 };
+      byYear[p.year].avSum   += p.career_av;
+      byYear[p.year].capital += pickVal(p.pick);
+      byYear[p.year].n++;
+    });
+
+    return _meta.years.map(year => {
+      const c = byYear[year] || { avSum: 0, capital: 0, n: 0 };
+      return {
+        year,
+        grade:      c.capital > 0 ? +(c.avSum / c.capital).toFixed(3) : 0,
+        totalAV:    c.avSum,
+        capital:    +c.capital.toFixed(1),
+        picks:      c.n,
+        incomplete: year >= INCOMPLETE_YEAR,
+      };
+    });
+  }
+
   /* G1.5 — position groups ranked by avg Draft AV surplus per R4–R7 pick */
   function posLateRoundEfficiency(filter = {}) {
     const expAv = _buildExpectedAv();
@@ -445,5 +471,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, lateRoundSteals, sleeperScores, hiddenGemColleges, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, lateRoundSteals, sleeperScores, hiddenGemColleges, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear };
 })();
