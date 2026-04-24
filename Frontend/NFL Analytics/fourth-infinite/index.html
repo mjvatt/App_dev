@@ -508,6 +508,23 @@
         <div class="chart-card wide">
           <div class="chart-card-header">
             <div>
+              <h3>Position Late-Round Breakdown</h3>
+              <p>Which position groups produce the most R4–R7 Draft AV above slot expectation</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="ghost-pl-yfrom" class="filter-select"></select>
+              <span style="color:var(--text-muted);font-size:12px">–</span>
+              <select id="ghost-pl-yto" class="filter-select"></select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar"><canvas id="chart-posLateRoundBreakdown"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
               <h3>Team Late-Round Efficiency</h3>
               <p>Franchises ranked by avg Draft AV surplus per R4–R7 pick · amber = above average · gray = below</p>
             </div>
@@ -532,6 +549,7 @@
         <div class="roadmap-item done"><i class="fas fa-check"></i> Late-round value identification — R4–R7 AV surplus by slot</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Sleeper scoring — AV surplus + Pro Bowl composite</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Hidden gem college detector — avg career AV per pick</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Position late-round breakdown — which positions yield R4–R7 surplus</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Team late-round efficiency — franchise ranking by R4–R7 value added</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> ML predictive model integration</div>
         <div class="roadmap-item"><i class="fas fa-circle"></i> Pre-draft sleeper rankings (annual)</div>

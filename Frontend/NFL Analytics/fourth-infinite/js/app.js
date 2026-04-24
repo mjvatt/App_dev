@@ -554,6 +554,9 @@
     const hgYto      = document.getElementById('ghost-hg-yto');
     const hgMinPicks = document.getElementById('ghost-hg-minpicks');
 
+    const plYfrom = document.getElementById('ghost-pl-yfrom');
+    const plYto   = document.getElementById('ghost-pl-yto');
+
     const teYfrom    = document.getElementById('ghost-te-yfrom');
     const teYto      = document.getElementById('ghost-te-yto');
     const teMinPicks = document.getElementById('ghost-te-minpicks');
@@ -565,6 +568,8 @@
       ssYto.add(new Option(y, y));
       hgYfrom.add(new Option(y, y));
       hgYto.add(new Option(y, y));
+      plYfrom.add(new Option(y, y));
+      plYto.add(new Option(y, y));
       teYfrom.add(new Option(y, y));
       teYto.add(new Option(y, y));
     });
@@ -575,6 +580,8 @@
     ssYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
     hgYfrom.value = String(meta.years[0]);
     hgYto.value   = String(meta.years[meta.years.length - 1]);
+    plYfrom.value = String(meta.years[0]);
+    plYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
     teYfrom.value = String(meta.years[0]);
     teYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
 
@@ -650,6 +657,25 @@
       });
     }
 
+    function renderPosLateRoundBreakdown() {
+      const filter = {
+        yearFrom: +plYfrom.value || undefined,
+        yearTo:   +plYto.value   || undefined,
+      };
+      const positions = DraftData.posLateRoundEfficiency(filter);
+      DraftCharts.ghostLeaderboard('chart-posLateRoundBreakdown', {
+        labels:      positions.map(p => p.pos_group),
+        values:      positions.map(p => p.avgSurplus),
+        colors:      positions.map(p => DraftData.posColorAlpha(p.pos_group, 0.75)),
+        metricLabel: 'Avg AV Surplus / Pick',
+        xLabel:      'Avg Draft AV above slot expectation per R4–R7 pick',
+        meta:        positions.map(p => ({
+          totalPicks: p.totalPicks,
+          totalAV:    p.totalAV,
+        })),
+      });
+    }
+
     function renderTeamLateRoundEff() {
       const filter = {
         yearFrom: +teYfrom.value || undefined,
@@ -672,11 +698,13 @@
     [lrYfrom, lrYto, lrPos].forEach(el => el.addEventListener('change', renderLateRoundSteals));
     [ssYfrom, ssYto, ssPos].forEach(el => el.addEventListener('change', renderSleeperScores));
     [hgYfrom, hgYto, hgMinPicks].forEach(el => el.addEventListener('change', renderHiddenGemColleges));
+    [plYfrom, plYto].forEach(el => el.addEventListener('change', renderPosLateRoundBreakdown));
     [teYfrom, teYto, teMinPicks].forEach(el => el.addEventListener('change', renderTeamLateRoundEff));
 
     renderLateRoundSteals();
     renderSleeperScores();
     renderHiddenGemColleges();
+    renderPosLateRoundBreakdown();
     renderTeamLateRoundEff();
 
     _ghostInited = true;

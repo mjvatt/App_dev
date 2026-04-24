@@ -384,6 +384,29 @@ const DraftData = (() => {
       .slice(0, topN);
   }
 
+  /* G1.5 — position groups ranked by avg Draft AV surplus per R4–R7 pick */
+  function posLateRoundEfficiency(filter = {}) {
+    const expAv = _buildExpectedAv();
+    const byPos = {};
+    picks(filter)
+      .filter(p => p.round >= 4 && p.pick > 0)
+      .forEach(p => {
+        const surplus = p.draft_av - (expAv[p.pick] || 0);
+        if (!byPos[p.pos_group]) byPos[p.pos_group] = { surplusSum: 0, n: 0, totalAV: 0 };
+        byPos[p.pos_group].surplusSum += surplus;
+        byPos[p.pos_group].n++;
+        byPos[p.pos_group].totalAV += p.draft_av;
+      });
+    return Object.entries(byPos)
+      .map(([pos_group, c]) => ({
+        pos_group,
+        avgSurplus: +(c.surplusSum / c.n).toFixed(2),
+        totalPicks: c.n,
+        totalAV:    c.totalAV,
+      }))
+      .sort((a, b) => b.avgSurplus - a.avgSurplus);
+  }
+
   /* G1.4 — teams ranked by avg Draft AV surplus per R4–R7 pick */
   function teamLateRoundEfficiency(filter = {}, minPicks = 10) {
     const expAv = _buildExpectedAv();
@@ -422,5 +445,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, lateRoundSteals, sleeperScores, hiddenGemColleges, teamLateRoundEfficiency, loadTrades, tradesForYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, lateRoundSteals, sleeperScores, hiddenGemColleges, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear };
 })();
