@@ -174,6 +174,9 @@
         <td>${p.pos}</td>
         <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos_group}</span></td>
         <td>${p.college}</td>
+        <td style="text-align:right">${p.draft_av}</td>
+        <td style="text-align:right">${p.career_av}</td>
+        <td style="text-align:right">${p.pro_bowls || '—'}</td>
         <td style="color:#7a8caa;font-size:12px">${p.notes}</td>
       </tr>`).join('');
 
