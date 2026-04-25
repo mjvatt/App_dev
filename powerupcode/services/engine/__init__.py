@@ -17,5 +17,7 @@ def _init_engine() -> GameEngine:
     if module == "stub":
         from services.engine.stub import StubEngine
         return StubEngine()
-    # engine-core implementation loaded here in production
+    if module == "claude":
+        from services.engine_core.haiku_engine import HaikuEngine
+        return HaikuEngine()
     raise ImportError(f"Unknown ENGINE_MODULE: {module!r}")

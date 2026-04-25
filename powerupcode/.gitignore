@@ -1,5 +1,5 @@
 # Proprietary engine — never commit
-services/engine-core/
+services/engine_core/
 
 # Python
 __pycache__/

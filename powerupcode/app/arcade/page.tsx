@@ -34,6 +34,9 @@ export default function ArcadePage() {
   const [fetching, setFetching] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
+  const [hintsRemaining, setHintsRemaining] = useState(3);
+  const [hinting, setHinting] = useState(false);
   const startTime = useRef<number>(Date.now());
 
   const loadChallenge = useCallback(async () => {
@@ -42,6 +45,8 @@ export default function ArcadePage() {
     setFetching(true);
     setResult(null);
     setError(null);
+    setHint(null);
+    setHintsRemaining(3);
     try {
       const data = await authedRequest<Challenge>("/api/challenges/next", token);
       setChallenge(data);
@@ -60,6 +65,26 @@ export default function ArcadePage() {
   function handleLanguageChange(lang: Language) {
     setLanguage(lang);
     setCode(STARTER[lang]);
+  }
+
+  async function handleHint() {
+    if (!challenge) return;
+    const token = getToken();
+    if (!token) return;
+    setHinting(true);
+    try {
+      const data = await authedRequest<{ hint: string; hints_remaining: number }>(
+        `/api/challenges/${challenge.id}/hint`,
+        token,
+        { method: "POST", body: JSON.stringify({ current_attempt: code }) }
+      );
+      setHint(data.hint);
+      setHintsRemaining(data.hints_remaining);
+    } catch {
+      setHint("Failed to get a hint. Please try again.");
+    } finally {
+      setHinting(false);
+    }
   }
 
   async function handleSubmit() {
@@ -158,6 +183,25 @@ export default function ArcadePage() {
                   </div>
                 )}
               </>
+            )}
+
+            {challenge && !fetching && !result && (
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleHint}
+                  disabled={hinting || hintsRemaining === 0}
+                  className="self-start px-3 py-1.5 border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 text-xs rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {hinting
+                    ? "Getting hint..."
+                    : hintsRemaining === 0
+                    ? "No hints left"
+                    : `Hint (${hintsRemaining} left)`}
+                </button>
+                {hint && (
+                  <p className="text-sm text-zinc-400 leading-relaxed">{hint}</p>
+                )}
+              </div>
             )}
 
             {result && (
