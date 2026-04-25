@@ -1,12 +1,13 @@
 from datetime import date, datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db
 from api.models.challenge import Attempt, UserProgress
+from api.models.user import Subscription
 from api.schemas.challenge import (
     AttemptRequest,
     AttemptResponse,
@@ -22,6 +23,15 @@ router = APIRouter()
 _ADAPTIVE_WINDOW = 5
 _MEDIUM_PASS_THRESHOLD = 3  # out of _ADAPTIVE_WINDOW
 _MIN_ATTEMPTS_FOR_ADAPT = 3
+
+
+async def _has_active_subscription(db: AsyncSession, user_id: str) -> bool:
+    result = await db.execute(
+        select(Subscription)
+        .where(Subscription.user_id == user_id, Subscription.status == "active")
+        .limit(1)
+    )
+    return result.scalar_one_or_none() is not None
 
 
 async def _suggest_difficulty(db: AsyncSession, user_id: str) -> Difficulty:
@@ -71,6 +81,8 @@ async def get_next_challenge(
 ) -> ChallengeResponse:
     if difficulty is None:
         difficulty = await _suggest_difficulty(db, user_id)
+    if difficulty != Difficulty.EASY and not await _has_active_subscription(db, user_id):
+        raise HTTPException(status_code=402, detail="subscription_required")
     challenge = await get_engine().next_challenge(user_id, topic, difficulty)
     return ChallengeResponse(
         id=challenge.id,

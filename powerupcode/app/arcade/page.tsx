@@ -37,6 +37,7 @@ export default function ArcadePage() {
   const [hint, setHint] = useState<string | null>(null);
   const [hintsRemaining, setHintsRemaining] = useState(3);
   const [hinting, setHinting] = useState(false);
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
   const startTime = useRef<number>(Date.now());
 
   const loadChallenge = useCallback(async () => {
@@ -47,12 +48,19 @@ export default function ArcadePage() {
     setError(null);
     setHint(null);
     setHintsRemaining(3);
+    setUpgradeRequired(false);
     try {
       const data = await authedRequest<Challenge>("/api/challenges/next", token);
       setChallenge(data);
       startTime.current = Date.now();
-    } catch {
-      setError("Failed to load challenge. Check that the API is running.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "subscription_required") {
+        setChallenge(null);
+        setUpgradeRequired(true);
+      } else {
+        setError("Failed to load challenge. Check that the API is running.");
+      }
     } finally {
       setFetching(false);
     }
@@ -143,6 +151,21 @@ export default function ArcadePage() {
             )}
             {error && (
               <p className="text-red-400 text-sm">{error}</p>
+            )}
+
+            {upgradeRequired && !fetching && (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm font-semibold text-white">Unlock harder challenges</p>
+                <p className="text-sm text-zinc-500">
+                  Medium, hard, and boss challenges require an active subscription.
+                </p>
+                <Link
+                  href="/billing"
+                  className="self-start px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+                >
+                  View plans
+                </Link>
+              </div>
             )}
 
             {challenge && !fetching && (
