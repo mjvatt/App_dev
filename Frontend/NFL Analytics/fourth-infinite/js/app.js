@@ -316,8 +316,10 @@
 
   function renderPosTrends() {
     const groups = ALL_GROUPS.filter(g => _activePosGroups.has(g));
-    const { years, data } = DraftData.posGroupSharePerYear(groups);
-    DraftCharts.multiLine('chart-posTrends', years, data, DraftData.posColor);
+    const share = DraftData.posGroupSharePerYear(groups);
+    DraftCharts.multiLine('chart-posTrends', share.years, share.data, DraftData.posColor);
+    const av = DraftData.posGroupAvPerYear(groups);
+    DraftCharts.multiLine('chart-posAvPerYear', av.years, av.data, DraftData.posColor, 'Avg Career AV per Pick');
   }
 
   function renderR1Concentration() {

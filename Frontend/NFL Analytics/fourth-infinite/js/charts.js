@@ -168,7 +168,7 @@ const DraftCharts = (() => {
   }
 
   /* ── Multi-line (position trends) ───────────────────────────────── */
-  function multiLine(canvasId, years, seriesMap, colorFn) {
+  function multiLine(canvasId, years, seriesMap, colorFn, yLabel = '% of Picks') {
     _destroy(canvasId);
     const ctx = document.getElementById(canvasId).getContext('2d');
     const datasets = Object.entries(seriesMap).map(([group, values]) => ({
@@ -187,7 +187,7 @@ const DraftCharts = (() => {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: _baseLegend(true), tooltip: _tooltip() },
-        scales: _baseScales('Year', '% of Picks'),
+        scales: _baseScales('Year', yLabel),
       },
     });
   }
