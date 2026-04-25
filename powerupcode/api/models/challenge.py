@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func
+from sqlalchemy import JSON, Boolean, DateTime, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from api.models.base import Base
@@ -30,3 +30,6 @@ class UserProgress(Base):
     level: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     streak_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_active: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    topics: Mapped[dict[str, int]] = mapped_column(
+        JSON, nullable=False, default=dict, server_default=text("'{}'")
+    )

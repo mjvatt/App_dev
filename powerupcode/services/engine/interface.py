@@ -40,6 +40,7 @@ class AttemptResult:
     feedback: str
     hints_used: int
     time_ms: int
+    topic: Optional[Topic] = None
     next_difficulty: Optional[Difficulty] = None
 
 

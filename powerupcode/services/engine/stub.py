@@ -68,6 +68,7 @@ class StubEngine(GameEngine):
             feedback="Evaluation is not available in stub mode.",
             hints_used=0,
             time_ms=time_ms,
+            topic=_STUB_CHALLENGE.topic,
         )
 
     async def generate_hint(

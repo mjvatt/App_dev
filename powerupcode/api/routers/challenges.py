@@ -123,6 +123,13 @@ async def submit_attempt(
 
     progress.level = _compute_level(progress.total_xp)
     _update_streak(progress)
+
+    if result.passed and result.topic is not None:
+        topics = dict(progress.topics or {})
+        key = result.topic.value
+        topics[key] = topics.get(key, 0) + 1
+        progress.topics = topics
+
     await db.commit()
 
     return AttemptResponse(
