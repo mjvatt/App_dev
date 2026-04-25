@@ -192,7 +192,7 @@ const DraftData = (() => {
     };
   }
 
-  /* picks made in year Y correlated with wins in year Y+1, for scatter */
+  /* draft capital spent in year Y correlated with wins in year Y+1, for scatter */
   function draftToWinsScatter(team) {
     const rows = teamStandings(team);
     const byYear = {};
@@ -202,8 +202,10 @@ const DraftData = (() => {
     teamStandings(team).forEach(r => {
       const nextSeason = byYear[r.year + 1];
       if (!nextSeason) return;
-      const pickCount = picks({ team, year: r.year }).length;
-      points.push({ x: pickCount, y: nextSeason.w, year: r.year });
+      const capital = picks({ team, year: r.year })
+        .filter(p => p.pick > 0)
+        .reduce((s, p) => s + 100 * Math.pow(p.pick, -0.66), 0);
+      points.push({ x: +capital.toFixed(1), y: nextSeason.w, year: r.year });
     });
     return points;
   }

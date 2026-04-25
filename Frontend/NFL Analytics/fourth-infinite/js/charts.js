@@ -248,7 +248,7 @@ const DraftCharts = (() => {
               label: item => {
                 const p = item.raw;
                 return p.year
-                  ? `${p.year}: ${p.x} picks → ${p.y}W next season`
+                  ? `${p.year}: ${p.x} capital → ${p.y}W next season`
                   : `(${p.x}, ${(+p.y).toFixed(1)})`;
               },
             },
@@ -258,7 +258,7 @@ const DraftCharts = (() => {
           x: {
             grid: { color: GRID_COLOR() },
             ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Picks in Draft Year', color: TICK_COLOR(), font: { size: 11 } },
+            title: { display: true, text: 'Draft Capital (pick value sum)', color: TICK_COLOR(), font: { size: 11 } },
           },
           y: {
             grid: { color: GRID_COLOR() },
