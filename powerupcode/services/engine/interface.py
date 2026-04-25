@@ -41,6 +41,7 @@ class AttemptResult:
     hints_used: int
     time_ms: int
     topic: Optional[Topic] = None
+    difficulty: Optional[Difficulty] = None
     next_difficulty: Optional[Difficulty] = None
 
 

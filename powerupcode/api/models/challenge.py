@@ -13,6 +13,7 @@ class Attempt(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
     challenge_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    difficulty: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     passed: Mapped[bool] = mapped_column(Boolean, nullable=False)
     xp_earned: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     hints_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

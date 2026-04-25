@@ -69,6 +69,7 @@ class StubEngine(GameEngine):
             hints_used=0,
             time_ms=time_ms,
             topic=_STUB_CHALLENGE.topic,
+            difficulty=_STUB_CHALLENGE.difficulty,
         )
 
     async def generate_hint(

@@ -107,6 +107,7 @@ async def submit_attempt(
     attempt = Attempt(
         user_id=user_id,
         challenge_id=challenge_id,
+        difficulty=result.difficulty.value if result.difficulty else None,
         passed=result.passed,
         xp_earned=result.xp_earned,
         hints_used=result.hints_used,

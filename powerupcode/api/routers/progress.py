@@ -63,7 +63,7 @@ async def get_my_history(
                 challenge_id=attempt.challenge_id,
                 challenge_title=challenge.title if challenge else None,
                 topic=challenge.topic.value if challenge else None,
-                difficulty=challenge.difficulty.value if challenge else None,
+                difficulty=attempt.difficulty or (challenge.difficulty.value if challenge else None),
                 passed=attempt.passed,
                 xp_earned=attempt.xp_earned,
                 hints_used=attempt.hints_used,
