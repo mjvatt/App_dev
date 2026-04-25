@@ -572,6 +572,12 @@
     const ciYto      = document.getElementById('ghost-ci-yto');
     const ciMinPicks = document.getElementById('ghost-ci-minpicks');
 
+    const mlMode  = document.getElementById('ghost-ml-mode');
+    const mlYfrom = document.getElementById('ghost-ml-yfrom');
+    const mlYto   = document.getElementById('ghost-ml-yto');
+    const mlRound = document.getElementById('ghost-ml-round');
+    const mlPos   = document.getElementById('ghost-ml-pos');
+
     meta.years.forEach(y => {
       lrYfrom.add(new Option(y, y));
       lrYto.add(new Option(y, y));
@@ -585,6 +591,8 @@
       teYto.add(new Option(y, y));
       ciYfrom.add(new Option(y, y));
       ciYto.add(new Option(y, y));
+      mlYfrom.add(new Option(y, y));
+      mlYto.add(new Option(y, y));
     });
 
     lrYfrom.value = String(meta.years[0]);
@@ -599,6 +607,8 @@
     teYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
     ciYfrom.value = String(meta.years[0]);
     ciYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
+    mlYfrom.value = String(meta.years[0]);
+    mlYto.value   = String(meta.years[meta.years.length - 1]);
 
     function renderLateRoundSteals() {
       const filter = {
@@ -737,6 +747,57 @@
     [teYfrom, teYto, teMinPicks].forEach(el => el.addEventListener('change', renderTeamLateRoundEff));
     [ciYfrom, ciYto, ciMinPicks].forEach(el => el.addEventListener('change', renderCollegeAvIndex));
 
+    async function renderMlRankings() {
+      await DraftData.loadSleeperPredictions();
+      const filter = {
+        yearFrom:  +mlYfrom.value || undefined,
+        yearTo:    +mlYto.value   || undefined,
+        pos_group: mlPos.value    || undefined,
+        round:     mlRound.value  || undefined,
+      };
+      const mode   = mlMode.value;
+      const result = DraftData.sleeperModelRankings(filter, 30, mode);
+
+      const rankLabel = mode === 'surprise' ? 'Actual − Predicted Surplus' : 'Predicted Career AV Surplus';
+      const xLabel    = mode === 'surprise'
+        ? 'Career AV above slot expectation minus model prediction'
+        : 'Predicted career AV above slot expectation';
+
+      DraftCharts.ghostLeaderboard('chart-mlRankings', {
+        labels:      result.picks.map(p => `${p.player} (${p.year})`),
+        values:      result.picks.map(p => p.displayScore),
+        colors:      result.picks.map(p => DraftData.posColorAlpha(p.pos_group, 0.75)),
+        metricLabel: rankLabel,
+        xLabel,
+        meta:        result.picks.map(p => ({
+          team:               p.team,
+          year:               p.year,
+          pos:                p.pos,
+          round:              p.round,
+          pick:               p.pick,
+          college:            p.college,
+          draft_av:           p.draft_av,
+          career_av:          p.career_av,
+          pro_bowls:          p.pro_bowls,
+          predicted_surplus:  p.predicted_surplus,
+          actual_surplus:     p.actual_surplus,
+          incomplete:         p.incomplete,
+        })),
+      });
+
+      if (result.importances.length) {
+        DraftCharts.ghostLeaderboard('chart-mlImportances', {
+          labels:      result.importances.map(f => f.feature),
+          values:      result.importances.map(f => f.importance),
+          metricLabel: 'Importance',
+          xLabel:      'Feature importance (sum = 1)',
+          meta:        result.importances.map(f => ({ totalPicks: undefined, totalAV: undefined })),
+        });
+      }
+    }
+
+    [mlMode, mlYfrom, mlYto, mlRound, mlPos].forEach(el => el.addEventListener('change', renderMlRankings));
+
     const GHOST_RENDERS = {
       steals:       renderLateRoundSteals,
       sleeper:      renderSleeperScores,
@@ -744,6 +805,7 @@
       pos:          renderPosLateRoundBreakdown,
       teams:        renderTeamLateRoundEff,
       'college-av': renderCollegeAvIndex,
+      'ml':         renderMlRankings,
     };
 
     function activateGhostTab(id) {

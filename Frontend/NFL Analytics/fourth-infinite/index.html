@@ -469,6 +469,7 @@
         <button class="ghost-tab" data-ghost-tab="pos">Position Breakdown</button>
         <button class="ghost-tab" data-ghost-tab="teams">Team Efficiency</button>
         <button class="ghost-tab" data-ghost-tab="college-av">College AV Index</button>
+        <button class="ghost-tab" data-ghost-tab="ml">ML Rankings</button>
       </div>
 
       <div class="ghost-panel active" data-ghost-panel="steals">
@@ -617,6 +618,53 @@
         </div>
       </div>
 
+      <div class="ghost-panel" data-ghost-panel="ml">
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>ML Pick Rankings</h3>
+                <p>Picks ranked by predicted career AV surplus above slot · GBR trained on 1994–2018 · R² = 0.005 · top 30</p>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <select id="ghost-ml-mode" class="filter-select">
+                  <option value="predicted">Top Predicted</option>
+                  <option value="surprise">Biggest Surprises</option>
+                </select>
+                <select id="ghost-ml-yfrom" class="filter-select"></select>
+                <span style="color:var(--text-muted);font-size:12px">–</span>
+                <select id="ghost-ml-yto" class="filter-select"></select>
+                <select id="ghost-ml-round" class="filter-select">
+                  <option value="">All rounds</option>
+                  <option value="1">R1</option>
+                  <option value="2">R2</option>
+                  <option value="3">R3</option>
+                  <option value="4">R4</option>
+                  <option value="5">R5</option>
+                  <option value="6">R6</option>
+                  <option value="7">R7</option>
+                </select>
+                <select id="ghost-ml-pos" class="filter-select">
+                  <option value="">All positions</option>
+                  <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+                  <option>OL</option><option>DL</option><option>LB</option><option>DB</option><option>ST</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-mlRankings"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>Feature Importances</h3>
+                <p>Signals driving the model's predictions · GBR feature importance</p>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chart-mlImportances"></canvas></div>
+          </div>
+        </div>
+      </div>
+
       <div class="engine-roadmap" style="margin-top:2rem">
         <div class="roadmap-item done"><i class="fas fa-check"></i> Data pipeline established (Draft AV · career stats)</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Late-round value identification — R4–R7 AV surplus by slot</div>
@@ -624,8 +672,8 @@
         <div class="roadmap-item done"><i class="fas fa-check"></i> Hidden gem college detector — avg career AV per pick</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Position late-round breakdown — which positions yield R4–R7 surplus</div>
         <div class="roadmap-item done"><i class="fas fa-check"></i> Team late-round efficiency — franchise ranking by R4–R7 value added</div>
-        <div class="roadmap-item"><i class="fas fa-circle"></i> ML predictive model integration</div>
-        <div class="roadmap-item"><i class="fas fa-circle"></i> Pre-draft sleeper rankings (annual)</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> ML predictive model integration — GBR trained on 1994–2018 draft data</div>
+        <div class="roadmap-item done"><i class="fas fa-check"></i> Pre-draft sleeper rankings — model-ranked historical picks by predicted surplus</div>
       </div>
     </section>
 

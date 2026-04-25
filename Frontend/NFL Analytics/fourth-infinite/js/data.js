@@ -1,11 +1,12 @@
 /* data.js — loads draft_data.json and exposes aggregation helpers */
 
 const DraftData = (() => {
-  let _picks       = [];
-  let _standings   = [];
-  let _meta        = {};
-  let _trades      = null;
-  let _expectedAv  = null;
+  let _picks        = [];
+  let _standings    = [];
+  let _meta         = {};
+  let _trades       = null;
+  let _expectedAv   = null;
+  let _sleeperPreds = null;
 
   const POS_COLORS = {
     QB:    '#3b82f6',
@@ -513,6 +514,39 @@ const DraftData = (() => {
       .slice(0, topN);
   }
 
+  async function loadSleeperPredictions() {
+    if (_sleeperPreds !== null) return;
+    try {
+      const resp = await fetch('data/sleeper_predictions.json');
+      _sleeperPreds = await resp.json();
+    } catch (_) {
+      _sleeperPreds = { predictions: [], importances: [], meta: {} };
+    }
+  }
+
+  function sleeperModelRankings(filter = {}, topN = 30, mode = 'predicted') {
+    if (!_sleeperPreds) return { picks: [], importances: [], modelMeta: {} };
+    let preds = _sleeperPreds.predictions;
+
+    if (filter.yearFrom)  preds = preds.filter(p => p.year      >= +filter.yearFrom);
+    if (filter.yearTo)    preds = preds.filter(p => p.year      <= +filter.yearTo);
+    if (filter.pos_group) preds = preds.filter(p => p.pos_group === filter.pos_group);
+    if (filter.round)     preds = preds.filter(p => p.round     === +filter.round);
+
+    const scored = preds.map(p => ({
+      ...p,
+      displayScore: mode === 'surprise'
+        ? +(p.actual_surplus - p.predicted_surplus).toFixed(2)
+        : p.predicted_surplus,
+    }));
+
+    return {
+      picks:       scored.sort((a, b) => b.displayScore - a.displayScore).slice(0, topN),
+      importances: _sleeperPreds.importances,
+      modelMeta:   _sleeperPreds.meta,
+    };
+  }
+
   async function loadTrades() {
     if (_trades !== null) return;
     try {
@@ -527,5 +561,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings };
 })();
