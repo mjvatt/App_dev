@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getToken } from "@/lib/auth";
 import { authedRequest } from "@/lib/api";
-import type { UserProgress, Topic } from "@/lib/types";
+import type { UserMe, UserProgress, Topic } from "@/lib/types";
 import XPBar from "@/components/game/XPBar";
 
 const TOPIC_LABELS: Record<Topic, string> = {
@@ -20,7 +20,10 @@ const XP_PER_LEVEL = 100;
 
 export default function DashboardPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [me, setMe] = useState<UserMe | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [resendMessage, setResendMessage] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -30,7 +33,24 @@ export default function DashboardPage() {
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load progress")
       );
+    authedRequest<UserMe>("/api/auth/me", token).then(setMe).catch(() => null);
   }, []);
+
+  async function handleResend() {
+    const token = getToken();
+    if (!token) return;
+    setResendState("sending");
+    try {
+      await authedRequest<{ message: string }>("/api/auth/resend-verification", token, {
+        method: "POST",
+      });
+      setResendState("sent");
+      setResendMessage("Verification email sent. Check your inbox.");
+    } catch (err) {
+      setResendState("error");
+      setResendMessage(err instanceof Error ? err.message : "Failed to send email");
+    }
+  }
 
   if (error) {
     return (
@@ -66,6 +86,29 @@ export default function DashboardPage() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+
+      {me && !me.is_verified && (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl px-5 py-4 mb-6 flex items-center justify-between gap-4">
+          <p className="text-sm text-zinc-400">
+            Your email address is not verified. Check your inbox or request a new link.
+          </p>
+          <div className="shrink-0">
+            {resendState === "sent" || resendState === "error" ? (
+              <p className={`text-xs ${resendState === "sent" ? "text-green-400" : "text-red-400"}`}>
+                {resendMessage}
+              </p>
+            ) : (
+              <button
+                onClick={handleResend}
+                disabled={resendState === "sending"}
+                className="text-xs text-white border border-zinc-700 rounded-lg px-3 py-1.5 hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              >
+                {resendState === "sending" ? "Sending..." : "Resend email"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard label="Level" value={String(progress.level)} />

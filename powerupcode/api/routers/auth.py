@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
-from api.dependencies import get_db
+from api.dependencies import get_current_user, get_db
 from api.models.user import EmailToken, User
 from api.schemas.user import (
     ForgotPasswordRequest,
@@ -17,6 +17,7 @@ from api.schemas.user import (
     TokenResponse,
     UserCreate,
     UserLogin,
+    UserMeResponse,
 )
 from services.auth.jwt import create_access_token
 from services.email.client import send_password_reset_email, send_verification_email
@@ -83,6 +84,67 @@ async def login(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     return TokenResponse(access_token=create_access_token(user.id, settings.secret_key))
+
+
+@router.get("/me", response_model=UserMeResponse)
+async def get_me(
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> UserMeResponse:
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserMeResponse(
+        user_id=user.id,
+        username=user.username,
+        email=user.email,
+        is_verified=user.is_verified,
+    )
+
+
+_RESEND_COOLDOWN = timedelta(minutes=5)
+
+
+@router.post("/resend-verification", response_model=MessageResponse)
+async def resend_verification(
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> MessageResponse:
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.is_verified:
+        return MessageResponse(message="Email is already verified")
+
+    recent = await db.scalar(
+        select(EmailToken).where(
+            EmailToken.user_id == user_id,
+            EmailToken.token_type == "verify",
+            EmailToken.used_at.is_(None),
+            EmailToken.created_at >= _now() - _RESEND_COOLDOWN,
+        )
+    )
+    if recent is not None:
+        raise HTTPException(
+            status_code=429,
+            detail="Please wait a few minutes before requesting another verification email",
+        )
+
+    token = EmailToken(
+        user_id=user_id,
+        token_type="verify",
+        expires_at=_now() + _VERIFY_TTL,
+    )
+    db.add(token)
+    await db.commit()
+
+    try:
+        await send_verification_email(user.email, user.username, token.token)
+    except Exception:
+        logger.exception("Failed to send verification email to %s", user.email)
+
+    return MessageResponse(message="Verification email sent")
 
 
 @router.get("/verify-email", response_model=MessageResponse)

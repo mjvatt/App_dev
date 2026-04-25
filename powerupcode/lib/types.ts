@@ -49,6 +49,13 @@ export interface SubscriptionStatus {
   current_period_end: string | null;
 }
 
+export interface UserMe {
+  user_id: string;
+  username: string;
+  email: string;
+  is_verified: boolean;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   username: string;

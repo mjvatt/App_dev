@@ -51,3 +51,10 @@ class ResetPasswordRequest(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class UserMeResponse(BaseModel):
+    user_id: str
+    username: str
+    email: str
+    is_verified: bool
