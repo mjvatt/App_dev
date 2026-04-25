@@ -279,12 +279,23 @@
         <select id="col-team" class="filter-select"><option value="">All Teams</option></select>
         <select id="col-yearfrom" class="filter-select"><option value="">From Year</option></select>
         <select id="col-yearto" class="filter-select"><option value="">To Year</option></select>
+        <select id="col-minpicks" class="filter-select">
+          <option value="10">Min 10 picks</option>
+          <option value="15" selected>Min 15 picks</option>
+          <option value="20">Min 20 picks</option>
+          <option value="30">Min 30 picks</option>
+          <option value="50">Min 50 picks</option>
+        </select>
         <button class="btn-apply" id="col-apply"><i class="fas fa-filter"></i> Apply</button>
       </div>
       <div class="chart-grid">
         <div class="chart-card wide">
           <div class="chart-card-header"><div><h3>Top 25 Colleges by Draft Picks</h3><p>Filtered results</p></div></div>
           <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-collegePipeline"></canvas></div>
+        </div>
+        <div class="chart-card wide">
+          <div class="chart-card-header"><div><h3>College Efficiency — Avg Career AV per Pick</h3><p>Top 25 colleges ranked by average career AV produced per draft selection · subject to min picks filter</p></div></div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-collegeEfficiency"></canvas></div>
         </div>
       </div>
     </section>

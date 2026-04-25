@@ -334,7 +334,22 @@
       yearFrom:  document.getElementById('col-yearfrom').value || undefined,
       yearTo:    document.getElementById('col-yearto').value   || undefined,
     };
+    const minPicks = +document.getElementById('col-minpicks').value || 15;
+
     DraftCharts.hbar('chart-collegePipeline', DraftData.topColleges(25, filter));
+
+    const efficient = DraftData.hiddenGemColleges(filter, minPicks, 25);
+    DraftCharts.ghostLeaderboard('chart-collegeEfficiency', {
+      labels:      efficient.map(c => c.college),
+      values:      efficient.map(c => c.avgAV),
+      metricLabel: 'Avg Career AV / Pick',
+      xLabel:      'Average career AV per draft selection',
+      meta:        efficient.map(c => ({
+        totalPicks: c.totalPicks,
+        totalAV:    c.totalAV,
+        avgPB:      c.avgPB,
+      })),
+    });
   }
 
   /* ═══════════════════════════════════════════════════════════════════
