@@ -77,6 +77,33 @@
     /* top colleges */
     DraftCharts.hbar('chart-topColleges', DraftData.topColleges(20));
 
+    /* Top draft classes */
+    const topClasses = DraftData.draftClassGrades()
+      .filter(d => !d.incomplete && d.picks > 0)
+      .sort((a, b) => b.grade - a.grade)
+      .slice(0, 5);
+    document.getElementById('dash-top-classes').innerHTML = topClasses.map((d, i) => `
+      <li class="stat-row">
+        <span class="stat-rank">${i + 1}</span>
+        <div class="stat-main">
+          <div class="stat-label">${d.year} Draft</div>
+          <div class="stat-sub">${d.picks} picks · ${d.totalAV.toLocaleString()} career AV</div>
+        </div>
+        <span class="stat-value">${d.grade}</span>
+      </li>`).join('');
+
+    /* Top drafting teams (careers through 2020 to avoid incomplete data) */
+    const topTeams = DraftData.teamOutcomeEfficiency({ yearFrom: 1994, yearTo: 2020 });
+    document.getElementById('dash-top-teams').innerHTML = topTeams.meta.slice(0, 5).map((t, i) => `
+      <li class="stat-row">
+        <span class="stat-rank">${i + 1}</span>
+        <div class="stat-main">
+          <div class="stat-label">${t.team}</div>
+          <div class="stat-sub">${t.picks} picks · ${t.totalAV.toLocaleString()} career AV</div>
+        </div>
+        <span class="stat-value">${t.efficiency}</span>
+      </li>`).join('');
+
     /* Round 1 year selector */
     const r1Sel = document.getElementById('r1year-select');
     r1Sel.innerHTML = meta.years.slice().reverse()

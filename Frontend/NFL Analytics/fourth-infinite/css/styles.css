@@ -389,6 +389,34 @@ body { display: flex; overflow: hidden; }
 .chart-wrap--hbar-lg { height: 520px; }
 .chart-wrap canvas { width: 100% !important; height: 100% !important; }
 
+/* ── Dashboard stat rail ───────────────────────────────────────── */
+.stat-list { list-style: none; display: flex; flex-direction: column; }
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-main { flex: 1; min-width: 0; }
+.stat-main .stat-label { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-main .stat-sub { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
+.stat-value { font-size: 18px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+
 /* ── Filters ───────────────────────────────────────────────────── */
 .filter-bar {
   display: flex;
