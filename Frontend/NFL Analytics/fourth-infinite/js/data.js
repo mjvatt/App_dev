@@ -7,6 +7,7 @@ const DraftData = (() => {
   let _trades       = null;
   let _expectedAv   = null;
   let _sleeperPreds = null;
+  let _teamStats    = null;
 
   const POS_COLORS = {
     QB:    '#3b82f6',
@@ -567,6 +568,30 @@ const DraftData = (() => {
       .slice(0, topN);
   }
 
+  async function loadTeamStats() {
+    if (_teamStats !== null) return;
+    try {
+      const resp = await fetch('data/team_stats.json');
+      const json = await resp.json();
+      _teamStats = {};
+      json.stats.forEach(s => {
+        if (!_teamStats[s.team]) _teamStats[s.team] = {};
+        _teamStats[s.team][s.year] = s;
+      });
+    } catch (_) {
+      _teamStats = {};
+    }
+  }
+
+  function teamSeasonStat(team, stat) {
+    if (!_teamStats || !_teamStats[team]) return { labels: [], values: [] };
+    const rows = Object.values(_teamStats[team]).sort((a, b) => a.year - b.year);
+    return {
+      labels: rows.map(r => r.year),
+      values: rows.map(r => r[stat] || 0),
+    };
+  }
+
   async function loadSleeperPredictions() {
     if (_sleeperPreds !== null) return;
     try {
@@ -614,5 +639,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings };
+  return { load, picks, meta, posColor, posColorAlpha, loadTeamStats, teamSeasonStat, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings };
 })();

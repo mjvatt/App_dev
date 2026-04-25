@@ -928,5 +928,39 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, update };
+  /* ── Season stat line ───────────────────────────────────────────── */
+  function statLine(canvasId, data, yLabel = '') {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, 'rgba(59,130,246,.25)');
+    gradient.addColorStop(1, 'rgba(59,130,246,0)');
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: yLabel,
+          data:  data.values,
+          borderColor: '#3b82f6',
+          backgroundColor: gradient,
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#3b82f6',
+          fill: true,
+          tension: .35,
+          spanGaps: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: _baseLegend(false), tooltip: _tooltip() },
+        scales: _baseScales('Year', yLabel),
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, statLine, update };
 })();

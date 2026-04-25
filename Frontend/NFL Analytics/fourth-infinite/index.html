@@ -268,6 +268,20 @@
           <div class="chart-card-header"><div><h3>Draft Class Grades by Year</h3><p>Career AV generated per unit of draft capital · amber = top quartile · faded = 2021+ incomplete</p></div></div>
           <div class="chart-wrap"><canvas id="chart-teamDraftGrade"></canvas></div>
         </div>
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div><h3>Season Stats</h3><p>Team offensive &amp; scoring stats by season · 1999–2025</p></div>
+            <select id="team-stat-select" class="filter-select">
+              <option value="points_for">Points For</option>
+              <option value="points_against">Points Against</option>
+              <option value="pass_yards">Pass Yards</option>
+              <option value="rush_yards">Rush Yards</option>
+              <option value="pass_tds">Pass TDs</option>
+              <option value="rush_tds">Rush TDs</option>
+            </select>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-teamSeasonStat"></canvas></div>
+        </div>
       </div>
     </section>
 

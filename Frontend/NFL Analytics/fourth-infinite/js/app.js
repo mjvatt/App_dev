@@ -235,6 +235,7 @@
   function initTeamHub() {
     const sel     = document.getElementById('team-select');
     const cmpSel  = document.getElementById('team-compare-select');
+    const statSel = document.getElementById('team-stat-select');
     if (sel.options.length === 1) {
       meta.teams.forEach(t => {
         sel.add(new Option(t, t));
@@ -244,6 +245,10 @@
     const render = () => renderTeamHub(sel.value, cmpSel.value);
     sel.addEventListener('change', render);
     cmpSel.addEventListener('change', render);
+    statSel.addEventListener('change', () => {
+      if (sel.value) renderTeamStatChart(sel.value, statSel.value);
+    });
+    DraftData.loadTeamStats();
     if (sel.value) render();
   }
 
@@ -273,6 +278,9 @@
     document.getElementById('t-kpi-playoffs').textContent = playoffs;
     document.getElementById('t-kpi-best').textContent     = bestSeason;
 
+    const statSel = document.getElementById('team-stat-select');
+    renderTeamStatChart(team, statSel.value);
+
     const cmp = compareTeam || null;
     DraftCharts.winsPerYear(
       'chart-teamWins',
@@ -289,6 +297,22 @@
       cmp ? DraftData.teamDraftClassGrades(cmp) : null,
       cmp || ''
     );
+  }
+
+  const STAT_LABELS = {
+    points_for:     'Points For',
+    points_against: 'Points Against',
+    pass_yards:     'Pass Yards',
+    rush_yards:     'Rush Yards',
+    pass_tds:       'Pass TDs',
+    rush_tds:       'Rush TDs',
+  };
+
+  async function renderTeamStatChart(team, stat) {
+    await DraftData.loadTeamStats();
+    const data = DraftData.teamSeasonStat(team, stat);
+    if (!data.labels.length) return;
+    DraftCharts.statLine('chart-teamSeasonStat', data, STAT_LABELS[stat] || stat);
   }
 
   /* ═══════════════════════════════════════════════════════════════════
