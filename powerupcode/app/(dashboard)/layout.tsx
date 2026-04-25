@@ -12,6 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/arcade">Arcade</NavLink>
+          <NavLink href="/history">History</NavLink>
           <NavLink href="/leaderboard">Leaderboard</NavLink>
           <NavLink href="/billing">Billing</NavLink>
           <LogoutButton />

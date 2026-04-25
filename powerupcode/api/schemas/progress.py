@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -8,3 +10,20 @@ class UserProgressResponse(BaseModel):
     xp_to_next: int
     streak_days: int
     topics: dict[str, int]
+
+
+class AttemptHistoryItem(BaseModel):
+    attempt_id: str
+    challenge_id: str
+    challenge_title: str | None = None
+    topic: str | None = None
+    difficulty: str | None = None
+    passed: bool
+    xp_earned: int
+    hints_used: int
+    time_ms: int
+    submitted_at: datetime
+
+
+class AttemptHistoryResponse(BaseModel):
+    items: list[AttemptHistoryItem]

@@ -79,6 +79,11 @@ class StubEngine(GameEngine):
     ) -> HintResult:
         return HintResult(hint="Hints are not available in stub mode.", hints_remaining=0)
 
+    async def get_challenge(self, challenge_id: str) -> Optional[ChallengeData]:
+        if challenge_id == _STUB_CHALLENGE.id:
+            return _STUB_CHALLENGE
+        return None
+
     async def get_user_level(self, user_id: str) -> UserLevel:
         return UserLevel(
             user_id=user_id,
