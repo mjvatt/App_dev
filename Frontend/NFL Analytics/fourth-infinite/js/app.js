@@ -568,6 +568,10 @@
     const teYto      = document.getElementById('ghost-te-yto');
     const teMinPicks = document.getElementById('ghost-te-minpicks');
 
+    const ciYfrom    = document.getElementById('ghost-ci-yfrom');
+    const ciYto      = document.getElementById('ghost-ci-yto');
+    const ciMinPicks = document.getElementById('ghost-ci-minpicks');
+
     meta.years.forEach(y => {
       lrYfrom.add(new Option(y, y));
       lrYto.add(new Option(y, y));
@@ -579,6 +583,8 @@
       plYto.add(new Option(y, y));
       teYfrom.add(new Option(y, y));
       teYto.add(new Option(y, y));
+      ciYfrom.add(new Option(y, y));
+      ciYto.add(new Option(y, y));
     });
 
     lrYfrom.value = String(meta.years[0]);
@@ -591,6 +597,8 @@
     plYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
     teYfrom.value = String(meta.years[0]);
     teYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
+    ciYfrom.value = String(meta.years[0]);
+    ciYto.value   = String(Math.min(2020, meta.years[meta.years.length - 1]));
 
     function renderLateRoundSteals() {
       const filter = {
@@ -702,18 +710,40 @@
       });
     }
 
+    function renderCollegeAvIndex() {
+      const filter = {
+        yearFrom: +ciYfrom.value || undefined,
+        yearTo:   +ciYto.value   || undefined,
+      };
+      const colleges = DraftData.collegeSlotSurplus(filter, +ciMinPicks.value || 20, 30);
+      DraftCharts.ghostLeaderboard('chart-collegeAvIndex', {
+        labels:      colleges.map(c => c.college),
+        values:      colleges.map(c => c.avgSurplus),
+        colors:      colleges.map(c => c.avgSurplus >= 0 ? 'rgba(245,158,11,0.75)' : 'rgba(107,114,128,0.45)'),
+        metricLabel: 'Avg Career AV Surplus vs Slot',
+        xLabel:      'Avg career AV above slot expectation per pick',
+        meta:        colleges.map(c => ({
+          totalPicks: c.totalPicks,
+          totalAV:    c.totalAV,
+          avgPick:    c.avgPick,
+        })),
+      });
+    }
+
     [lrYfrom, lrYto, lrPos].forEach(el => el.addEventListener('change', renderLateRoundSteals));
     [ssYfrom, ssYto, ssPos].forEach(el => el.addEventListener('change', renderSleeperScores));
     [hgYfrom, hgYto, hgMinPicks].forEach(el => el.addEventListener('change', renderHiddenGemColleges));
     [plYfrom, plYto].forEach(el => el.addEventListener('change', renderPosLateRoundBreakdown));
     [teYfrom, teYto, teMinPicks].forEach(el => el.addEventListener('change', renderTeamLateRoundEff));
+    [ciYfrom, ciYto, ciMinPicks].forEach(el => el.addEventListener('change', renderCollegeAvIndex));
 
     const GHOST_RENDERS = {
-      steals:  renderLateRoundSteals,
-      sleeper: renderSleeperScores,
-      hidden:  renderHiddenGemColleges,
-      pos:     renderPosLateRoundBreakdown,
-      teams:   renderTeamLateRoundEff,
+      steals:       renderLateRoundSteals,
+      sleeper:      renderSleeperScores,
+      hidden:       renderHiddenGemColleges,
+      pos:          renderPosLateRoundBreakdown,
+      teams:        renderTeamLateRoundEff,
+      'college-av': renderCollegeAvIndex,
     };
 
     function activateGhostTab(id) {

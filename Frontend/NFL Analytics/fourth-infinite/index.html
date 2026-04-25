@@ -468,6 +468,7 @@
         <button class="ghost-tab" data-ghost-tab="hidden">Hidden Gem Colleges</button>
         <button class="ghost-tab" data-ghost-tab="pos">Position Breakdown</button>
         <button class="ghost-tab" data-ghost-tab="teams">Team Efficiency</button>
+        <button class="ghost-tab" data-ghost-tab="college-av">College AV Index</button>
       </div>
 
       <div class="ghost-panel active" data-ghost-panel="steals">
@@ -585,6 +586,33 @@
               </div>
             </div>
             <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-teamLateRoundEff"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ghost-panel" data-ghost-panel="college-av">
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>College AV Index</h3>
+                <p>Colleges ranked by avg career AV above slot expectation · adjusts for draft position · top 30</p>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <select id="ghost-ci-yfrom" class="filter-select"></select>
+                <span style="color:var(--text-muted);font-size:12px">–</span>
+                <select id="ghost-ci-yto" class="filter-select"></select>
+                <select id="ghost-ci-minpicks" class="filter-select">
+                  <option value="10">Min 10 picks</option>
+                  <option value="15">Min 15 picks</option>
+                  <option value="20" selected>Min 20 picks</option>
+                  <option value="30">Min 30 picks</option>
+                  <option value="40">Min 40 picks</option>
+                  <option value="50">Min 50 picks</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-collegeAvIndex"></canvas></div>
           </div>
         </div>
       </div>

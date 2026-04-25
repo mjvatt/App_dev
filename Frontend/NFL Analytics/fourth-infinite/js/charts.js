@@ -857,6 +857,7 @@ const DraftCharts = (() => {
                 if (m.pro_bowls)  lines.push(`Pro Bowls: ${m.pro_bowls}`);
                 if (m.surplus !== undefined)  lines.push(`AV surplus vs slot: ${m.surplus}`);
                 if (m.totalPicks) lines.push(`Picks: ${m.totalPicks}  ·  Total AV: ${m.totalAV}`);
+                if (m.avgPick !== undefined) lines.push(`Avg draft slot: #${m.avgPick}`);
                 if (m.avgPB !== undefined)    lines.push(`Avg Pro Bowls/pick: ${m.avgPB}`);
                 return lines;
               },

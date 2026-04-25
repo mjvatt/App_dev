@@ -487,6 +487,32 @@ const DraftData = (() => {
       .sort((a, b) => b.avgSurplus - a.avgSurplus);
   }
 
+  /* G — colleges ranked by avg career AV surplus above slot expectation */
+  function collegeSlotSurplus(filter = {}, minPicks = 20, topN = 30) {
+    const expAv = _buildExpectedAv();
+    const byCollege = {};
+
+    picks(filter).filter(p => p.college && p.pick > 0).forEach(p => {
+      if (!byCollege[p.college]) byCollege[p.college] = { surplusSum: 0, avSum: 0, pickSum: 0, n: 0 };
+      byCollege[p.college].surplusSum += p.career_av - (expAv[p.pick] || 0);
+      byCollege[p.college].avSum      += p.career_av;
+      byCollege[p.college].pickSum    += p.pick;
+      byCollege[p.college].n++;
+    });
+
+    return Object.entries(byCollege)
+      .filter(([, c]) => c.n >= minPicks)
+      .map(([college, c]) => ({
+        college,
+        avgSurplus: +(c.surplusSum / c.n).toFixed(2),
+        totalPicks: c.n,
+        totalAV:    c.avSum,
+        avgPick:    +(c.pickSum / c.n).toFixed(1),
+      }))
+      .sort((a, b) => b.avgSurplus - a.avgSurplus)
+      .slice(0, topN);
+  }
+
   async function loadTrades() {
     if (_trades !== null) return;
     try {
@@ -501,5 +527,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear };
+  return { load, picks, meta, posColor, posColorAlpha, picksPerYear, byPosGroup, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear };
 })();
