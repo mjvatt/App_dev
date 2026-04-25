@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import settings
-from api.routers import auth, billing, challenges, progress
+from api.routers import auth, billing, challenges, leaderboard, progress
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(challenges.router, prefix="/api/challenges", tags=["challenges"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 app.include_router(billing.router, prefix="/api/billing", tags=["billing"])
+app.include_router(leaderboard.router, prefix="/api/leaderboard", tags=["leaderboard"])
 
 
 @app.get("/health", tags=["meta"])

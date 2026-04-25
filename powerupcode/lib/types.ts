@@ -48,3 +48,16 @@ export interface SubscriptionStatus {
   status: string | null;
   current_period_end: string | null;
 }
+
+export interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  level: number;
+  total_xp: number;
+  streak_days: number;
+  is_current_user: boolean;
+}
+
+export interface LeaderboardResponse {
+  entries: LeaderboardEntry[];
+}
