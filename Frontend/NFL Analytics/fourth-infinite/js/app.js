@@ -244,6 +244,7 @@
     DraftCharts.picksPerYear('chart-teamPicksYear', DraftData.picksPerYear({ team }));
     DraftCharts.donut('chart-teamPosDonut', DraftData.byPosGroup({ team }), 'Picks');
     DraftCharts.vbar('chart-teamRoundBar', DraftData.teamByRound(team), null);
+    DraftCharts.draftClassBar('chart-teamDraftGrade', DraftData.teamDraftClassGrades(team));
   }
 
   /* ═══════════════════════════════════════════════════════════════════
