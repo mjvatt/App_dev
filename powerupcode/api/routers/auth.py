@@ -38,9 +38,15 @@ async def register(
     body: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
-    existing = await db.scalar(select(User).where(User.email == body.email))
+    existing = await db.scalar(
+        select(User).where(
+            (User.email == body.email) | (User.username == body.username)
+        )
+    )
     if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        if existing.email == body.email:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Username already taken")
 
     user = User(
         email=body.email,
