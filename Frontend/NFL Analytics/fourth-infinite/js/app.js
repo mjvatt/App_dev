@@ -442,6 +442,7 @@
       renderProBowlRate();
 
       DraftCharts.draftClassBar('chart-draftClassGrades', DraftData.draftClassGrades());
+      DraftCharts.draftClassPosBar('chart-draftClassPos', DraftData.draftClassPosByYear());
 
       // Draft pick trade analysis
       const tradeYearSel = document.getElementById('trade-year');

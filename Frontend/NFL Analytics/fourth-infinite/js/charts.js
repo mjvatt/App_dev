@@ -766,6 +766,60 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── Draft class position contribution — stacked 100% bar by year ─ */
+  function draftClassPosBar(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const datasets = data.groups.map(g => ({
+      label: g,
+      data:  data.data[g],
+      backgroundColor: data.colors[g] + 'cc',
+      borderColor: 'transparent',
+      borderWidth: 0,
+      stack: 'pos',
+    }));
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: data.years, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            mode: 'index',
+            callbacks: {
+              title: items => `${items[0]?.label} Draft Class`,
+              label: item => `${item.dataset.label}: ${item.raw}%`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
+            title: { display: true, text: 'Draft Year', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            stacked: true,
+            max: 100,
+            grid: { color: GRID_COLOR() },
+            ticks: {
+              color: TICK_COLOR(),
+              font: { family: FONT_FAMILY, size: 11 },
+              callback: val => `${val}%`,
+            },
+            title: { display: true, text: '% of Class Career AV', color: TICK_COLOR(), font: { size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
   /* ── GHOST leaderboard — ranked hbar for player/college lists ──── */
   function ghostLeaderboard(canvasId, data) {
     _destroy(canvasId);
@@ -824,5 +878,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, ghostLeaderboard, update };
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, update };
 })();
