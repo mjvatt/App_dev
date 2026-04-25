@@ -2,6 +2,7 @@ from datetime import date, datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db
@@ -17,6 +18,31 @@ from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
 
 router = APIRouter()
+
+_ADAPTIVE_WINDOW = 5
+_MEDIUM_PASS_THRESHOLD = 3  # out of _ADAPTIVE_WINDOW
+_MIN_ATTEMPTS_FOR_ADAPT = 3
+
+
+async def _suggest_difficulty(db: AsyncSession, user_id: str) -> Difficulty:
+    result = await db.execute(
+        select(Attempt.passed)
+        .where(Attempt.user_id == user_id)
+        .order_by(Attempt.submitted_at.desc())
+        .limit(_ADAPTIVE_WINDOW)
+    )
+    recent = list(result.scalars().all())
+
+    if len(recent) < _MIN_ATTEMPTS_FOR_ADAPT:
+        return Difficulty.EASY
+
+    passed_count = sum(1 for p in recent if p)
+
+    if passed_count == len(recent):
+        return Difficulty.HARD
+    if passed_count >= _MEDIUM_PASS_THRESHOLD:
+        return Difficulty.MEDIUM
+    return Difficulty.EASY
 
 
 def _compute_level(total_xp: int) -> int:
@@ -39,9 +65,12 @@ def _update_streak(progress: UserProgress) -> None:
 @router.get("/next", response_model=ChallengeResponse)
 async def get_next_challenge(
     user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     topic: Topic | None = None,
     difficulty: Difficulty | None = None,
 ) -> ChallengeResponse:
+    if difficulty is None:
+        difficulty = await _suggest_difficulty(db, user_id)
     challenge = await get_engine().next_challenge(user_id, topic, difficulty)
     return ChallengeResponse(
         id=challenge.id,
