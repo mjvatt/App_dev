@@ -12,6 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/arcade">Arcade</NavLink>
           <NavLink href="/leaderboard">Leaderboard</NavLink>
+          <NavLink href="/billing">Billing</NavLink>
         </aside>
         <div className="flex-1 overflow-auto">{children}</div>
       </div>

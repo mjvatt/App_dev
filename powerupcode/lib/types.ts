@@ -41,3 +41,10 @@ export interface TokenResponse {
   access_token: string;
   token_type: string;
 }
+
+export interface SubscriptionStatus {
+  active: boolean;
+  tier: string | null;
+  status: string | null;
+  current_period_end: string | null;
+}

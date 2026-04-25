@@ -1,3 +1,5 @@
+import asyncio
+
 import stripe
 
 from api.config import settings
@@ -17,16 +19,23 @@ async def create_checkout_session(
     success_url: str,
     cancel_url: str,
 ) -> str:
-    session = stripe.checkout.Session.create(
+    session = await asyncio.to_thread(
+        stripe.checkout.Session.create,
         client_reference_id=user_id,
         payment_method_types=["card"],
         line_items=[{"price": _PRICE_IDS[plan], "quantity": 1}],
         mode="subscription",
+        subscription_data={"metadata": {"user_id": user_id, "plan": plan}},
         success_url=success_url,
         cancel_url=cancel_url,
     )
     return session.url or ""
 
 
-async def handle_webhook(payload: bytes, sig_header: str) -> dict:  # type: ignore[type-arg]
-    return stripe.Webhook.construct_event(payload, sig_header, settings.stripe_webhook_secret)
+def handle_webhook(payload: bytes, sig_header: str) -> stripe.Event:
+    try:
+        return stripe.Webhook.construct_event(  # type: ignore[return-value]
+            payload, sig_header, settings.stripe_webhook_secret
+        )
+    except (stripe.error.SignatureVerificationError, ValueError) as exc:
+        raise ValueError(str(exc)) from exc
