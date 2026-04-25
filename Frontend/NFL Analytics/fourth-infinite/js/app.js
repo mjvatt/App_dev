@@ -340,8 +340,9 @@
   /* ═══════════════════════════════════════════════════════════════════
      SAGE
   ═══════════════════════════════════════════════════════════════════ */
-  let _sageInited  = false;
-  let _ghostInited = false;
+  let _sageInited     = false;
+  let _ghostInited    = false;
+  let _ghostTabInited = {};
 
   function initSAGE() {
     if (!_sageInited) {
@@ -706,12 +707,32 @@
     [plYfrom, plYto].forEach(el => el.addEventListener('change', renderPosLateRoundBreakdown));
     [teYfrom, teYto, teMinPicks].forEach(el => el.addEventListener('change', renderTeamLateRoundEff));
 
-    renderLateRoundSteals();
-    renderSleeperScores();
-    renderHiddenGemColleges();
-    renderPosLateRoundBreakdown();
-    renderTeamLateRoundEff();
+    const GHOST_RENDERS = {
+      steals:  renderLateRoundSteals,
+      sleeper: renderSleeperScores,
+      hidden:  renderHiddenGemColleges,
+      pos:     renderPosLateRoundBreakdown,
+      teams:   renderTeamLateRoundEff,
+    };
 
+    function activateGhostTab(id) {
+      document.querySelectorAll('.ghost-tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.ghostTab === id)
+      );
+      document.querySelectorAll('.ghost-panel').forEach(p =>
+        p.classList.toggle('active', p.dataset.ghostPanel === id)
+      );
+      if (!_ghostTabInited[id]) {
+        _ghostTabInited[id] = true;
+        GHOST_RENDERS[id]();
+      }
+    }
+
+    document.querySelectorAll('.ghost-tab').forEach(tab => {
+      tab.addEventListener('click', () => activateGhostTab(tab.dataset.ghostTab));
+    });
+
+    activateGhostTab('steals');
     _ghostInited = true;
   }
 
@@ -733,8 +754,9 @@
   document.querySelectorAll('.theme-switch-opt').forEach(btn => {
     btn.addEventListener('click', () => {
       applyTheme(btn.dataset.t);
-      _sageInited  = false;
-      _ghostInited = false;
+      _sageInited     = false;
+      _ghostInited    = false;
+      _ghostTabInited = {};
       showView(_currentView);
     });
   });
