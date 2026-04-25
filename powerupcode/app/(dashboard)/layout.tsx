@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AuthGuard from "@/components/auth/AuthGuard";
+import LogoutButton from "@/components/auth/LogoutButton";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <NavLink href="/arcade">Arcade</NavLink>
           <NavLink href="/leaderboard">Leaderboard</NavLink>
           <NavLink href="/billing">Billing</NavLink>
+          <LogoutButton />
         </aside>
         <div className="flex-1 overflow-auto">{children}</div>
       </div>
