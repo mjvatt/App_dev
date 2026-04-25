@@ -233,15 +233,21 @@
      TEAM HUB
   ═══════════════════════════════════════════════════════════════════ */
   function initTeamHub() {
-    const sel = document.getElementById('team-select');
+    const sel     = document.getElementById('team-select');
+    const cmpSel  = document.getElementById('team-compare-select');
     if (sel.options.length === 1) {
-      meta.teams.forEach(t => sel.add(new Option(t, t)));
+      meta.teams.forEach(t => {
+        sel.add(new Option(t, t));
+        cmpSel.add(new Option(t, t));
+      });
     }
-    sel.addEventListener('change', () => renderTeamHub(sel.value));
-    if (sel.value) renderTeamHub(sel.value);
+    const render = () => renderTeamHub(sel.value, cmpSel.value);
+    sel.addEventListener('change', render);
+    cmpSel.addEventListener('change', render);
+    if (sel.value) render();
   }
 
-  function renderTeamHub(team) {
+  function renderTeamHub(team, compareTeam = '') {
     if (!team) return;
     const teamPicks = DraftData.picks({ team });
     const r1        = teamPicks.filter(p => p.round === 1).length;
@@ -267,11 +273,22 @@
     document.getElementById('t-kpi-playoffs').textContent = playoffs;
     document.getElementById('t-kpi-best').textContent     = bestSeason;
 
-    DraftCharts.winsPerYear('chart-teamWins', DraftData.winsByYear(team));
+    const cmp = compareTeam || null;
+    DraftCharts.winsPerYear(
+      'chart-teamWins',
+      DraftData.winsByYear(team),
+      cmp ? DraftData.winsByYear(cmp) : null,
+      team, cmp || ''
+    );
     DraftCharts.picksPerYear('chart-teamPicksYear', DraftData.picksPerYear({ team }));
     DraftCharts.donut('chart-teamPosDonut', DraftData.byPosGroup({ team }), 'Picks');
     DraftCharts.vbar('chart-teamRoundBar', DraftData.teamByRound(team), null);
-    DraftCharts.draftClassBar('chart-teamDraftGrade', DraftData.teamDraftClassGrades(team));
+    DraftCharts.draftClassBar(
+      'chart-teamDraftGrade',
+      DraftData.teamDraftClassGrades(team),
+      cmp ? DraftData.teamDraftClassGrades(cmp) : null,
+      cmp || ''
+    );
   }
 
   /* ═══════════════════════════════════════════════════════════════════

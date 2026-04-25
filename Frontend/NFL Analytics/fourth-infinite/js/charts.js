@@ -273,33 +273,55 @@ const DraftCharts = (() => {
   }
 
   /* ── Wins per season line (playoff years highlighted) ───────────── */
-  function winsPerYear(canvasId, data) {
+  function winsPerYear(canvasId, dataA, dataB = null, labelA = 'Wins', labelB = 'Compare') {
     _destroy(canvasId);
     const ctx = document.getElementById(canvasId).getContext('2d');
-    const pointColors = data.playoffs.map(p => p ? ACCENT : '#3b82f6');
-    const pointRadii  = data.playoffs.map(p => p ? 5 : 3);
+
+    const pointColorsA = dataA.playoffs.map(p => p ? ACCENT : '#3b82f6');
+    const pointRadiiA  = dataA.playoffs.map(p => p ? 5 : 3);
+
+    const datasets = [{
+      label: labelA,
+      data: dataA.values,
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,.1)',
+      borderWidth: 2.5,
+      pointBackgroundColor: pointColorsA,
+      pointRadius: pointRadiiA,
+      pointHoverRadius: 6,
+      fill: true,
+      tension: .3,
+    }];
+
+    if (dataB) {
+      const COMPARE_COLOR = '#10b981';
+      const bByYear = {};
+      dataB.labels.forEach((y, i) => { bByYear[y] = { w: dataB.values[i], playoff: dataB.playoffs[i] }; });
+      const bValues   = dataA.labels.map(y => bByYear[y]?.w   ?? null);
+      const bPlayoffs = dataA.labels.map(y => bByYear[y]?.playoff ?? false);
+      datasets.push({
+        label: labelB,
+        data: bValues,
+        borderColor: COMPARE_COLOR,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [5, 4],
+        pointBackgroundColor: bPlayoffs.map(p => p ? ACCENT : COMPARE_COLOR),
+        pointRadius: bPlayoffs.map(p => p ? 4 : 2),
+        pointHoverRadius: 5,
+        fill: false,
+        tension: .3,
+        spanGaps: true,
+      });
+    }
 
     _charts[canvasId] = new Chart(ctx, {
       type: 'line',
-      data: {
-        labels: data.labels,
-        datasets: [{
-          label: 'Wins',
-          data: data.values,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59,130,246,.1)',
-          borderWidth: 2.5,
-          pointBackgroundColor: pointColors,
-          pointRadius: pointRadii,
-          pointHoverRadius: 6,
-          fill: true,
-          tension: .3,
-        }],
-      },
+      data: { labels: dataA.labels, datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: _baseLegend(false), tooltip: _tooltip() },
+        plugins: { legend: _baseLegend(dataB !== null), tooltip: _tooltip() },
         scales: {
           x: {
             grid: { color: GRID_COLOR() },
@@ -711,44 +733,67 @@ const DraftCharts = (() => {
   }
 
   /* ── Draft class grades — vertical bar by year ─────────────────── */
-  function draftClassBar(canvasId, data) {
+  function draftClassBar(canvasId, dataA, dataB = null, labelB = 'Compare') {
     _destroy(canvasId);
     const ctx = document.getElementById(canvasId).getContext('2d');
 
-    const complete = data.filter(d => !d.incomplete).map(d => d.grade).sort((a, b) => a - b);
+    const complete = dataA.filter(d => !d.incomplete).map(d => d.grade).sort((a, b) => a - b);
     const q1 = complete[Math.floor(complete.length * 0.25)];
     const q3 = complete[Math.floor(complete.length * 0.75)];
 
-    const colors = data.map(d => {
+    const colors = dataA.map(d => {
       if (d.incomplete)  return 'rgba(107,114,128,0.3)';
       if (d.grade >= q3) return '#f59e0bdd';
       if (d.grade <= q1) return '#6b728099';
       return '#3b82f6cc';
     });
 
+    const datasets = [{
+      label: 'Draft Class Grade',
+      data:  dataA.map(d => d.grade),
+      backgroundColor: colors,
+      borderWidth: 0,
+      borderRadius: 3,
+    }];
+
+    if (dataB) {
+      const COMPARE_COLOR = '#10b981';
+      const bByYear = {};
+      dataB.forEach(d => { bByYear[d.year] = d; });
+      datasets.push({
+        type: 'line',
+        label: labelB,
+        data: dataA.map(d => bByYear[d.year]?.grade ?? null),
+        borderColor: COMPARE_COLOR,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [4, 3],
+        pointRadius: 3,
+        pointBackgroundColor: COMPARE_COLOR,
+        fill: false,
+        tension: .3,
+        spanGaps: true,
+      });
+    }
+
     _charts[canvasId] = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: data.map(d => d.year),
-        datasets: [{
-          label: 'Draft Class Grade',
-          data:  data.map(d => d.grade),
-          backgroundColor: colors,
-          borderWidth: 0,
-          borderRadius: 3,
-        }],
+        labels: dataA.map(d => d.year),
+        datasets,
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: _baseLegend(false),
+          legend: _baseLegend(dataB !== null),
           tooltip: {
             ..._tooltip(),
             callbacks: {
               title: items => `${items[0]?.label} Draft Class`,
               label: item => {
-                const d = data[item.dataIndex];
+                if (item.dataset.type === 'line') return `${item.dataset.label}: ${item.raw} AV/cap`;
+                const d = dataA[item.dataIndex];
                 const lines = [
                   `Grade: ${d.grade} AV / capital unit`,
                   `Career AV: ${d.totalAV.toLocaleString()}`,
