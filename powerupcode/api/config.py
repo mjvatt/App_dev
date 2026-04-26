@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost/powerupcode"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5434/powerupcode"
     secret_key: str = "dev-secret-change-in-production"
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
