@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getToken } from "@/lib/auth";
 import { authedRequest } from "@/lib/api";
-import type { UserMe, UserProgress, Topic } from "@/lib/types";
+import type { UserMe, UserProgress, Topic, Difficulty } from "@/lib/types";
 import XPBar from "@/components/game/XPBar";
 
 const TOPIC_LABELS: Record<Topic, string> = {
@@ -17,6 +17,13 @@ const TOPIC_LABELS: Record<Topic, string> = {
 };
 
 const XP_PER_LEVEL = 100;
+
+const DIFFICULTIES: { key: Difficulty; label: string; color: string }[] = [
+  { key: "easy", label: "Easy", color: "text-green-400" },
+  { key: "medium", label: "Medium", color: "text-yellow-400" },
+  { key: "hard", label: "Hard", color: "text-orange-400" },
+  { key: "boss", label: "Boss", color: "text-red-400" },
+];
 
 export default function DashboardPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -77,6 +84,18 @@ export default function DashboardPage() {
           <div className="h-3 w-32 bg-zinc-800 rounded mb-4" />
           <div className="h-2 w-full bg-zinc-800 rounded" />
         </div>
+        <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 mb-6 animate-pulse">
+          <div className="h-3 w-28 bg-zinc-800 rounded mb-4" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-zinc-900 rounded-lg p-3">
+                <div className="h-2 w-12 bg-zinc-800 rounded mb-2" />
+                <div className="h-6 w-8 bg-zinc-800 rounded mb-1" />
+                <div className="h-2 w-16 bg-zinc-800 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -124,7 +143,7 @@ export default function DashboardPage() {
         <XPBar current={xpInLevel} max={XP_PER_LEVEL} level={progress.level} />
       </div>
 
-      <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6">
+      <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 mb-4">
         <p className="text-zinc-500 text-sm mb-4">Topics Solved</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {(Object.keys(TOPIC_LABELS) as Topic[]).map((topic) => (
@@ -133,6 +152,24 @@ export default function DashboardPage() {
               <p className="text-xl font-bold text-white">{progress.topics[topic] ?? 0}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6">
+        <p className="text-zinc-500 text-sm mb-4">By Difficulty</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {DIFFICULTIES.map(({ key, label, color }) => {
+            const stats = progress.difficulty_stats[key];
+            return (
+              <div key={key} className="bg-zinc-900 rounded-lg p-3">
+                <p className={`text-xs font-medium mb-1 ${color}`}>{label}</p>
+                <p className="text-xl font-bold text-white">{stats?.attempts ?? 0}</p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  {stats ? `${Math.round(stats.pass_rate * 100)}% pass` : "No attempts"}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -3,6 +3,12 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class DifficultyStats(BaseModel):
+    attempts: int
+    passed: int
+    pass_rate: float
+
+
 class UserProgressResponse(BaseModel):
     user_id: str
     total_xp: int
@@ -10,6 +16,7 @@ class UserProgressResponse(BaseModel):
     xp_to_next: int
     streak_days: int
     topics: dict[str, int]
+    difficulty_stats: dict[str, DifficultyStats]
 
 
 class AttemptHistoryItem(BaseModel):

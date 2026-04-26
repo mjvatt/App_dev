@@ -28,6 +28,12 @@ export interface AttemptResult {
   time_ms: number;
 }
 
+export interface DifficultyStats {
+  attempts: number;
+  passed: number;
+  pass_rate: number;
+}
+
 export interface UserProgress {
   user_id: string;
   total_xp: number;
@@ -35,6 +41,7 @@ export interface UserProgress {
   xp_to_next: number;
   streak_days: number;
   topics: Record<Topic, number>;
+  difficulty_stats: Partial<Record<Difficulty, DifficultyStats>>;
 }
 
 export interface TokenResponse {

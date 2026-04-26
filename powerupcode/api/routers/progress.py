@@ -1,12 +1,12 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db
 from api.models.challenge import Attempt, UserProgress
-from api.schemas.progress import AttemptHistoryItem, AttemptHistoryResponse, UserProgressResponse
+from api.schemas.progress import AttemptHistoryItem, AttemptHistoryResponse, DifficultyStats, UserProgressResponse
 from services.engine import get_engine
 
 router = APIRouter()
@@ -21,6 +21,25 @@ async def get_my_progress(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserProgressResponse:
     progress = await db.get(UserProgress, user_id)
+
+    diff_result = await db.execute(
+        select(
+            Attempt.difficulty,
+            func.count().label("attempts"),
+            func.sum(case((Attempt.passed == True, 1), else_=0)).label("passed"),
+        )
+        .where(Attempt.user_id == user_id, Attempt.difficulty.isnot(None))
+        .group_by(Attempt.difficulty)
+    )
+    difficulty_stats: dict[str, DifficultyStats] = {
+        row.difficulty: DifficultyStats(
+            attempts=row.attempts,
+            passed=row.passed,
+            pass_rate=row.passed / row.attempts if row.attempts > 0 else 0.0,
+        )
+        for row in diff_result.all()
+    }
+
     if progress is None:
         return UserProgressResponse(
             user_id=user_id,
@@ -29,6 +48,7 @@ async def get_my_progress(
             xp_to_next=_XP_PER_LEVEL,
             streak_days=0,
             topics={},
+            difficulty_stats=difficulty_stats,
         )
     return UserProgressResponse(
         user_id=progress.user_id,
@@ -37,6 +57,7 @@ async def get_my_progress(
         xp_to_next=_XP_PER_LEVEL - (progress.total_xp % _XP_PER_LEVEL),
         streak_days=progress.streak_days,
         topics=progress.topics or {},
+        difficulty_stats=difficulty_stats,
     )
 
 
