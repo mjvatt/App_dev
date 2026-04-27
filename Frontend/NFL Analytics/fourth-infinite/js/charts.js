@@ -1005,7 +1005,7 @@ const DraftCharts = (() => {
             pointHoverRadius: 6,
           },
           {
-            label: `Trend  (R² = ${data.r2})`,
+            label: `Trend  (R² = ${data.r2})  ·  n = ${data.points.length} team-seasons`,
             data: trend,
             type: 'line',
             borderColor: ACCENT,
@@ -1028,10 +1028,13 @@ const DraftCharts = (() => {
             callbacks: {
               title: () => '',
               label: item => {
-                const p = item.raw;
+                const p   = item.raw;
+                const lf  = data.lagFrom;
+                const lt  = data.lagTo;
+                const lag = lf === lt ? `Y+${lf} wins` : `avg wins Y+${lf}–Y+${lt}`;
                 return [
                   `${p.franchise}  ·  ${p.year} draft`,
-                  `Capital: ${p.x}  →  ${p.year + 1} wins: ${p.y}`,
+                  `Capital: ${p.x}  →  ${lag}: ${p.y}`,
                 ];
               },
             },

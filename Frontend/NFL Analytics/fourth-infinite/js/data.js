@@ -238,8 +238,10 @@ const DraftData = (() => {
     return { rows, eras: eraLabels };
   }
 
-  /* ATLAS — league-wide draft capital (year Y) vs wins (year Y+1) with linear regression */
-  function leagueDraftToWins(yearFrom = 1994, yearTo = 2024) {
+  /* ATLAS — league-wide draft capital (year Y) vs avg wins in Y+lagFrom through Y+lagTo */
+  function leagueDraftToWins(yearFrom = 1994, yearTo = 2020, lagFrom = 3, lagTo = 5) {
+    lagFrom = +lagFrom; lagTo = +lagTo;
+
     const standingsMap = {};
     _standings.forEach(s => {
       if (!standingsMap[s.year]) standingsMap[s.year] = {};
@@ -256,13 +258,18 @@ const DraftData = (() => {
     Object.entries(capByKey).forEach(([key, capital]) => {
       const [franchise, yearStr] = key.split('|');
       const year = +yearStr;
-      const nextW = standingsMap[year + 1]?.[franchise];
-      if (nextW === undefined) return;
-      points.push({ franchise, year, capital: +capital.toFixed(1), wins: nextW });
+      const winValues = [];
+      for (let lag = lagFrom; lag <= lagTo; lag++) {
+        const w = standingsMap[year + lag]?.[franchise];
+        if (w !== undefined) winValues.push(w);
+      }
+      if (!winValues.length) return;
+      const avgWins = +(winValues.reduce((s, w) => s + w, 0) / winValues.length).toFixed(1);
+      points.push({ franchise, year, capital: +capital.toFixed(1), wins: avgWins });
     });
 
     const n = points.length;
-    if (n < 2) return { points, m: 0, b: 0, r2: 0, xMin: 0, xMax: 100 };
+    if (n < 2) return { points, m: 0, b: 0, r2: 0, xMin: 0, xMax: 100, lagFrom, lagTo };
 
     const sumX  = points.reduce((s, p) => s + p.capital, 0);
     const sumY  = points.reduce((s, p) => s + p.wins, 0);
@@ -278,7 +285,7 @@ const DraftData = (() => {
     const xMin  = +Math.min(...points.map(p => p.capital)).toFixed(1);
     const xMax  = +Math.max(...points.map(p => p.capital)).toFixed(1);
 
-    return { points, m: +m.toFixed(4), b: +b.toFixed(2), r2, xMin, xMax };
+    return { points, m: +m.toFixed(4), b: +b.toFixed(2), r2, xMin, xMax, lagFrom, lagTo };
   }
 
   /* ATLAS — franchise legacy score: 40% win %, 40% playoff rate, 20% draft efficiency */

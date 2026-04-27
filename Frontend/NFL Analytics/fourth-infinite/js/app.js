@@ -591,17 +591,28 @@
       DraftCharts.trajectoryChart('chart-atlas-trajectories', series);
     }
 
+    const dwLag   = document.getElementById('atlas-dw-lag');
     const dwYfrom = document.getElementById('atlas-dw-yfrom');
     const dwYto   = document.getElementById('atlas-dw-yto');
 
+    /* default yearTo per lag window: need standings through yearTo+lagTo */
+    const LAG_DEFAULTS = { '1|1': { yearTo: 2024 }, '3|5': { yearTo: 2020 } };
+
     if (dwYfrom.options.length === 0) {
-      const draftYears = meta.years.filter(y => y <= 2024);
-      draftYears.forEach(y => {
+      meta.years.filter(y => y <= 2024).forEach(y => {
         dwYfrom.add(new Option(y, y));
         dwYto.add(new Option(y, y));
       });
-      dwYfrom.value = String(draftYears[0]);
-      dwYto.value   = '2024';
+      dwYfrom.value = String(meta.years[0]);
+      dwYto.value   = '2020';
+
+      dwLag.addEventListener('change', () => {
+        const def = LAG_DEFAULTS[dwLag.value];
+        if (def) dwYto.value = String(def.yearTo);
+        _atlasTabInited['draft-wins'] = false;
+        renderDraftWins();
+        _atlasTabInited['draft-wins'] = true;
+      });
       [dwYfrom, dwYto].forEach(el => el.addEventListener('change', () => {
         _atlasTabInited['draft-wins'] = false;
         renderDraftWins();
@@ -610,8 +621,10 @@
     }
 
     function renderDraftWins() {
-      const data = DraftData.leagueDraftToWins(+dwYfrom.value, +dwYto.value);
-      document.getElementById('atlas-dw-r2').textContent = `R² = ${data.r2}`;
+      const [lagFrom, lagTo] = (dwLag.value || '3|5').split('|').map(Number);
+      const data = DraftData.leagueDraftToWins(+dwYfrom.value, +dwYto.value, lagFrom, lagTo);
+      const lagLabel = lagFrom === lagTo ? `Y+${lagFrom}` : `Y+${lagFrom}–Y+${lagTo}`;
+      document.getElementById('atlas-dw-r2').textContent = `R² = ${data.r2}  ·  lag ${lagLabel}`;
       DraftCharts.leagueDraftWinsChart('chart-atlas-draft-wins', data);
     }
 

@@ -497,7 +497,12 @@
       <!-- Tab 3: Draft → Wins -->
       <div class="ghost-panel" data-atlas-panel="draft-wins">
         <div class="filter-bar">
-          <label class="filter-label">Draft years:</label>
+          <label class="filter-label">Lag window:</label>
+          <select id="atlas-dw-lag" class="filter-select">
+            <option value="1|1">Y+1 · next season</option>
+            <option value="3|5" selected>Y+3 to Y+5 · prime years</option>
+          </select>
+          <label class="filter-label" style="margin-left:8px">Draft years:</label>
           <select id="atlas-dw-yfrom" class="filter-select"></select>
           <span style="color:var(--text-muted);font-size:12px">–</span>
           <select id="atlas-dw-yto" class="filter-select"></select>
