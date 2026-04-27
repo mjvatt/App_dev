@@ -127,14 +127,14 @@ export default function ArcadeScreen() {
               style={[
                 styles.diffBtn,
                 { borderColor: DIFFICULTY_COLORS[d] },
-                difficulty === d && { backgroundColor: DIFFICULTY_COLORS[d] + "20" },
+                difficulty === d ? { backgroundColor: DIFFICULTY_COLORS[d] + "20" } : null,
               ]}
             >
               <Text
                 style={[
                   styles.diffLabel,
                   { color: DIFFICULTY_COLORS[d] },
-                  difficulty === d && styles.diffLabelActive,
+                  difficulty === d ? styles.diffLabelActive : null,
                 ]}
               >
                 {d.charAt(0).toUpperCase() + d.slice(1)}
@@ -182,9 +182,9 @@ export default function ArcadeScreen() {
                 <TouchableOpacity
                   key={l}
                   onPress={() => handleLanguageChange(l)}
-                  style={[styles.langBtn, language === l && styles.langBtnActive]}
+                  style={[styles.langBtn, language === l ? styles.langBtnActive : null]}
                 >
-                  <Text style={[styles.langLabel, language === l && styles.langLabelActive]}>
+                  <Text style={[styles.langLabel, language === l ? styles.langLabelActive : null]}>
                     {l}
                   </Text>
                 </TouchableOpacity>

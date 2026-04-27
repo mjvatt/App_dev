@@ -1,16 +1,16 @@
 import React from "react";
-import { View, StyleSheet, ViewStyle } from "react-native";
+import { View, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import { colors, radius, spacing } from "@/lib/theme";
 
 interface CardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   elevated?: boolean;
 }
 
 export default function Card({ children, style, elevated = false }: CardProps) {
   return (
-    <View style={[styles.card, elevated && styles.elevated, style]}>{children}</View>
+    <View style={[styles.card, elevated ? styles.elevated : null, style]}>{children}</View>
   );
 }
 

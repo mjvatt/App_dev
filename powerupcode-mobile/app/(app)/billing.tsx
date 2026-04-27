@@ -92,7 +92,7 @@ export default function BillingScreen() {
         )}
 
         {status && (
-          <Card style={[styles.currentPlan, isPremium && styles.premiumBorder]}>
+          <Card style={[styles.currentPlan, isPremium ? styles.premiumBorder : null]}>
             <Text style={styles.currentPlanLabel}>Current plan</Text>
             <Text style={styles.currentPlanName}>
               {status.plan.charAt(0).toUpperCase() + status.plan.slice(1)}
