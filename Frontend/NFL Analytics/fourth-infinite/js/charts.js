@@ -1259,11 +1259,11 @@ const DraftCharts = (() => {
         },
         scales: {
           x: {
-            min: 0,
-            max: 100,
+            min: data.xMin ?? 0,
+            max: data.xMax ?? undefined,
             grid: { color: GRID_COLOR() },
             ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
-            title: { display: true, text: 'Legacy Score (0–100)', color: TICK_COLOR(), font: { size: 11 } },
+            title: { display: true, text: data.xLabel || 'Legacy Score (0–100)', color: TICK_COLOR(), font: { size: 11 } },
           },
           y: {
             grid: { display: false },

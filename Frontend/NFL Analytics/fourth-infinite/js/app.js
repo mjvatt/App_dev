@@ -683,6 +683,8 @@
         colors: stats.map(s =>
           s.stdDev >= median ? 'rgba(139,92,246,0.70)' : 'rgba(107,114,128,0.45)'
         ),
+        xMin:   0,
+        xLabel: 'Win Std Dev',
         meta: stats.map(s => ({
           avgWins:  s.avgWins,
           maxWin:   s.maxWin,
