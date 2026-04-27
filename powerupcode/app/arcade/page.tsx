@@ -38,9 +38,11 @@ export default function ArcadePage() {
   const [hintsRemaining, setHintsRemaining] = useState(3);
   const [hinting, setHinting] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | "">("");
+  const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
 
-  const loadChallenge = useCallback(async () => {
+  const loadChallenge = useCallback(async (difficulty?: Difficulty | "") => {
     const token = getToken();
     if (!token) return;
     setFetching(true);
@@ -49,8 +51,10 @@ export default function ArcadePage() {
     setHint(null);
     setHintsRemaining(3);
     setUpgradeRequired(false);
+    const diff = difficulty !== undefined ? difficulty : selectedDifficultyRef.current;
+    const qs = diff ? `?difficulty=${diff}` : "";
     try {
-      const data = await authedRequest<Challenge>("/api/challenges/next", token);
+      const data = await authedRequest<Challenge>(`/api/challenges/next${qs}`, token);
       setChallenge(data);
       startTime.current = Date.now();
     } catch (err: unknown) {
@@ -69,6 +73,12 @@ export default function ArcadePage() {
   useEffect(() => {
     loadChallenge();
   }, [loadChallenge]);
+
+  function handleDifficultyChange(diff: Difficulty | "") {
+    selectedDifficultyRef.current = diff;
+    setSelectedDifficulty(diff);
+    loadChallenge(diff);
+  }
 
   function handleLanguageChange(lang: Language) {
     setLanguage(lang);
@@ -146,6 +156,20 @@ export default function ArcadePage() {
 
           {/* Left pane: challenge description + result */}
           <div className="w-2/5 min-w-64 border-r border-zinc-900 overflow-y-auto p-6 flex flex-col gap-5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-600 shrink-0">Difficulty</span>
+              <select
+                value={selectedDifficulty}
+                onChange={(e) => handleDifficultyChange(e.target.value as Difficulty | "")}
+                className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none"
+              >
+                <option value="">Adaptive</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="boss">Boss</option>
+              </select>
+            </div>
             {fetching && (
               <p className="text-zinc-600 text-sm">Loading challenge...</p>
             )}

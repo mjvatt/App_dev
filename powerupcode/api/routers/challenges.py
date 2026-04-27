@@ -36,20 +36,21 @@ async def _has_active_subscription(db: AsyncSession, user_id: str) -> bool:
 
 async def _suggest_difficulty(db: AsyncSession, user_id: str) -> Difficulty:
     result = await db.execute(
-        select(Attempt.passed)
+        select(Attempt.passed, Attempt.difficulty)
         .where(Attempt.user_id == user_id)
         .order_by(Attempt.submitted_at.desc())
         .limit(_ADAPTIVE_WINDOW)
     )
-    recent = list(result.scalars().all())
+    recent = result.all()
 
     if len(recent) < _MIN_ATTEMPTS_FOR_ADAPT:
         return Difficulty.EASY
 
-    passed_count = sum(1 for p in recent if p)
+    passed_count = sum(1 for row in recent if row.passed)
 
     if passed_count == len(recent):
-        return Difficulty.HARD
+        had_hard = any(row.difficulty == Difficulty.HARD.value for row in recent)
+        return Difficulty.BOSS if had_hard else Difficulty.HARD
     if passed_count >= _MEDIUM_PASS_THRESHOLD:
         return Difficulty.MEDIUM
     return Difficulty.EASY
