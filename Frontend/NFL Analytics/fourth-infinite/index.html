@@ -552,7 +552,35 @@
           </div>
         </div>
       </div>
-      <div class="ghost-panel" data-atlas-panel="variance"></div>
+      <!-- Tab 5: Boom & Bust -->
+      <div class="ghost-panel" data-atlas-panel="variance">
+        <div class="filter-bar">
+          <label class="filter-label">Seasons:</label>
+          <select id="atlas-bb-yfrom" class="filter-select"></select>
+          <span style="color:var(--text-muted);font-size:12px">–</span>
+          <select id="atlas-bb-yto" class="filter-select"></select>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>Consistency vs. Quality</h3>
+                <p>Amber = consistent winners · Red = high avg, volatile · Purple = low avg, volatile · Gray = consistently mediocre</p>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:380px"><canvas id="chart-atlas-bb-scatter"></canvas></div>
+          </div>
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>Win Volatility Ranking</h3>
+                <p>Franchises ranked by win standard deviation · most volatile at top</p>
+              </div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-atlas-bb-rank"></canvas></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ─── SAGE VIEW ─── -->

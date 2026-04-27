@@ -656,11 +656,50 @@
       DraftCharts.eraRankingsChart('chart-atlas-era', sorted, eras);
     }
 
+    const bbYfrom = document.getElementById('atlas-bb-yfrom');
+    const bbYto   = document.getElementById('atlas-bb-yto');
+
+    if (bbYfrom.options.length === 0) {
+      meta.years.filter(y => y <= 2025).forEach(y => {
+        bbYfrom.add(new Option(y, y));
+        bbYto.add(new Option(y, y));
+      });
+      bbYfrom.value = String(meta.years[0]);
+      bbYto.value   = '2025';
+      [bbYfrom, bbYto].forEach(el => el.addEventListener('change', () => {
+        _atlasTabInited.variance = false;
+        renderBoomBust();
+        _atlasTabInited.variance = true;
+      }));
+    }
+
+    function renderBoomBust() {
+      const stats  = DraftData.boomBustStats(+bbYfrom.value, +bbYto.value);
+      const median = stats[Math.floor(stats.length / 2)]?.stdDev ?? 0;
+      DraftCharts.boomBustScatter('chart-atlas-bb-scatter', stats);
+      DraftCharts.atlasLeaderboard('chart-atlas-bb-rank', {
+        labels: stats.map(s => s.franchise),
+        values: stats.map(s => s.stdDev),
+        colors: stats.map(s =>
+          s.stdDev >= median ? 'rgba(139,92,246,0.70)' : 'rgba(107,114,128,0.45)'
+        ),
+        meta: stats.map(s => ({
+          avgWins:  s.avgWins,
+          maxWin:   s.maxWin,
+          minWin:   s.minWin,
+          avgSwing: s.avgSwing,
+          maxSwing: s.maxSwing,
+          seasons:  s.seasons,
+        })),
+      });
+    }
+
     const ATLAS_RENDERS = {
       dynasty:      renderDynastyIndex,
       trajectories: renderTrajectories,
       'draft-wins': renderDraftWins,
       era:          renderEraRankings,
+      variance:     renderBoomBust,
     };
 
     function activateAtlasTab(id) {

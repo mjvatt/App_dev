@@ -928,6 +928,103 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── ATLAS Boom & Bust quadrant scatter ────────────────────────── */
+  function boomBustScatter(canvasId, stats) {
+    _destroy(canvasId);
+    if (!stats.length) return;
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const meanWins = stats.reduce((s, p) => s + p.avgWins, 0) / stats.length;
+    const meanStd  = stats.reduce((s, p) => s + p.stdDev,  0) / stats.length;
+    const maxStd   = Math.max(...stats.map(p => p.stdDev))  + 0.3;
+    const maxWins  = Math.max(...stats.map(p => p.avgWins)) + 0.5;
+
+    const quadrantColor = p => {
+      const hi = p.avgWins >= meanWins;
+      const vol = p.stdDev  >= meanStd;
+      if  (hi && !vol) return 'rgba(245,158,11,0.85)';  // consistent winners
+      if  (hi &&  vol) return 'rgba(239,68,68,0.75)';   // high avg, volatile
+      if (!hi &&  vol) return 'rgba(139,92,246,0.75)';  // low avg, volatile
+      return                  'rgba(107,114,128,0.60)'; // consistently mediocre
+    };
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Franchise',
+            data: stats.map(p => ({
+              x: p.avgWins, y: p.stdDev,
+              franchise: p.franchise, maxWin: p.maxWin, minWin: p.minWin,
+              avgSwing: p.avgSwing, maxSwing: p.maxSwing, seasons: p.seasons,
+            })),
+            backgroundColor: stats.map(quadrantColor),
+            borderColor:     stats.map(quadrantColor),
+            pointRadius: 6,
+            pointHoverRadius: 8,
+          },
+          {
+            label: `Avg wins (${meanWins.toFixed(1)})`,
+            data: [{ x: meanWins, y: 0 }, { x: meanWins, y: maxStd }],
+            type: 'line',
+            borderColor: 'rgba(255,255,255,0.12)',
+            borderWidth: 1,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+          {
+            label: `Avg std dev (${meanStd.toFixed(2)})`,
+            data: [{ x: 0, y: meanStd }, { x: maxWins, y: meanStd }],
+            type: 'line',
+            borderColor: 'rgba(255,255,255,0.12)',
+            borderWidth: 1,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            filter: item => item.datasetIndex === 0,
+            callbacks: {
+              title: () => '',
+              label: item => {
+                const p = item.raw;
+                return [
+                  p.franchise,
+                  `Avg wins: ${p.x}  ·  Std dev: ${p.y}`,
+                  `Best: ${p.maxWin}W  ·  Worst: ${p.minWin}W`,
+                  `Avg YoY swing: ${p.avgSwing}W  ·  Biggest swing: ${p.maxSwing}W`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Average Wins Per Season  →', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Win Std Dev (Volatility)  →', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0,
+          },
+        },
+      },
+    });
+  }
+
   /* ── ATLAS Era Rankings — grouped hbar by era ──────────────────── */
   function eraRankingsChart(canvasId, rows, eras) {
     _destroy(canvasId);
@@ -1141,7 +1238,15 @@ const DraftCharts = (() => {
               title: items => items[0]?.label || '',
               label: item => {
                 const m = data.meta[item.dataIndex];
-                if (!m) return `Legacy Score: ${item.raw}`;
+                if (!m) return `${item.raw}`;
+                if (m.avgWins !== undefined) {
+                  return [
+                    `Std Dev: ${item.raw}`,
+                    `Avg wins: ${m.avgWins}  ·  Best: ${m.maxWin}W  ·  Worst: ${m.minWin}W`,
+                    `Avg YoY swing: ${m.avgSwing}W  ·  Biggest swing: ${m.maxSwing}W`,
+                    `${m.seasons} seasons`,
+                  ];
+                }
                 return [
                   `Legacy Score: ${item.raw}`,
                   `Win %: ${(m.winPct * 100).toFixed(1)}%  ·  ${m.wins}W over ${m.seasons} seasons`,
@@ -1203,5 +1308,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
 })();
