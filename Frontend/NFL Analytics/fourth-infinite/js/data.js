@@ -457,6 +457,36 @@ const DraftData = (() => {
     };
   }
 
+  /* expose expected AV for a single pick slot */
+  function expectedAvForPick(pick) {
+    return _buildExpectedAv()[+pick] || 0;
+  }
+
+  /* full player profile: pick data + pick value + slot context + comps */
+  function playerProfile(year, pick) {
+    const p = _picks.find(pk => pk.year === +year && pk.pick === +pick);
+    if (!p) return null;
+
+    const expAv      = _buildExpectedAv();
+    const pickValue  = +(100 * Math.pow(p.pick, -0.66)).toFixed(1);
+    const slotAvg    = +(expAv[p.pick] || 0).toFixed(1);
+    const avSurplus  = +(p.career_av - slotAvg).toFixed(1);
+
+    const comps = _picks
+      .filter(c =>
+        !(c.year === +year && c.pick === +pick) &&
+        c.pos_group === p.pos_group &&
+        Math.abs(c.pick - p.pick) <= 25 &&
+        c.pick > 0 &&
+        c.year <= 2021 &&
+        c.career_av > 0
+      )
+      .sort((a, b) => b.career_av - a.career_av)
+      .slice(0, 5);
+
+    return { pick: p, pickValue, slotAvg, avSurplus, comps };
+  }
+
   /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2020) */
   function _buildExpectedAv() {
     if (_expectedAv) return _expectedAv;
@@ -863,5 +893,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
 })();

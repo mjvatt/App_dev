@@ -198,7 +198,7 @@
     const slice = _filteredPicks.slice((_currentPage - 1) * PAGE_SIZE, _currentPage * PAGE_SIZE);
     const tbody = document.getElementById('draftTableBody');
     tbody.innerHTML = slice.map(p => `
-      <tr>
+      <tr data-year="${p.year}" data-pick="${p.pick}">
         <td>${p.year}</td>
         <td>${p.round}</td>
         <td>${p.pick}</td>
@@ -396,7 +396,7 @@
       document.getElementById('c26-board-count').textContent =
         `${filtered.length.toLocaleString()} pick${filtered.length !== 1 ? 's' : ''}`;
       document.getElementById('c26-board-body').innerHTML = filtered.map(p => `
-        <tr>
+        <tr data-year="${p.year}" data-pick="${p.pick}">
           <td>${p.round}</td>
           <td>${p.pick}</td>
           <td>${p.team}</td>
@@ -1218,6 +1218,111 @@
     activateGhostTab('steals');
     _ghostInited = true;
   }
+
+  /* ── Player Profile Modal ────────────────────────────────────────── */
+  const playerModal      = document.getElementById('playerModal');
+  const playerModalClose = document.getElementById('playerModalClose');
+
+  function closePlayerModal() {
+    playerModal.classList.remove('open');
+  }
+
+  playerModalClose.addEventListener('click', closePlayerModal);
+  playerModal.addEventListener('click', e => { if (e.target === playerModal) closePlayerModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayerModal(); });
+
+  async function openPlayerModal(year, pick) {
+    const profile = DraftData.playerProfile(year, pick);
+    if (!profile) return;
+
+    await DraftData.loadSleeperPredictions();
+    const mlResult = DraftData.sleeperModelRankings({}, 99999, 'predicted');
+    const mlPick   = mlResult.picks.find(p => p.year === +year && p.pick === +pick);
+
+    const p          = profile.pick;
+    const incomplete = p.year >= 2022;
+    const surplus    = profile.avSurplus;
+
+    const compsHtml = profile.comps.length
+      ? profile.comps.map(c => `
+          <div class="profile-comp-row">
+            <span class="profile-comp-name">${c.player}</span>
+            <span class="profile-comp-meta">${c.year} · ${c.franchise} · #${c.pick}</span>
+            <span class="profile-comp-av">${c.career_av} AV</span>
+          </div>`).join('')
+      : '<div style="color:var(--text-muted);font-size:13px">No comps with complete data found</div>';
+
+    const mlHtml = mlPick ? `
+      <div class="profile-section">
+        <h4>GHOST · ML Prediction</h4>
+        <div class="profile-context-row">
+          <span>Predicted career AV surplus</span>
+          <span class="profile-val">${mlPick.predicted_surplus}</span>
+        </div>
+        ${!mlPick.incomplete ? `
+        <div class="profile-context-row">
+          <span>Actual surplus</span>
+          <span class="profile-val ${mlPick.actual_surplus >= 0 ? 'pos' : 'neg'}">
+            ${mlPick.actual_surplus >= 0 ? '+' : ''}${mlPick.actual_surplus}
+          </span>
+        </div>` : ''}
+      </div>` : '';
+
+    document.getElementById('playerModalContent').innerHTML = `
+      <div class="profile-header">
+        <div>
+          <h2 class="profile-name">${p.player}</h2>
+          <div class="profile-meta">${p.year} Draft · Round ${p.round} · Pick #${p.pick}</div>
+          <div class="profile-meta">${p.franchise} · ${p.pos} · ${p.college}</div>
+        </div>
+        <span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)};font-size:14px;padding:6px 14px">${p.pos_group}</span>
+      </div>
+
+      <div class="profile-section">
+        <h4>Career Stats${incomplete ? ' <span class="profile-incomplete">· data still accumulating</span>' : ''}</h4>
+        <div class="profile-stat-grid">
+          <div class="profile-stat"><span class="profile-stat-val">${p.seasons}</span><span class="profile-stat-label">Seasons</span></div>
+          <div class="profile-stat"><span class="profile-stat-val">${p.career_av}</span><span class="profile-stat-label">Career AV</span></div>
+          <div class="profile-stat"><span class="profile-stat-val">${p.draft_av}</span><span class="profile-stat-label">Draft AV</span></div>
+          <div class="profile-stat"><span class="profile-stat-val">${p.pro_bowls || '—'}</span><span class="profile-stat-label">Pro Bowls</span></div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h4>Pick Context</h4>
+        <div class="profile-context-row">
+          <span>Pick #${p.pick} power-law value</span>
+          <span class="profile-val">${profile.pickValue}</span>
+        </div>
+        <div class="profile-context-row">
+          <span>Slot avg career AV (1994–2021)</span>
+          <span class="profile-val">${profile.slotAvg}</span>
+        </div>
+        <div class="profile-context-row">
+          <span>AV surplus vs slot expectation</span>
+          <span class="profile-val ${surplus >= 0 ? 'pos' : 'neg'}">${surplus >= 0 ? '+' : ''}${surplus}</span>
+        </div>
+      </div>
+
+      ${mlHtml}
+
+      <div class="profile-section">
+        <h4>Historical Comps · ${p.pos_group} · Picks ${Math.max(1, p.pick - 25)}–${p.pick + 25} · ranked by career AV</h4>
+        <div class="profile-comps">${compsHtml}</div>
+      </div>
+    `;
+
+    playerModal.classList.add('open');
+  }
+
+  /* event delegation — works for both draft board and 2026 pick board */
+  document.addEventListener('click', e => {
+    const row = e.target.closest('tr[data-year][data-pick]');
+    if (!row) return;
+    const year = +row.dataset.year;
+    const pick = +row.dataset.pick;
+    if (year && pick) openPlayerModal(year, pick);
+  });
 
   /* ── Theme toggle ─────────────────────────────────────────────────── */
   function applyTheme(theme) {
