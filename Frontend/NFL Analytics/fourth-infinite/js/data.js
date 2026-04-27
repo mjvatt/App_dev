@@ -487,11 +487,11 @@ const DraftData = (() => {
     return { pick: p, pickValue, slotAvg, avSurplus, comps };
   }
 
-  /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2020) */
+  /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2021) */
   function _buildExpectedAv() {
     if (_expectedAv) return _expectedAv;
     const slots = {};
-    _picks.filter(p => p.pick > 0 && p.year <= 2020).forEach(p => {
+    _picks.filter(p => p.pick > 0 && p.year <= 2021).forEach(p => {
       if (!slots[p.pick]) slots[p.pick] = { sum: 0, n: 0 };
       slots[p.pick].sum += p.draft_av;
       slots[p.pick].n++;
