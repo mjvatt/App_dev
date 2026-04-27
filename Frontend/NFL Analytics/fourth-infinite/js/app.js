@@ -249,6 +249,7 @@
       if (sel.value) renderTeamStatChart(sel.value, statSel.value);
     });
     DraftData.loadTeamStats();
+    DraftData.loadSalaries();
     if (sel.value) render();
   }
 
@@ -280,6 +281,7 @@
 
     const statSel = document.getElementById('team-stat-select');
     renderTeamStatChart(team, statSel.value);
+    renderTeamSalary(team);
 
     const cmp = compareTeam || null;
     DraftCharts.winsPerYear(
@@ -313,6 +315,30 @@
     const data = DraftData.teamSeasonStat(team, stat);
     if (!data.labels.length) return;
     DraftCharts.statLine('chart-teamSeasonStat', data, STAT_LABELS[stat] || stat);
+  }
+
+  async function renderTeamSalary(team) {
+    await DraftData.loadSalaries();
+
+    const capData = DraftData.teamCapSpace(team);
+    if (capData.length) {
+      DraftCharts.statLine('chart-teamCapSpace', {
+        labels: capData.map(r => r.year),
+        values: capData.map(r => +(r.cap_space / 1e6).toFixed(1)),
+      }, 'Cap Space ($M)');
+    }
+
+    const earners = DraftData.teamTopEarners(team);
+    if (earners.length) {
+      DraftCharts.ghostLeaderboard('chart-teamTopEarners', {
+        metricLabel: 'Cap Hit ($M)',
+        xLabel:      'Cap Hit ($M)',
+        labels: earners.map(e => e.pos ? `${e.player}  ·  ${e.pos}` : e.player),
+        values: earners.map(e => +(e.cap_hit / 1e6).toFixed(1)),
+        colors: earners.map(() => 'rgba(245,158,11,0.75)'),
+        meta:   earners.map(() => ({})),
+      });
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════════════

@@ -4,13 +4,13 @@ scrape_salaries.py
 Scrapes Spotrac for NFL salary cap data and writes data/salaries.json.
 
 Two datasets collected:
-  cap_by_year  — all 32 teams, total cap hit per season (FIRST_YEAR–CURRENT_YEAR)
-  top_earners  — top 15 cap hits per team for CURRENT_YEAR
+  cap_by_year  — all 32 teams, available cap space per season (FIRST_YEAR–CURRENT_YEAR)
+                 (Spotrac's /nfl/cap/{year}/ page ranks by cap space; that's the
+                  metric available from the league summary URL)
+  top_earners  — top 15 active-roster cap hits per team for CURRENT_YEAR
 
 Flags:
-  --probe   Fetch one URL (league cap 2025 + Cowboys 2025), print table
-            structure, then exit. Use this first to verify HTML before a
-            full run.
+  --probe   Fetch league cap 2025 + Cowboys 2025, print parsed results, exit.
   --debug   Dump raw HTML for every fetched URL to debug_*.html files.
   --year N  Override CURRENT_YEAR for top_earners (e.g. --year 2024).
 
@@ -76,6 +76,52 @@ TEAM_SLUGS = {
     "Washington Commanders": "washington-commanders",
 }
 
+# Reverse: slug → canonical name (used for href matching)
+SLUG_TO_TEAM = {slug: name for name, slug in TEAM_SLUGS.items()}
+
+# NFL abbreviation → canonical name (league cap summary page uses abbreviated cells)
+TEAM_ABBREVS = {
+    "ARI": "Arizona Cardinals",
+    "ATL": "Atlanta Falcons",
+    "BAL": "Baltimore Ravens",
+    "BUF": "Buffalo Bills",
+    "CAR": "Carolina Panthers",
+    "CHI": "Chicago Bears",
+    "CIN": "Cincinnati Bengals",
+    "CLE": "Cleveland Browns",
+    "DAL": "Dallas Cowboys",
+    "DEN": "Denver Broncos",
+    "DET": "Detroit Lions",
+    "GB":  "Green Bay Packers",
+    "HOU": "Houston Texans",
+    "IND": "Indianapolis Colts",
+    "JAC": "Jacksonville Jaguars",
+    "JAX": "Jacksonville Jaguars",
+    "KC":  "Kansas City Chiefs",
+    "LV":  "Las Vegas Raiders",
+    "LVR": "Las Vegas Raiders",
+    "LAC": "Los Angeles Chargers",
+    "LA":  "Los Angeles Rams",
+    "LAR": "Los Angeles Rams",
+    "MIA": "Miami Dolphins",
+    "MIN": "Minnesota Vikings",
+    "NE":  "New England Patriots",
+    "NO":  "New Orleans Saints",
+    "NYG": "New York Giants",
+    "NYJ": "New York Jets",
+    "PHI": "Philadelphia Eagles",
+    "PIT": "Pittsburgh Steelers",
+    "SF":  "San Francisco 49ers",
+    "SEA": "Seattle Seahawks",
+    "TB":  "Tampa Bay Buccaneers",
+    "TEN": "Tennessee Titans",
+    "WAS": "Washington Commanders",
+    "WSH": "Washington Commanders",
+}
+
+# Player cell format: "Dak Prescott(QB, 32)"
+_NAME_POS_RE = re.compile(r"^(.*?)\s*\(([A-Z/]+),\s*\d+\)")
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -94,23 +140,47 @@ def is_dollar(text):
     return bool(re.search(r"\$[\d,]+", text))
 
 
-def match_team(cell_text):
-    """Map a Spotrac team cell (may include city, nickname, or both) to a canonical name."""
-    lower = cell_text.lower()
-    for name in TEAM_SLUGS:
-        parts = name.lower().split()
-        # Match on city (first word) or last word of nickname
-        if parts[0] in lower or parts[-1] in lower:
+def team_from_href(tag):
+    """Return canonical team name from any <a href> containing a known slug."""
+    a = tag.find("a", href=True) if hasattr(tag, "find") else None
+    if not a:
+        return None
+    href = a["href"]
+    for slug, name in SLUG_TO_TEAM.items():
+        if f"/{slug}/" in href:
             return name
     return None
 
 
+def team_from_abbrev(cell_text):
+    """
+    League cap summary cells contain the team abbreviation doubled, e.g. 'NENE',
+    'LVLV', 'WASWAS'. Split in half; look up the first half in TEAM_ABBREVS.
+    """
+    n = len(cell_text)
+    if n < 2:
+        return None
+    half = cell_text[: n // 2]
+    if cell_text == half * 2:
+        return TEAM_ABBREVS.get(half)
+    # Fallback: direct lookup (handles odd-length or non-doubled cells)
+    return TEAM_ABBREVS.get(cell_text)
+
+
+def extract_player_pos(cell_text):
+    """Split 'Dak Prescott(QB, 32)' → ('Dak Prescott', 'QB')."""
+    m = _NAME_POS_RE.match(cell_text.strip())
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+    return cell_text.strip(), ""
+
+
 def header_indices(table):
-    """Return a dict of lowercased header text → column index for the first header row found."""
+    """Lowercased header text → column index from the first header row with content."""
     for tr in table.find_all("tr"):
-        ths = tr.find_all(["th", "td"])
-        texts = [th.get_text(strip=True).lower() for th in ths]
-        if any(t for t in texts):
+        cells = tr.find_all(["th", "td"])
+        texts = [c.get_text(strip=True).lower() for c in cells]
+        if any(texts):
             return {t: i for i, t in enumerate(texts)}
     return {}
 
@@ -125,13 +195,8 @@ def fetch(session, url):
 
 
 # ---------------------------------------------------------------------------
-# League cap summary  (one page per year → all 32 teams)
+# League cap summary  (one page per year → cap space per team)
 # ---------------------------------------------------------------------------
-
-_CAP_HIT_KEYS  = {"cap hit", "total", "total allocations", "cap allocations", "cap"}
-_CAP_SPACE_KEYS = {"cap space", "available", "space", "remaining"}
-_TEAM_KEYS     = {"team"}
-
 
 def fetch_cap_summary(session, year):
     url = f"{BASE}/nfl/cap/{year}/"
@@ -140,52 +205,41 @@ def fetch_cap_summary(session, year):
     soup = BeautifulSoup(html, "html.parser")
 
     rows = []
+    seen = set()
+
     for table in soup.find_all("table"):
-        hdrs = header_indices(table)
-
-        team_idx    = next((hdrs[k] for k in _TEAM_KEYS     if k in hdrs), None)
-        cap_idx     = next((hdrs[k] for k in _CAP_HIT_KEYS  if k in hdrs), None)
-        space_idx   = next((hdrs[k] for k in _CAP_SPACE_KEYS if k in hdrs), None)
-
         for tr in table.find_all("tr"):
             tds = tr.find_all("td")
             if not tds:
                 continue
 
-            # Team: use detected index, else scan all cells
-            team_text = tds[team_idx].get_text(strip=True) if team_idx is not None and team_idx < len(tds) else ""
-            if not team_text:
-                team_text = " ".join(td.get_text(strip=True) for td in tds[:3])
-            team = match_team(team_text)
-            if not team:
+            # Team: abbrev cell is doubled (e.g. "NENE"); href uses redirect IDs (no slug)
+            team = None
+            for td in tds[:3]:
+                team = team_from_abbrev(td.get_text(strip=True))
+                if team:
+                    break
+            if not team or team in seen:
                 continue
 
-            # Cap hit: use detected index, else largest dollar value in row
-            if cap_idx is not None and cap_idx < len(tds):
-                cap_hit = parse_dollars(tds[cap_idx].get_text())
-            else:
-                dollar_vals = [parse_dollars(td.get_text()) for td in tds if is_dollar(td.get_text())]
-                cap_hit = max(dollar_vals, default=0)
+            # Dollar value: only one per row on this page (cap space)
+            cap_space = max(
+                (parse_dollars(td.get_text()) for td in tds if is_dollar(td.get_text())),
+                default=0,
+            )
+            if cap_space == 0:
+                continue
 
-            cap_space = 0
-            if space_idx is not None and space_idx < len(tds):
-                cap_space = parse_dollars(tds[space_idx].get_text())
-
-            if cap_hit > 0:
-                rows.append({"year": year, "team": team, "cap_hit": cap_hit, "cap_space": cap_space})
+            seen.add(team)
+            rows.append({"year": year, "team": team, "cap_space": cap_space})
 
     print(f"{len(rows)} teams")
     return rows
 
 
 # ---------------------------------------------------------------------------
-# Per-team top earners  (one page per team for CURRENT_YEAR)
+# Per-team top earners  (Table 0 = active roster, already sorted by cap hit)
 # ---------------------------------------------------------------------------
-
-_PLAYER_KEYS  = {"player", "name"}
-_POS_KEYS     = {"pos", "position"}
-_CAPHIT_KEYS  = {"cap hit", "cap", "2025 cap hit", "2024 cap hit", "cap number"}
-
 
 def fetch_team_earners(session, team_name, slug, year=CURRENT_YEAR):
     url = f"{BASE}/nfl/{slug}/cap/{year}/"
@@ -193,47 +247,43 @@ def fetch_team_earners(session, team_name, slug, year=CURRENT_YEAR):
     html = fetch(session, url)
     soup = BeautifulSoup(html, "html.parser")
 
+    tables = soup.find_all("table")
+    if not tables:
+        print("0 earners (no tables)")
+        return []
+
+    # Table 0 = active roster ranked by cap hit descending
+    table = tables[0]
+    hdrs  = header_indices(table)
+
+    # Headers confirmed by probe: ['rk', 'player', 'cap hit']
+    player_idx = hdrs.get("player", 1)
+    cap_idx    = hdrs.get("cap hit", 2)
+
     earners = []
-    for table in soup.find_all("table"):
-        hdrs = header_indices(table)
+    for tr in table.find_all("tr"):
+        tds = tr.find_all("td")
+        if len(tds) <= max(player_idx, cap_idx):
+            continue
 
-        player_idx = next((hdrs[k] for k in _PLAYER_KEYS  if k in hdrs), 0)
-        pos_idx    = next((hdrs[k] for k in _POS_KEYS     if k in hdrs), None)
-        cap_idx    = next((hdrs[k] for k in _CAPHIT_KEYS  if k in hdrs), None)
+        raw_player = tds[player_idx].get_text(strip=True)
+        player, pos = extract_player_pos(raw_player)
 
-        for tr in table.find_all("tr"):
-            tds = tr.find_all("td")
-            if len(tds) < 2:
-                continue
+        if not player or player.lower() in ("player", "name", "total"):
+            continue
 
-            player = tds[player_idx].get_text(strip=True) if player_idx < len(tds) else ""
-            if not player or player.lower() in ("player", "name", "total", ""):
-                continue
+        cap_hit = parse_dollars(tds[cap_idx].get_text())
+        if cap_hit <= 0:
+            continue
 
-            pos = ""
-            if pos_idx is not None and pos_idx < len(tds):
-                pos = tds[pos_idx].get_text(strip=True)
-
-            if cap_idx is not None and cap_idx < len(tds):
-                cap_hit = parse_dollars(tds[cap_idx].get_text())
-            else:
-                dollar_vals = [parse_dollars(td.get_text()) for td in tds if is_dollar(td.get_text())]
-                cap_hit = max(dollar_vals, default=0)
-
-            if cap_hit <= 0:
-                continue
-
-            earners.append({
-                "year":    year,
-                "team":    team_name,
-                "rank":    len(earners) + 1,
-                "player":  player,
-                "pos":     pos,
-                "cap_hit": cap_hit,
-            })
-
-            if len(earners) >= TOP_N:
-                break
+        earners.append({
+            "year":    year,
+            "team":    team_name,
+            "rank":    len(earners) + 1,
+            "player":  player,
+            "pos":     pos,
+            "cap_hit": cap_hit,
+        })
 
         if len(earners) >= TOP_N:
             break
@@ -243,33 +293,23 @@ def fetch_team_earners(session, team_name, slug, year=CURRENT_YEAR):
 
 
 # ---------------------------------------------------------------------------
-# Probe mode — inspect table structure without writing data
+# Probe mode
 # ---------------------------------------------------------------------------
 
 def probe(session):
-    for label, url in [
-        ("league cap 2025", f"{BASE}/nfl/cap/2025/"),
-        ("Cowboys 2025",    f"{BASE}/nfl/dallas-cowboys/cap/2025/"),
-    ]:
-        print(f"\n{'='*60}")
-        print(f"PROBE: {label}")
-        print(f"URL:   {url}")
-        try:
-            html = fetch(session, url)
-            soup = BeautifulSoup(html, "html.parser")
-            tables = soup.find_all("table")
-            print(f"Tables found: {len(tables)}")
-            for i, t in enumerate(tables):
-                print(f"\n  Table {i}: id={t.get('id')} class={t.get('class')}")
-                hdrs = header_indices(t)
-                print(f"  Headers: {list(hdrs.keys())}")
-                data_rows = [tr for tr in t.find_all("tr") if tr.find("td")]
-                print(f"  Data rows: {len(data_rows)}")
-                for tr in data_rows[:3]:
-                    print(f"    {[td.get_text(strip=True)[:25] for td in tr.find_all('td')]}")
-        except Exception as e:
-            print(f"ERROR: {e}")
-        time.sleep(DELAY)
+    print("\n--- League cap summary (2025) ---")
+    rows = fetch_cap_summary(session, 2025)
+    for r in rows[:5]:
+        print(f"  {r}")
+    if len(rows) > 5:
+        print(f"  ... ({len(rows)} total)")
+
+    time.sleep(DELAY)
+
+    print("\n--- Cowboys top earners (2025) ---")
+    earners = fetch_team_earners(session, "Dallas Cowboys", "dallas-cowboys")
+    for e in earners:
+        print(f"  #{e['rank']:2d}  {e['player']:<25} {e['pos']:<5} ${e['cap_hit']:>12,}")
 
 
 # ---------------------------------------------------------------------------
