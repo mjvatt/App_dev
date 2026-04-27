@@ -563,8 +563,37 @@
       });
     }
 
+    const trajSels = [
+      document.getElementById('atlas-traj-t1'),
+      document.getElementById('atlas-traj-t2'),
+      document.getElementById('atlas-traj-t3'),
+      document.getElementById('atlas-traj-t4'),
+    ];
+
+    if (trajSels[0].options.length === 1) {
+      trajSels.forEach(sel => {
+        meta.teams.forEach(t => sel.add(new Option(t, t)));
+        sel.addEventListener('change', () => {
+          _atlasTabInited.trajectories = false;
+          renderTrajectories();
+          _atlasTabInited.trajectories = true;
+        });
+      });
+    }
+
+    function renderTrajectories() {
+      const selected = trajSels.map(s => s.value).filter(Boolean);
+      if (!selected.length) return;
+      const series = selected.map(team => {
+        const d = DraftData.winsByYear(team);
+        return { label: team, labels: d.labels, values: d.values, playoffs: d.playoffs };
+      });
+      DraftCharts.trajectoryChart('chart-atlas-trajectories', series);
+    }
+
     const ATLAS_RENDERS = {
-      dynasty: renderDynastyIndex,
+      dynasty:      renderDynastyIndex,
+      trajectories: renderTrajectories,
     };
 
     function activateAtlasTab(id) {

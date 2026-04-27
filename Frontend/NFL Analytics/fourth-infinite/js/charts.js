@@ -928,6 +928,61 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── ATLAS Win Trajectories — up to 4 teams ────────────────────── */
+  function trajectoryChart(canvasId, series) {
+    _destroy(canvasId);
+    if (!series.length) return;
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6'];
+    const allYears = [...new Set(series.flatMap(s => s.labels))].sort((a, b) => a - b);
+
+    const datasets = series.map((s, i) => {
+      const color  = COLORS[i % COLORS.length];
+      const byYear = {};
+      s.labels.forEach((y, j) => { byYear[y] = { w: s.values[j], playoff: s.playoffs[j] }; });
+      const vals     = allYears.map(y => byYear[y]?.w       ?? null);
+      const playoffs = allYears.map(y => byYear[y]?.playoff ?? false);
+      return {
+        label:              s.label,
+        data:               vals,
+        borderColor:        color,
+        backgroundColor:    i === 0 ? color + '18' : 'transparent',
+        borderWidth:        2.5,
+        pointBackgroundColor: playoffs.map(p => p ? ACCENT : color),
+        pointRadius:          playoffs.map(p => p ? 5 : 2.5),
+        pointHoverRadius:     6,
+        fill:    i === 0,
+        tension: 0.3,
+        spanGaps: true,
+      };
+    });
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: { labels: allYears, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: _baseLegend(true), tooltip: _tooltip() },
+        scales: {
+          x: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
+            title: { display: true, text: 'Season', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0,
+            suggestedMax: 17,
+          },
+        },
+      },
+    });
+  }
+
   /* ── ATLAS Dynasty leaderboard ─────────────────────────────────── */
   function atlasLeaderboard(canvasId, data) {
     _destroy(canvasId);
@@ -1018,5 +1073,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
+  return { picksPerYear, winsPerYear, trajectoryChart, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
 })();

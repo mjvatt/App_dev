@@ -477,8 +477,23 @@
         </div>
       </div>
 
-      <!-- Tabs 2–5: stubbed, filled in future sessions -->
-      <div class="ghost-panel" data-atlas-panel="trajectories"></div>
+      <!-- Tab 2: Win Trajectories -->
+      <div class="ghost-panel" data-atlas-panel="trajectories">
+        <div class="filter-bar">
+          <select id="atlas-traj-t1" class="filter-select filter-select--lg"><option value="">Select team 1…</option></select>
+          <select id="atlas-traj-t2" class="filter-select filter-select--lg"><option value="">+ Team 2</option></select>
+          <select id="atlas-traj-t3" class="filter-select filter-select--lg"><option value="">+ Team 3</option></select>
+          <select id="atlas-traj-t4" class="filter-select filter-select--lg"><option value="">+ Team 4</option></select>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div><h3>Win Trajectories</h3><p>Regular season wins per year · amber dot = playoff season · up to 4 teams</p></div>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-atlas-trajectories"></canvas></div>
+          </div>
+        </div>
+      </div>
       <div class="ghost-panel" data-atlas-panel="draft-wins"></div>
       <div class="ghost-panel" data-atlas-panel="era"></div>
       <div class="ghost-panel" data-atlas-panel="variance"></div>
