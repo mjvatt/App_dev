@@ -1,3 +1,5 @@
+# NOTE: PFR now returns 403 for automated requests.
+# Use fetch_av_nflverse.py instead — single download, no rate limits.
 import csv
 import time
 import cloudscraper
