@@ -15,7 +15,7 @@ HEADERS = {
     ),
     "Accept-Language": "en-US,en;q=0.9",
 }
-YEARS = range(2005, 2026)
+YEARS = range(2005, 2027)
 ROUNDS = range(1, 8)
 DELAY = 2.0  # seconds between requests — be polite
 

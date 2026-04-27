@@ -212,8 +212,9 @@ body { display: flex; overflow: hidden; }
   margin-left: auto;
   flex-shrink: 0;
 }
-.sage-badge { background: var(--sage-dim); color: var(--sage); }
-.ghost-badge { background: var(--ghost-dim); color: var(--ghost); }
+.sage-badge  { background: var(--sage-dim);       color: var(--sage); }
+.ghost-badge { background: var(--ghost-dim);      color: var(--ghost); }
+.new-badge   { background: rgba(245,158,11,.12);  color: #f59e0b; }
 
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .logo-text,

@@ -3,12 +3,14 @@
 (async () => {
   /* ── Load data ────────────────────────────────────────────────────── */
   const { meta } = await DraftData.load();
+  document.getElementById('pickCount').textContent = `${meta.total_picks.toLocaleString()} picks`;
 
   /* ── Navigation ───────────────────────────────────────────────────── */
   const VIEW_TITLES = {
     dashboard:  ['Dashboard',        '32 seasons · 8,116 picks · all NFL teams'],
-    draftboard: ['Draft Board',      'Search and filter every pick from 1994–2025'],
+    draftboard: ['Draft Board',      'Search and filter every pick from 1994–2026'],
     teams:      ['Team Hub',         'Draft history and tendencies by franchise'],
+    class2026:  ['2026 Draft Class', 'NFL Draft · April 24–26, 2026'],
     positions:  ['Position Trends',  'How position drafting has evolved over 32 years'],
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
@@ -32,6 +34,7 @@
 
     if (id === 'dashboard')  initDashboard();
     if (id === 'teams')      initTeamHub();
+    if (id === 'class2026')  initClass2026();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
     if (id === 'draftboard') renderDraftTable();
@@ -62,7 +65,8 @@
      DASHBOARD
   ═══════════════════════════════════════════════════════════════════ */
   function initDashboard() {
-    /* KPIs */
+    document.getElementById('viewSub').textContent =
+      `${meta.years.length} seasons · ${meta.total_picks.toLocaleString()} picks · all NFL teams`;
     document.getElementById('kpi-years').textContent    = meta.years.length;
     document.getElementById('kpi-picks').textContent    = meta.total_picks.toLocaleString();
     document.getElementById('kpi-teams').textContent    = meta.teams.length;
@@ -339,6 +343,69 @@
         meta:   earners.map(() => ({})),
       });
     }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     2026 DRAFT CLASS
+  ═══════════════════════════════════════════════════════════════════ */
+  function initClass2026() {
+    const picks2026 = DraftData.picks({ year: 2026 });
+    const r1        = picks2026.filter(p => p.round === 1).length;
+    const teamCount = new Set(picks2026.map(p => p.team)).size;
+    const colCount  = new Set(picks2026.map(p => p.college).filter(Boolean)).size;
+
+    document.getElementById('c26-kpi-picks').textContent    = picks2026.length;
+    document.getElementById('c26-kpi-teams').textContent    = teamCount;
+    document.getElementById('c26-kpi-colleges').textContent = colCount;
+    document.getElementById('c26-kpi-r1').textContent       = r1;
+
+    DraftCharts.hbar('chart-c26-capital', DraftData.teamCapitalByYear(2026), '#3b82f6', 'Draft Capital Score');
+    DraftCharts.donut('chart-c26-pos', DraftData.byPosGroup({ year: 2026 }), 'Picks');
+
+    const ROUNDS = [1, 2, 3, 4, 5, 6, 7];
+    DraftCharts.vbar('chart-c26-rounds', {
+      labels: ROUNDS.map(r => `R${r}`),
+      values: ROUNDS.map(r => picks2026.filter(p => p.round === r).length),
+    });
+
+    DraftCharts.hbar('chart-c26-colleges', DraftData.topColleges(20, { year: 2026 }));
+
+    const rndSel  = document.getElementById('c26-rnd');
+    const teamSel = document.getElementById('c26-team');
+    const search  = document.getElementById('c26-search');
+
+    if (rndSel.options.length === 1) {
+      ROUNDS.forEach(r => rndSel.add(new Option(`Round ${r}`, r)));
+      [...new Set(picks2026.map(p => p.team).filter(Boolean))].sort()
+        .forEach(t => teamSel.add(new Option(t, t)));
+      [rndSel, teamSel].forEach(el => el.addEventListener('change', renderBoard));
+      search.addEventListener('input', renderBoard);
+    }
+
+    function renderBoard() {
+      const r = rndSel.value  ? +rndSel.value : 0;
+      const t = teamSel.value || '';
+      const q = search.value.trim().toLowerCase();
+      const filtered = picks2026.filter(p =>
+        (!r || p.round === r) &&
+        (!t || p.team  === t) &&
+        (!q || p.player.toLowerCase().includes(q) || p.college.toLowerCase().includes(q))
+      );
+      document.getElementById('c26-board-count').textContent =
+        `${filtered.length.toLocaleString()} pick${filtered.length !== 1 ? 's' : ''}`;
+      document.getElementById('c26-board-body').innerHTML = filtered.map(p => `
+        <tr>
+          <td>${p.round}</td>
+          <td>${p.pick}</td>
+          <td>${p.team}</td>
+          <td><strong>${p.player}</strong></td>
+          <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
+          <td>${p.college}</td>
+          <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
+        </tr>`).join('');
+    }
+
+    renderBoard();
   }
 
   /* ═══════════════════════════════════════════════════════════════════

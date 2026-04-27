@@ -43,6 +43,10 @@
         <a href="#" class="nav-item" data-view="teams">
           <i class="fas fa-shield-halved"></i><span>Team Hub</span>
         </a>
+        <a href="#" class="nav-item" data-view="class2026">
+          <i class="fas fa-clipboard-list"></i><span>2026 Class</span>
+          <span class="engine-badge new-badge">NEW</span>
+        </a>
         <a href="#" class="nav-item" data-view="positions">
           <i class="fas fa-arrow-trend-up"></i><span>Position Trends</span>
         </a>
@@ -289,6 +293,86 @@
         <div class="chart-card wide">
           <div class="chart-card-header"><div><h3>Top Cap Hits · 2025</h3><p>Active roster cap hits · top 15 players · source: Spotrac</p></div></div>
           <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-teamTopEarners"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 2026 DRAFT CLASS VIEW ─── -->
+    <section class="view" id="view-class2026">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-user-check"></i></div>
+          <div class="kpi-body"><span class="kpi-value" id="c26-kpi-picks">—</span><span class="kpi-label">Total Picks</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-shield-halved"></i></div>
+          <div class="kpi-body"><span class="kpi-value" id="c26-kpi-teams">—</span><span class="kpi-label">Teams</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-graduation-cap"></i></div>
+          <div class="kpi-body"><span class="kpi-value" id="c26-kpi-colleges">—</span><span class="kpi-label">Colleges</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
+          <div class="kpi-body"><span class="kpi-value" id="c26-kpi-r1">—</span><span class="kpi-label">Round 1 Picks</span></div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div><h3>Team Draft Capital</h3><p>Franchises ranked by total pick value score · power-law model · pick #1 = 100</p></div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-c26-capital"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div><h3>Position Distribution</h3><p>Picks by position group</p></div>
+          </div>
+          <div class="chart-wrap chart-wrap--donut"><canvas id="chart-c26-pos"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div><h3>Picks by Round</h3><p>Total selections per round</p></div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-c26-rounds"></canvas></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div><h3>College Pipeline</h3><p>Top 20 programs by picks in the 2026 class</p></div>
+          </div>
+          <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-c26-colleges"></canvas></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div><h3>2026 Pick Board</h3><p>Every selection · career data will populate in future seasons</p></div>
+          </div>
+          <div class="filter-bar" style="padding:0 0 12px">
+            <select id="c26-rnd" class="filter-select"><option value="">All Rounds</option></select>
+            <select id="c26-team" class="filter-select"><option value="">All Teams</option></select>
+            <input type="text" id="c26-search" class="filter-input" placeholder="Search player or college…" />
+          </div>
+          <div class="table-wrap">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>Rnd</th>
+                  <th>Pick</th>
+                  <th>Team</th>
+                  <th>Player</th>
+                  <th>Pos</th>
+                  <th>College</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="c26-board-body"></tbody>
+            </table>
+          </div>
+          <div class="table-footer"><span id="c26-board-count">— picks</span></div>
         </div>
       </div>
     </section>
