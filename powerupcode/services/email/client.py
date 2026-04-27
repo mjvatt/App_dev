@@ -57,15 +57,18 @@ async def _send(to: str, subject: str, html: str, plain: str) -> None:
     msg.attach(MIMEText(plain, "plain"))
     msg.attach(MIMEText(html, "html"))
 
-    await aiosmtplib.send(
-        msg,
-        hostname=settings.smtp_host,
-        port=settings.smtp_port,
-        username=settings.smtp_username or None,
-        password=settings.smtp_password or None,
-        use_tls=settings.smtp_port == 465,
-        start_tls=settings.smtp_port != 465,
-    )
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=settings.smtp_host,
+            port=settings.smtp_port,
+            username=settings.smtp_username or None,
+            password=settings.smtp_password or None,
+            use_tls=settings.smtp_port == 465,
+            start_tls=settings.smtp_port != 465,
+        )
+    except Exception:
+        logger.exception("Failed to send email to %s (subject: %s)", to, subject)
 
 
 async def send_verification_email(to_email: str, username: str, token: str) -> None:
