@@ -20,18 +20,18 @@ from sklearn.model_selection import cross_val_score
 
 DATA_PATH   = 'data/draft_data.json'
 OUTPUT_PATH = 'data/sleeper_predictions.json'
-TRAIN_CUTOFF = 2018
-INCOMPLETE_YEAR = 2021
+TRAIN_CUTOFF = 2021
+INCOMPLETE_YEAR = 2022
 WINDOW = 12
 POS_GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB', 'ST']
 SMOOTH_K = 10  # Bayesian smoothing strength for college target encoding
 
 
 def build_expected_av(picks):
-    """Rolling-average draft_av by pick slot, calibrated on picks <= 2020."""
+    """Rolling-average draft_av by pick slot, calibrated on picks <= 2021."""
     slots = {}
     for p in picks:
-        if p['pick'] > 0 and p['year'] <= 2020:
+        if p['pick'] > 0 and p['year'] <= 2021:
             s = p['pick']
             if s not in slots:
                 slots[s] = {'sum': 0, 'n': 0}
