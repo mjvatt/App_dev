@@ -243,7 +243,7 @@
     const cmpSel  = document.getElementById('team-compare-select');
     const statSel = document.getElementById('team-stat-select');
     if (sel.options.length === 1) {
-      meta.teams.forEach(t => {
+      DraftData.franchiseTeams().forEach(t => {
         sel.add(new Option(t, t));
         cmpSel.add(new Option(t, t));
       });
@@ -261,7 +261,7 @@
 
   function renderTeamHub(team, compareTeam = '') {
     if (!team) return;
-    const teamPicks = DraftData.picks({ team });
+    const teamPicks = DraftData.picks({ franchise: team });
     const r1        = teamPicks.filter(p => p.round === 1).length;
     const colleges  = new Set(teamPicks.map(p => p.college)).size;
 
@@ -296,8 +296,8 @@
       cmp ? DraftData.winsByYear(cmp) : null,
       team, cmp || ''
     );
-    DraftCharts.picksPerYear('chart-teamPicksYear', DraftData.picksPerYear({ team }));
-    DraftCharts.donut('chart-teamPosDonut', DraftData.byPosGroup({ team }), 'Picks');
+    DraftCharts.picksPerYear('chart-teamPicksYear', DraftData.picksPerYear({ franchise: team }));
+    DraftCharts.donut('chart-teamPosDonut', DraftData.byPosGroup({ franchise: team }), 'Picks');
     DraftCharts.vbar('chart-teamRoundBar', DraftData.teamByRound(team), null);
     DraftCharts.draftClassBar(
       'chart-teamDraftGrade',
@@ -572,7 +572,7 @@
 
     if (trajSels[0].options.length === 1) {
       trajSels.forEach(sel => {
-        meta.teams.forEach(t => sel.add(new Option(t, t)));
+        DraftData.franchiseTeams().forEach(t => sel.add(new Option(t, t)));
         sel.addEventListener('change', () => {
           _atlasTabInited.trajectories = false;
           renderTrajectories();
@@ -810,7 +810,7 @@
 
     const sel = document.getElementById('sage-team');
     if (sel.options.length === 1) {
-      meta.teams.forEach(t => sel.add(new Option(t, t)));
+      DraftData.franchiseTeams().forEach(t => sel.add(new Option(t, t)));
     }
     sel.addEventListener('change', () => renderSageScatter(sel.value));
     if (sel.value) renderSageScatter(sel.value);
