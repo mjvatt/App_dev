@@ -591,9 +591,34 @@
       DraftCharts.trajectoryChart('chart-atlas-trajectories', series);
     }
 
+    const dwYfrom = document.getElementById('atlas-dw-yfrom');
+    const dwYto   = document.getElementById('atlas-dw-yto');
+
+    if (dwYfrom.options.length === 0) {
+      const draftYears = meta.years.filter(y => y <= 2024);
+      draftYears.forEach(y => {
+        dwYfrom.add(new Option(y, y));
+        dwYto.add(new Option(y, y));
+      });
+      dwYfrom.value = String(draftYears[0]);
+      dwYto.value   = '2024';
+      [dwYfrom, dwYto].forEach(el => el.addEventListener('change', () => {
+        _atlasTabInited['draft-wins'] = false;
+        renderDraftWins();
+        _atlasTabInited['draft-wins'] = true;
+      }));
+    }
+
+    function renderDraftWins() {
+      const data = DraftData.leagueDraftToWins(+dwYfrom.value, +dwYto.value);
+      document.getElementById('atlas-dw-r2').textContent = `R² = ${data.r2}`;
+      DraftCharts.leagueDraftWinsChart('chart-atlas-draft-wins', data);
+    }
+
     const ATLAS_RENDERS = {
       dynasty:      renderDynastyIndex,
       trajectories: renderTrajectories,
+      'draft-wins': renderDraftWins,
     };
 
     function activateAtlasTab(id) {

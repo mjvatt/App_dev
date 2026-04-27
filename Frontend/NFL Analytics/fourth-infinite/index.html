@@ -494,7 +494,29 @@
           </div>
         </div>
       </div>
-      <div class="ghost-panel" data-atlas-panel="draft-wins"></div>
+      <!-- Tab 3: Draft → Wins -->
+      <div class="ghost-panel" data-atlas-panel="draft-wins">
+        <div class="filter-bar">
+          <label class="filter-label">Draft years:</label>
+          <select id="atlas-dw-yfrom" class="filter-select"></select>
+          <span style="color:var(--text-muted);font-size:12px">–</span>
+          <select id="atlas-dw-yto" class="filter-select"></select>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>Draft Capital → Next-Season Wins</h3>
+                <p>Each point = one franchise-season · X = total draft capital in year Y · Y = wins in year Y+1 · amber line = trend</p>
+              </div>
+              <span id="atlas-dw-r2" style="color:var(--atlas);font-size:13px;font-weight:600;white-space:nowrap"></span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-atlas-draft-wins"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Era Rankings (stub) -->
       <div class="ghost-panel" data-atlas-panel="era"></div>
       <div class="ghost-panel" data-atlas-panel="variance"></div>
     </section>

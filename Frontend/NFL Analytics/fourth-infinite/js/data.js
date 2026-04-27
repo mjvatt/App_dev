@@ -11,12 +11,14 @@ const DraftData = (() => {
   let _salaries     = null;
 
   const FRANCHISE_ALIASES = {
-    'Houston Oilers':      'Tennessee Titans',
-    'Tennessee Oilers':    'Tennessee Titans',
-    'San Diego Chargers':  'Los Angeles Chargers',
-    'Oakland Raiders':     'Las Vegas Raiders',
-    'Los Angeles Raiders': 'Las Vegas Raiders',
-    'St. Louis Rams':      'Los Angeles Rams',
+    'Houston Oilers':         'Tennessee Titans',
+    'Tennessee Oilers':       'Tennessee Titans',
+    'San Diego Chargers':     'Los Angeles Chargers',
+    'Oakland Raiders':        'Las Vegas Raiders',
+    'Los Angeles Raiders':    'Las Vegas Raiders',
+    'St. Louis Rams':         'Los Angeles Rams',
+    'Washington Redskins':    'Washington Commanders',
+    'Washington Football Team': 'Washington Commanders',
   };
 
   function _franchise(team, year) {
@@ -199,6 +201,49 @@ const DraftData = (() => {
       if (filter.playoff   !== undefined  && s.playoff !== filter.playoff) return false;
       return true;
     });
+  }
+
+  /* ATLAS — league-wide draft capital (year Y) vs wins (year Y+1) with linear regression */
+  function leagueDraftToWins(yearFrom = 1994, yearTo = 2024) {
+    const standingsMap = {};
+    _standings.forEach(s => {
+      if (!standingsMap[s.year]) standingsMap[s.year] = {};
+      standingsMap[s.year][s.franchise] = s.w;
+    });
+
+    const capByKey = {};
+    _picks.filter(p => p.pick > 0 && p.year >= +yearFrom && p.year <= +yearTo).forEach(p => {
+      const key = `${p.franchise}|${p.year}`;
+      capByKey[key] = (capByKey[key] || 0) + 100 * Math.pow(p.pick, -0.66);
+    });
+
+    const points = [];
+    Object.entries(capByKey).forEach(([key, capital]) => {
+      const [franchise, yearStr] = key.split('|');
+      const year = +yearStr;
+      const nextW = standingsMap[year + 1]?.[franchise];
+      if (nextW === undefined) return;
+      points.push({ franchise, year, capital: +capital.toFixed(1), wins: nextW });
+    });
+
+    const n = points.length;
+    if (n < 2) return { points, m: 0, b: 0, r2: 0, xMin: 0, xMax: 100 };
+
+    const sumX  = points.reduce((s, p) => s + p.capital, 0);
+    const sumY  = points.reduce((s, p) => s + p.wins, 0);
+    const sumXY = points.reduce((s, p) => s + p.capital * p.wins, 0);
+    const sumX2 = points.reduce((s, p) => s + p.capital * p.capital, 0);
+    const denom = n * sumX2 - sumX * sumX;
+    const m     = denom ? (n * sumXY - sumX * sumY) / denom : 0;
+    const b     = (sumY - m * sumX) / n;
+    const yMean = sumY / n;
+    const ssTot = points.reduce((s, p) => s + Math.pow(p.wins - yMean, 2), 0);
+    const ssRes = points.reduce((s, p) => s + Math.pow(p.wins - (m * p.capital + b), 2), 0);
+    const r2    = ssTot > 0 ? +(1 - ssRes / ssTot).toFixed(3) : 0;
+    const xMin  = +Math.min(...points.map(p => p.capital)).toFixed(1);
+    const xMax  = +Math.max(...points.map(p => p.capital)).toFixed(1);
+
+    return { points, m: +m.toFixed(4), b: +b.toFixed(2), r2, xMin, xMax };
   }
 
   /* ATLAS — franchise legacy score: 40% win %, 40% playoff rate, 20% draft efficiency */
@@ -743,5 +788,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, leagueDraftToWins, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
 })();

@@ -928,6 +928,80 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── ATLAS Draft Capital → Next-Season Wins (league-wide scatter) ── */
+  function leagueDraftWinsChart(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const trend = [
+      { x: data.xMin, y: +(data.m * data.xMin + data.b).toFixed(2) },
+      { x: data.xMax, y: +(data.m * data.xMax + data.b).toFixed(2) },
+    ];
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Franchise-Season',
+            data: data.points.map(p => ({ x: p.capital, y: p.wins, franchise: p.franchise, year: p.year })),
+            backgroundColor: 'rgba(14,165,233,0.40)',
+            borderColor:     'rgba(14,165,233,0.70)',
+            borderWidth: 1,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+          },
+          {
+            label: `Trend  (R² = ${data.r2})`,
+            data: trend,
+            type: 'line',
+            borderColor: ACCENT,
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            filter: item => item.datasetIndex === 0,
+            callbacks: {
+              title: () => '',
+              label: item => {
+                const p = item.raw;
+                return [
+                  `${p.franchise}  ·  ${p.year} draft`,
+                  `Capital: ${p.x}  →  ${p.year + 1} wins: ${p.y}`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Draft Capital Score (Year Y)', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins (Year Y+1)', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0,
+            suggestedMax: 17,
+          },
+        },
+      },
+    });
+  }
+
   /* ── ATLAS Win Trajectories — up to 4 teams ────────────────────── */
   function trajectoryChart(canvasId, series) {
     _destroy(canvasId);
@@ -1073,5 +1147,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
 })();
