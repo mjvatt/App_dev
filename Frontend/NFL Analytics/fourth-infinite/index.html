@@ -72,6 +72,11 @@
           <span>GHOST</span>
           <span class="engine-badge ghost-badge">BETA</span>
         </a>
+        <a href="#" class="nav-item engine-item" data-view="oracle">
+          <i class="fas fa-eye"></i>
+          <span>ORACLE</span>
+          <span class="engine-badge oracle-badge">NEW</span>
+        </a>
       </div>
     </nav>
 
@@ -961,6 +966,101 @@
       </div>
 
 
+    </section>
+
+    <!-- ─── ORACLE ENGINE VIEW ─── -->
+    <section class="view" id="view-oracle">
+      <div class="engine-hero oracle-hero">
+        <div class="engine-hero-badge">ORACLE</div>
+        <h2>Optimized Regression &amp; Analytical Championship Learning Engine</h2>
+        <p>Win prediction model · forecasts 2026 regular-season wins for all 32 franchises using prior performance, point differential, and draft capital. CV R² <strong id="oracle-r2">—</strong> across <strong id="oracle-n-train">—</strong> franchise-seasons.</p>
+      </div>
+
+      <div class="ghost-tabs" id="oracleTabs">
+        <button class="ghost-tab active" data-oracle-tab="forecast">2026 Forecast</button>
+        <button class="ghost-tab" data-oracle-tab="backtest">Backtest</button>
+        <button class="ghost-tab" data-oracle-tab="drivers">Drivers</button>
+      </div>
+
+      <!-- Tab 1: 2026 Forecast -->
+      <div class="ghost-panel active" data-oracle-panel="forecast">
+        <div class="charts-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>2026 Win Projections — All 32 Franchises</h3>
+                <p>Ranked by predicted wins &nbsp;·&nbsp; <span style="color:#3b82f6;font-weight:600">■ AFC</span> &nbsp; <span style="color:#ef4444;font-weight:600">■ NFC</span> &nbsp;·&nbsp; <span style="color:var(--text-sub)">★ = made 2025 playoffs</span></p>
+              </div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-oracle-forecast"></canvas></div>
+          </div>
+        </div>
+        <div class="chart-card wide" style="margin-top:16px">
+          <div class="chart-card-header">
+            <div><h3>Full Rankings</h3><p>All 32 franchises · key input factors shown</p></div>
+          </div>
+          <div class="table-wrap">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Franchise</th>
+                  <th>Conf</th>
+                  <th>Predicted W</th>
+                  <th>2025 W</th>
+                  <th>Playoffs</th>
+                  <th>Pt Diff/G</th>
+                  <th>Draft Capital</th>
+                </tr>
+              </thead>
+              <tbody id="oracle-forecast-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Backtest -->
+      <div class="ghost-panel" data-oracle-panel="backtest">
+        <div class="charts-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div><h3>Predicted vs Actual Wins</h3><p>All 917 franchise-seasons 1996–2024 · diagonal = perfect prediction · <span style="color:#10b981">■</span> low error &nbsp; <span style="color:#f59e0b">■</span> mid &nbsp; <span style="color:#ef4444">■</span> high</p></div>
+            </div>
+            <div class="chart-wrap" style="height:420px"><canvas id="chart-oracle-backtest"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div><h3>Team Accuracy</h3><p>Predicted vs actual wins by season for one franchise</p></div>
+              <select id="oracle-team-sel" class="filter-select"><option value="">Select franchise…</option></select>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-oracle-team-line"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div><h3>Error Distribution</h3><p>How often the model lands within N wins of actual</p></div>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-oracle-error-dist"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Drivers -->
+      <div class="ghost-panel" data-oracle-panel="drivers">
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div><h3>Feature Importance</h3><p>Relative contribution of each input to the model's predictions</p></div>
+            </div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chart-oracle-importance"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div><h3>Model Notes</h3><p>What ORACLE can and cannot do</p></div>
+            </div>
+            <div id="oracle-model-notes" style="padding:16px 20px;font-size:13px;line-height:1.7;color:var(--text-sub)"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ─── PLAYER PROFILE MODAL ─── -->

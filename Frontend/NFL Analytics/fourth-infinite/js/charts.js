@@ -1274,6 +1274,151 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── ORACLE predicted vs actual scatter ────────────────────────── */
+  function oracleBacktestScatter(canvasId, backtest) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const absErrors = backtest.map(r => Math.abs(r.error));
+    const maxErr    = Math.max(...absErrors);
+
+    const colorPoint = err => {
+      const t = maxErr > 0 ? Math.abs(err) / maxErr : 0;
+      if (t < 0.25) return 'rgba(16,185,129,0.65)';
+      if (t < 0.55) return 'rgba(245,158,11,0.65)';
+      return 'rgba(239,68,68,0.60)';
+    };
+
+    const mn = Math.min(...backtest.map(r => Math.min(r.actual_wins, r.predicted_wins))) - 0.5;
+    const mx = Math.max(...backtest.map(r => Math.max(r.actual_wins, r.predicted_wins))) + 0.5;
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Season',
+            data: backtest.map(r => ({
+              x: r.predicted_wins, y: r.actual_wins,
+              franchise: r.franchise, year: r.year, error: r.error,
+            })),
+            backgroundColor: backtest.map(r => colorPoint(r.error)),
+            borderColor:     'transparent',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+          },
+          {
+            label: 'Perfect prediction',
+            data: [{ x: mn, y: mn }, { x: mx, y: mx }],
+            type: 'line',
+            borderColor: 'rgba(255,255,255,0.18)',
+            borderWidth: 1.5,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            filter: item => item.datasetIndex === 0,
+            callbacks: {
+              title: () => '',
+              label: item => {
+                const p = item.raw;
+                const sign = p.error >= 0 ? '+' : '';
+                return [
+                  `${p.franchise}  ·  ${p.year}`,
+                  `Predicted: ${p.x}W  ·  Actual: ${p.y}W  (${sign}${p.error})`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Predicted Wins', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0, suggestedMax: 17,
+          },
+          y: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Actual Wins', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0, suggestedMax: 17,
+          },
+        },
+      },
+    });
+  }
+
+  /* ── ORACLE predicted vs actual by year for one franchise ───────── */
+  function oracleTeamLine(canvasId, franchise, backtest) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const rows = backtest
+      .filter(r => r.franchise === franchise)
+      .sort((a, b) => a.year - b.year);
+
+    if (!rows.length) return;
+
+    const ORACLE_COLOR = '#f97316';
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: rows.map(r => r.year),
+        datasets: [
+          {
+            label: 'Actual Wins',
+            data:  rows.map(r => r.actual_wins),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,.1)',
+            borderWidth: 2.5,
+            pointRadius: 3,
+            fill: true,
+            tension: .3,
+          },
+          {
+            label: 'Predicted',
+            data:  rows.map(r => r.predicted_wins),
+            borderColor: ORACLE_COLOR,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 4],
+            pointRadius: 2,
+            fill: false,
+            tension: .3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: _baseLegend(true), tooltip: _tooltip() },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 }, maxRotation: 0 },
+          },
+          y: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Wins', color: TICK_COLOR(), font: { size: 11 } },
+            suggestedMin: 0, suggestedMax: 17,
+          },
+        },
+      },
+    });
+  }
+
   /* ── Season stat line ───────────────────────────────────────────── */
   function statLine(canvasId, data, yLabel = '') {
     _destroy(canvasId);
@@ -1308,5 +1453,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, update };
 })();

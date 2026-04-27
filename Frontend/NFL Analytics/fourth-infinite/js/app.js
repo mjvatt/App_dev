@@ -42,6 +42,7 @@
     if (id === 'draftboard') renderDraftTable();
     if (id === 'sage')       initSAGE();
     if (id === 'ghost')      initGHOST();
+    if (id === 'oracle')     initORACLE();
   }
 
   document.querySelectorAll('.nav-item').forEach(el => {
@@ -734,6 +735,7 @@
   let _ghostTabInited  = {};
   let _atlasInited     = false;
   let _atlasTabInited  = {};
+  let _oracleInited    = false;
 
   function initSAGE() {
     if (!_sageInited) {
@@ -1220,6 +1222,100 @@
     _ghostInited = true;
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     ORACLE
+  ═══════════════════════════════════════════════════════════════════ */
+  async function initORACLE() {
+    if (_oracleInited) return;
+    _oracleInited = true;
+
+    await DraftData.loadOraclePredictions();
+    const data = DraftData.oracleData();
+    if (!data || !data.forecast.length) return;
+
+    const { forecast, backtest, importances, meta } = data;
+
+    document.getElementById('oracle-r2').textContent      = meta.cv_r2_mean.toFixed(3);
+    document.getElementById('oracle-n-train').textContent = meta.n_train.toLocaleString();
+
+    // ── Tab 1: Forecast bar chart ────────────────────────────────────
+    const AFC_COLOR = '#3b82f6';
+    const NFC_COLOR = '#ef4444';
+    const barColors = forecast.map(r => (r.conf === 'AFC' ? AFC_COLOR : NFC_COLOR) + 'cc');
+    const forecastLabels = forecast.map(r => r.made_playoffs ? `${r.franchise} ★` : r.franchise);
+
+    DraftCharts.hbar(
+      'chart-oracle-forecast',
+      { labels: forecastLabels, values: forecast.map(r => r.predicted_wins) },
+      barColors,
+      'Predicted Wins',
+    );
+
+    // Forecast table
+    document.getElementById('oracle-forecast-body').innerHTML = forecast.map((r, i) => `
+      <tr>
+        <td style="color:var(--text-muted)">${i + 1}</td>
+        <td><strong>${r.franchise}</strong></td>
+        <td><span style="color:${r.conf === 'AFC' ? AFC_COLOR : NFC_COLOR};font-weight:600;font-size:12px">${r.conf}</span></td>
+        <td style="font-weight:600;color:var(--oracle)">${r.predicted_wins}</td>
+        <td>${r.prior_wins}</td>
+        <td>${r.made_playoffs ? '<span style="color:var(--accent)">Yes</span>' : '<span style="color:var(--text-muted)">No</span>'}</td>
+        <td style="color:${r.point_diff_pg >= 0 ? '#10b981' : '#ef4444'}">${r.point_diff_pg >= 0 ? '+' : ''}${r.point_diff_pg.toFixed(2)}</td>
+        <td style="color:var(--text-sub)">${r.draft_capital.toFixed(1)}</td>
+      </tr>`).join('');
+
+    // ── Tab 2: Backtest ──────────────────────────────────────────────
+    DraftCharts.oracleBacktestScatter('chart-oracle-backtest', backtest);
+
+    const teamSel = document.getElementById('oracle-team-sel');
+    if (teamSel.options.length === 1) {
+      [...new Set(backtest.map(r => r.franchise))].sort()
+        .forEach(t => teamSel.add(new Option(t, t)));
+      teamSel.addEventListener('change', () => {
+        if (teamSel.value) DraftCharts.oracleTeamLine('chart-oracle-team-line', teamSel.value, backtest);
+      });
+    }
+
+    // Error distribution bar
+    const BUCKETS = [1, 2, 3, 4, 5];
+    const counts  = BUCKETS.map(b => backtest.filter(r => Math.abs(r.error) <= b).length);
+    const pcts    = counts.map(c => +((c / backtest.length) * 100).toFixed(1));
+    DraftCharts.vbar('chart-oracle-error-dist', {
+      labels: BUCKETS.map(b => `≤${b}W`),
+      values: pcts,
+      colors: ['#10b981cc', '#22c55ecc', '#f59e0bcc', '#f97316cc', '#ef4444cc'],
+    });
+
+    // ── Tab 3: Drivers ───────────────────────────────────────────────
+    DraftCharts.hbar(
+      'chart-oracle-importance',
+      { labels: importances.map(f => f.feature), values: importances.map(f => f.importance) },
+      '#f97316',
+      'Importance',
+    );
+
+    document.getElementById('oracle-model-notes').innerHTML = `
+      <p><strong style="color:var(--text)">What this model does well:</strong> captures mean-reversion toward league average (the NFL's salary cap and scheduling create strong parity), weights point differential as a better signal of true team quality than raw wins, and incorporates draft capital as a forward-looking roster investment signal.</p>
+      <p style="margin-top:10px"><strong style="color:var(--text)">Limitations:</strong> CV R² = ${meta.cv_r2_mean} reflects genuine NFL unpredictability — coaching changes, injuries, and free agency are not modeled. Individual predictions carry ±3–4 win uncertainty. The model should be read as a probability-weighted central estimate, not a precise forecast.</p>
+      <p style="margin-top:10px"><strong style="color:var(--text)">Training data:</strong> ${meta.n_train.toLocaleString()} franchise-seasons, ${meta.train_from}–${meta.train_to}.</p>`;
+
+    // ── Tab activation ───────────────────────────────────────────────
+    function activateOracleTab(id) {
+      document.querySelectorAll('[data-oracle-tab]').forEach(t =>
+        t.classList.toggle('active', t.dataset.oracleTab === id)
+      );
+      document.querySelectorAll('[data-oracle-panel]').forEach(p =>
+        p.classList.toggle('active', p.dataset.oraclePanel === id)
+      );
+    }
+
+    document.querySelectorAll('[data-oracle-tab]').forEach(tab => {
+      tab.addEventListener('click', () => activateOracleTab(tab.dataset.oracleTab));
+    });
+
+    activateOracleTab('forecast');
+  }
+
   /* ── Player Profile Modal ────────────────────────────────────────── */
   const playerModal      = document.getElementById('playerModal');
   const playerModalClose = document.getElementById('playerModalClose');
@@ -1348,6 +1444,7 @@
       _ghostTabInited = {};
       _atlasInited    = false;
       _atlasTabInited = {};
+      _oracleInited   = false;
       showView(_currentView);
     });
   });
