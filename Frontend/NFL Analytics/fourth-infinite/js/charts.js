@@ -928,6 +928,59 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── ATLAS Era Rankings — grouped hbar by era ──────────────────── */
+  function eraRankingsChart(canvasId, rows, eras) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const ERA_COLORS = {
+      '1990s': 'rgba(16,185,129,0.75)',
+      '2000s': 'rgba(59,130,246,0.75)',
+      '2010s': 'rgba(245,158,11,0.75)',
+      '2020s': 'rgba(139,92,246,0.75)',
+    };
+
+    const datasets = eras.map(era => ({
+      label: era,
+      data:  rows.map(r => r[era] ?? 0),
+      backgroundColor: ERA_COLORS[era] || 'rgba(107,114,128,0.6)',
+      borderRadius: 3,
+      borderWidth: 0,
+    }));
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: rows.map(r => r.franchise), datasets },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              label: item => `${item.dataset.label}: ${item.raw}% win rate`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid:  { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Win %', color: TICK_COLOR(), font: { size: 11 } },
+            min: 0,
+            max: 85,
+          },
+          y: {
+            grid:  { display: false },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 10 } },
+          },
+        },
+      },
+    });
+  }
+
   /* ── ATLAS Draft Capital → Next-Season Wins (league-wide scatter) ── */
   function leagueDraftWinsChart(canvasId, data) {
     _destroy(canvasId);
@@ -1147,5 +1200,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
 })();

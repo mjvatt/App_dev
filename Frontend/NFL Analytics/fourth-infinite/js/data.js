@@ -203,6 +203,41 @@ const DraftData = (() => {
     });
   }
 
+  /* ATLAS — win % per franchise broken out by era (1990s / 2000s / 2010s / 2020s) */
+  function eraRankings() {
+    const ERAS = [
+      { label: '1990s', from: 1994, to: 1999 },
+      { label: '2000s', from: 2000, to: 2009 },
+      { label: '2010s', from: 2010, to: 2019 },
+      { label: '2020s', from: 2020, to: 2025 },
+    ];
+
+    const byFranchise = {};
+    _standings.forEach(s => {
+      if (!byFranchise[s.franchise]) byFranchise[s.franchise] = {};
+      ERAS.forEach(era => {
+        if (s.year < era.from || s.year > era.to) return;
+        if (!byFranchise[s.franchise][era.label]) byFranchise[s.franchise][era.label] = { w: 0, g: 0 };
+        byFranchise[s.franchise][era.label].w += s.w;
+        byFranchise[s.franchise][era.label].g += s.w + s.l + s.t;
+      });
+    });
+
+    const eraLabels = ERAS.map(e => e.label);
+    const rows = Object.entries(byFranchise).map(([franchise, eras]) => {
+      const winPcts = {};
+      eraLabels.forEach(era => {
+        const d = eras[era];
+        winPcts[era] = d && d.g > 0 ? +(d.w / d.g * 100).toFixed(1) : null;
+      });
+      const nonNull = eraLabels.map(e => winPcts[e]).filter(v => v !== null);
+      const avgPct  = nonNull.length ? +(nonNull.reduce((s, v) => s + v, 0) / nonNull.length).toFixed(1) : 0;
+      return { franchise, ...winPcts, avgPct };
+    });
+
+    return { rows, eras: eraLabels };
+  }
+
   /* ATLAS — league-wide draft capital (year Y) vs wins (year Y+1) with linear regression */
   function leagueDraftToWins(yearFrom = 1994, yearTo = 2024) {
     const standingsMap = {};
@@ -788,5 +823,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, leagueDraftToWins, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, leagueDraftToWins, eraRankings, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
 })();

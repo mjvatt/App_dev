@@ -516,8 +516,37 @@
         </div>
       </div>
 
-      <!-- Tab 4: Era Rankings (stub) -->
-      <div class="ghost-panel" data-atlas-panel="era"></div>
+      <!-- Tab 4: Era Rankings -->
+      <div class="ghost-panel" data-atlas-panel="era">
+        <div class="filter-bar">
+          <label class="filter-label">Sort by:</label>
+          <select id="atlas-era-sort" class="filter-select">
+            <option value="avgPct">Avg across all eras</option>
+            <option value="1990s">1990s</option>
+            <option value="2000s">2000s</option>
+            <option value="2010s">2010s</option>
+            <option value="2020s">2020s</option>
+          </select>
+          <label class="filter-label" style="margin-left:8px">Show top:</label>
+          <select id="atlas-era-topn" class="filter-select">
+            <option value="8">8</option>
+            <option value="12" selected>12</option>
+            <option value="16">16</option>
+            <option value="32">All 32</option>
+          </select>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>Era Rankings</h3>
+                <p>Win % per franchise by decade · green = 1990s · blue = 2000s · amber = 2010s · purple = 2020s</p>
+              </div>
+            </div>
+            <div class="chart-wrap" id="atlas-era-wrap" style="height:520px"><canvas id="chart-atlas-era"></canvas></div>
+          </div>
+        </div>
+      </div>
       <div class="ghost-panel" data-atlas-panel="variance"></div>
     </section>
 

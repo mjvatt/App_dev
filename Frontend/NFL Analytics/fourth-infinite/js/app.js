@@ -615,10 +615,39 @@
       DraftCharts.leagueDraftWinsChart('chart-atlas-draft-wins', data);
     }
 
+    const eraSortSel = document.getElementById('atlas-era-sort');
+    const eraTopNSel = document.getElementById('atlas-era-topn');
+
+    if (eraSortSel.dataset.wired !== 'true') {
+      [eraSortSel, eraTopNSel].forEach(el => el.addEventListener('change', () => {
+        _atlasTabInited.era = false;
+        renderEraRankings();
+        _atlasTabInited.era = true;
+      }));
+      eraSortSel.dataset.wired = 'true';
+    }
+
+    function renderEraRankings() {
+      const { rows, eras } = DraftData.eraRankings();
+      const sortKey = eraSortSel.value;
+      const topN    = +eraTopNSel.value || 12;
+
+      const sorted = rows
+        .slice()
+        .sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0))
+        .slice(0, topN);
+
+      const wrap = document.getElementById('atlas-era-wrap');
+      if (wrap) wrap.style.height = `${Math.max(360, topN * 44)}px`;
+
+      DraftCharts.eraRankingsChart('chart-atlas-era', sorted, eras);
+    }
+
     const ATLAS_RENDERS = {
       dynasty:      renderDynastyIndex,
       trajectories: renderTrajectories,
       'draft-wins': renderDraftWins,
+      era:          renderEraRankings,
     };
 
     function activateAtlasTab(id) {
