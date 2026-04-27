@@ -928,6 +928,62 @@ const DraftCharts = (() => {
     });
   }
 
+  /* ── ATLAS Dynasty leaderboard ─────────────────────────────────── */
+  function atlasLeaderboard(canvasId, data) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Legacy Score',
+          data:  data.values,
+          backgroundColor: data.colors || (ACCENT + 'cc'),
+          borderWidth: 0,
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              title: items => items[0]?.label || '',
+              label: item => {
+                const m = data.meta[item.dataIndex];
+                if (!m) return `Legacy Score: ${item.raw}`;
+                return [
+                  `Legacy Score: ${item.raw}`,
+                  `Win %: ${(m.winPct * 100).toFixed(1)}%  ·  ${m.wins}W over ${m.seasons} seasons`,
+                  `Playoffs: ${m.playoffs} of ${m.seasons} seasons (${(m.playoffRate * 100).toFixed(0)}%)`,
+                  `Draft Eff: ${m.draftEff}  (AV per capital unit · picks ≤ 2020)`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            min: 0,
+            max: 100,
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Legacy Score (0–100)', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 10 } },
+          },
+        },
+      },
+    });
+  }
+
   /* ── Season stat line ───────────────────────────────────────────── */
   function statLine(canvasId, data, yLabel = '') {
     _destroy(canvasId);
@@ -962,5 +1018,5 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, statLine, update };
+  return { picksPerYear, winsPerYear, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, statLine, update };
 })();

@@ -19,6 +19,8 @@
   --sage-dim:    rgba(16,185,129,.12);
   --ghost:       #8b5cf6;
   --ghost-dim:   rgba(139,92,246,.12);
+  --atlas:       #0ea5e9;
+  --atlas-dim:   rgba(14,165,233,.12);
 
   --chart-grid:          rgba(255,255,255,0.06);
   --chart-tick:          #777777;
@@ -58,6 +60,8 @@
   --sage-dim:    rgba(5,150,105,.1);
   --ghost:       #7c3aed;
   --ghost-dim:   rgba(124,58,237,.1);
+  --atlas:       #0284c7;
+  --atlas-dim:   rgba(2,132,199,.1);
 
   --chart-grid:          rgba(0,0,0,0.07);
   --chart-tick:          #6b7280;
@@ -214,6 +218,7 @@ body { display: flex; overflow: hidden; }
 }
 .sage-badge  { background: var(--sage-dim);       color: var(--sage); }
 .ghost-badge { background: var(--ghost-dim);      color: var(--ghost); }
+.atlas-badge { background: var(--atlas-dim);      color: var(--atlas); }
 .new-badge   { background: rgba(245,158,11,.12);  color: #f59e0b; }
 
 .sidebar.collapsed .nav-label,
@@ -590,8 +595,9 @@ body { display: flex; overflow: hidden; }
   padding: 6px 18px;
   border-radius: 8px;
 }
-.sage-hero .engine-hero-badge { background: var(--sage-dim); color: var(--sage); border: 1px solid var(--sage); }
+.sage-hero  .engine-hero-badge { background: var(--sage-dim);  color: var(--sage);  border: 1px solid var(--sage); }
 .ghost-hero .engine-hero-badge { background: var(--ghost-dim); color: var(--ghost); border: 1px solid var(--ghost); }
+.atlas-hero .engine-hero-badge { background: var(--atlas-dim); color: var(--atlas); border: 1px solid var(--atlas); }
 .ghost-badge-hero { color: var(--ghost) !important; }
 
 .engine-roadmap {

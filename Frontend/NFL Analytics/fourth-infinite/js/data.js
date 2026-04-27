@@ -167,16 +167,77 @@ const DraftData = (() => {
     return { labels: rounds.map(r => `Rnd ${r}`), values: rounds.map(r => counts[r]) };
   }
 
-  /* standings — generic filter (year, team, conf, div, playoff) */
+  /* standings — generic filter (year, yearFrom, yearTo, team, conf, div, playoff) */
   function standings(filter = {}) {
     return _standings.filter(s => {
-      if (filter.year    && s.year    !== +filter.year)  return false;
-      if (filter.team    && s.team    !== filter.team)   return false;
-      if (filter.conf    && s.conf    !== filter.conf)   return false;
-      if (filter.div     && s.div     !== filter.div)    return false;
-      if (filter.playoff !== undefined && s.playoff !== filter.playoff) return false;
+      if (filter.year     && s.year !== +filter.year)     return false;
+      if (filter.yearFrom && s.year <  +filter.yearFrom)  return false;
+      if (filter.yearTo   && s.year >  +filter.yearTo)    return false;
+      if (filter.team     && s.team !== filter.team)      return false;
+      if (filter.conf     && s.conf !== filter.conf)      return false;
+      if (filter.div      && s.div  !== filter.div)       return false;
+      if (filter.playoff  !== undefined && s.playoff !== filter.playoff) return false;
       return true;
     });
+  }
+
+  /* ATLAS — franchise legacy score: 40% win %, 40% playoff rate, 20% draft efficiency */
+  function dynastyIndex(yearFrom = 1994, yearTo = 2025) {
+    const DRAFT_CUTOFF = 2020;
+    const draftYearTo  = Math.min(+yearTo, DRAFT_CUTOFF);
+
+    const byTeam = {};
+    standings({ yearFrom, yearTo }).forEach(s => {
+      if (!byTeam[s.team]) byTeam[s.team] = { w: 0, l: 0, t: 0, seasons: 0, playoffs: 0 };
+      byTeam[s.team].w       += s.w;
+      byTeam[s.team].l       += s.l;
+      byTeam[s.team].t       += s.t;
+      byTeam[s.team].seasons++;
+      if (s.playoff) byTeam[s.team].playoffs++;
+    });
+
+    const byTeamDraft = {};
+    picks({ yearFrom, yearTo: draftYearTo }).filter(p => p.pick > 0).forEach(p => {
+      if (!byTeamDraft[p.team]) byTeamDraft[p.team] = { avSum: 0, capSum: 0 };
+      byTeamDraft[p.team].avSum  += p.career_av;
+      byTeamDraft[p.team].capSum += 100 * Math.pow(p.pick, -0.66);
+    });
+
+    const rows = Object.entries(byTeam)
+      .filter(([, d]) => d.seasons >= 3)
+      .map(([team, d]) => {
+        const games       = d.w + d.l + d.t || 1;
+        const winPct      = d.w / games;
+        const playoffRate = d.playoffs / d.seasons;
+        const dd          = byTeamDraft[team] || { avSum: 0, capSum: 1 };
+        const draftEff    = dd.capSum > 0 ? dd.avSum / dd.capSum : 0;
+        return { team, winPct, playoffRate, draftEff, wins: d.w, seasons: d.seasons, playoffs: d.playoffs };
+      });
+
+    const ext = key => {
+      const vals = rows.map(r => r[key]);
+      return { min: Math.min(...vals), max: Math.max(...vals) };
+    };
+    const norm = (v, min, max) => max > min ? (v - min) / (max - min) : 0.5;
+
+    const { min: minW, max: maxW } = ext('winPct');
+    const { min: minP, max: maxP } = ext('playoffRate');
+    const { min: minD, max: maxD } = ext('draftEff');
+
+    return rows.map(r => ({
+      team:         r.team,
+      wins:         r.wins,
+      seasons:      r.seasons,
+      playoffs:     r.playoffs,
+      winPct:       +r.winPct.toFixed(3),
+      playoffRate:  +r.playoffRate.toFixed(3),
+      draftEff:     +r.draftEff.toFixed(2),
+      score:        +(
+        (0.4 * norm(r.winPct,      minW, maxW) +
+         0.4 * norm(r.playoffRate, minP, maxP) +
+         0.2 * norm(r.draftEff,    minD, maxD)) * 100
+      ).toFixed(1),
+    })).sort((a, b) => b.score - a.score);
   }
 
   /* all season rows for one team, sorted by year */
@@ -662,5 +723,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings };
+  return { load, picks, meta, posColor, posColorAlpha, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, dynastyIndex };
 })();

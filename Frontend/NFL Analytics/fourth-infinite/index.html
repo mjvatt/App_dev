@@ -57,6 +57,11 @@
 
       <div class="nav-group">
         <span class="nav-label">Engines</span>
+        <a href="#" class="nav-item engine-item" data-view="atlas">
+          <i class="fas fa-globe"></i>
+          <span>ATLAS</span>
+          <span class="engine-badge atlas-badge">BETA</span>
+        </a>
         <a href="#" class="nav-item engine-item" data-view="sage">
           <i class="fas fa-brain"></i>
           <span>SAGE</span>
@@ -429,6 +434,54 @@
           <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-collegeEfficiency"></canvas></div>
         </div>
       </div>
+    </section>
+
+    <!-- ─── ATLAS VIEW ─── -->
+    <section class="view" id="view-atlas">
+      <div class="engine-hero atlas-hero">
+        <div class="engine-hero-badge">ATLAS</div>
+        <h2>Advanced Team Legacy Analytics System</h2>
+        <p>Cross-franchise intelligence across 32 seasons — dynasty rankings, win trajectories, draft-to-win correlation, era comparisons, and franchise volatility.</p>
+      </div>
+
+      <div class="ghost-tabs" id="atlasTabs">
+        <button class="ghost-tab active" data-atlas-tab="dynasty">Dynasty Index</button>
+        <button class="ghost-tab" data-atlas-tab="trajectories">Win Trajectories</button>
+        <button class="ghost-tab" data-atlas-tab="draft-wins">Draft → Wins</button>
+        <button class="ghost-tab" data-atlas-tab="era">Era Rankings</button>
+        <button class="ghost-tab" data-atlas-tab="variance">Boom &amp; Bust</button>
+      </div>
+
+      <!-- Tab 1: Dynasty Index -->
+      <div class="ghost-panel active" data-atlas-panel="dynasty">
+        <div class="filter-bar">
+          <label class="filter-label">Era:</label>
+          <select id="atlas-era-sel" class="filter-select">
+            <option value="all">All Time (1994–2025)</option>
+            <option value="1990s">1990s (1994–1999)</option>
+            <option value="2000s">2000s (2000–2009)</option>
+            <option value="2010s">2010s (2010–2019)</option>
+            <option value="2020s">2020s (2020–2025)</option>
+          </select>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>Dynasty Index</h3>
+                <p>Franchises ranked by composite legacy score · 40% win % · 40% playoff rate · 20% draft efficiency · top quartile in amber</p>
+              </div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-atlas-dynasty"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs 2–5: stubbed, filled in future sessions -->
+      <div class="ghost-panel" data-atlas-panel="trajectories"></div>
+      <div class="ghost-panel" data-atlas-panel="draft-wins"></div>
+      <div class="ghost-panel" data-atlas-panel="era"></div>
+      <div class="ghost-panel" data-atlas-panel="variance"></div>
     </section>
 
     <!-- ─── SAGE VIEW ─── -->

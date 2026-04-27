@@ -13,6 +13,7 @@
     class2026:  ['2026 Draft Class', 'NFL Draft · April 24–26, 2026'],
     positions:  ['Position Trends',  'How position drafting has evolved over 32 years'],
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
+    atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
   };
@@ -35,6 +36,7 @@
     if (id === 'dashboard')  initDashboard();
     if (id === 'teams')      initTeamHub();
     if (id === 'class2026')  initClass2026();
+    if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
     if (id === 'draftboard') renderDraftTable();
@@ -517,11 +519,83 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
+     ATLAS
+  ═══════════════════════════════════════════════════════════════════ */
+  const ERA_RANGES = {
+    all:   { yearFrom: 1994, yearTo: 2025 },
+    '1990s': { yearFrom: 1994, yearTo: 1999 },
+    '2000s': { yearFrom: 2000, yearTo: 2009 },
+    '2010s': { yearFrom: 2010, yearTo: 2019 },
+    '2020s': { yearFrom: 2020, yearTo: 2025 },
+  };
+
+  function initATLAS() {
+    if (_atlasInited) return;
+
+    const eraSel = document.getElementById('atlas-era-sel');
+    eraSel.addEventListener('change', () => {
+      if (_atlasTabInited.dynasty) {
+        _atlasTabInited.dynasty = false;
+      }
+      if (document.querySelector('[data-atlas-panel="dynasty"]').classList.contains('active')) {
+        renderDynastyIndex();
+      }
+    });
+
+    function renderDynastyIndex() {
+      const { yearFrom, yearTo } = ERA_RANGES[eraSel.value] || ERA_RANGES.all;
+      const rows    = DraftData.dynastyIndex(yearFrom, yearTo);
+      const q3score = rows[Math.floor(rows.length * 0.25)]?.score ?? 0;
+      DraftCharts.atlasLeaderboard('chart-atlas-dynasty', {
+        labels: rows.map(r => r.team),
+        values: rows.map(r => r.score),
+        colors: rows.map(r =>
+          r.score >= q3score ? 'rgba(245,158,11,0.80)' : 'rgba(14,165,233,0.60)'
+        ),
+        meta: rows.map(r => ({
+          winPct:      r.winPct,
+          wins:        r.wins,
+          seasons:     r.seasons,
+          playoffs:    r.playoffs,
+          playoffRate: r.playoffRate,
+          draftEff:    r.draftEff,
+        })),
+      });
+    }
+
+    const ATLAS_RENDERS = {
+      dynasty: renderDynastyIndex,
+    };
+
+    function activateAtlasTab(id) {
+      document.querySelectorAll('[data-atlas-tab]').forEach(t =>
+        t.classList.toggle('active', t.dataset.atlasTab === id)
+      );
+      document.querySelectorAll('[data-atlas-panel]').forEach(p =>
+        p.classList.toggle('active', p.dataset.atlasPanel === id)
+      );
+      if (!_atlasTabInited[id] && ATLAS_RENDERS[id]) {
+        _atlasTabInited[id] = true;
+        ATLAS_RENDERS[id]();
+      }
+    }
+
+    document.querySelectorAll('[data-atlas-tab]').forEach(tab => {
+      tab.addEventListener('click', () => activateAtlasTab(tab.dataset.atlasTab));
+    });
+
+    activateAtlasTab('dynasty');
+    _atlasInited = true;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
      SAGE
   ═══════════════════════════════════════════════════════════════════ */
-  let _sageInited     = false;
-  let _ghostInited    = false;
-  let _ghostTabInited = {};
+  let _sageInited      = false;
+  let _ghostInited     = false;
+  let _ghostTabInited  = {};
+  let _atlasInited     = false;
+  let _atlasTabInited  = {};
 
   function initSAGE() {
     if (!_sageInited) {
@@ -1029,6 +1103,8 @@
       _sageInited     = false;
       _ghostInited    = false;
       _ghostTabInited = {};
+      _atlasInited    = false;
+      _atlasTabInited = {};
       showView(_currentView);
     });
   });
