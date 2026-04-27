@@ -159,7 +159,7 @@ def main():
     with open(OUTPUT_PATH, 'w') as f:
         json.dump(output, f, separators=(',', ':'))
 
-    print(f"\nWrote {len(results)} predictions → {OUTPUT_PATH}")
+    print(f"\nWrote {len(results)} predictions -> {OUTPUT_PATH}")
 
 
 if __name__ == '__main__':
