@@ -600,7 +600,7 @@ const DraftData = (() => {
 
   /* career AV generated per unit of draft capital, by year, for one franchise */
   function teamDraftClassGrades(franchise) {
-    const INCOMPLETE_YEAR = 2021;
+    const INCOMPLETE_YEAR = 2022;
     const pickVal = pick => 100 * Math.pow(pick, -0.66);
 
     const byYear = {};
@@ -673,7 +673,7 @@ const DraftData = (() => {
 
   /* SAGE — career AV generated per unit of draft capital, by draft year */
   function draftClassGrades() {
-    const INCOMPLETE_YEAR = 2021;
+    const INCOMPLETE_YEAR = 2022;
     const pickVal = pick => 100 * Math.pow(pick, -0.66);
 
     const byYear = {};
