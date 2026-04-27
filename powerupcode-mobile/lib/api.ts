@@ -1,6 +1,8 @@
-// For local dev: iOS simulator uses localhost, Android emulator uses 10.0.2.2
-// Physical devices need the local network IP (e.g. http://192.168.x.x:8000)
-export const API_BASE = "http://localhost:8000";
+// Controlled per EAS build profile via EXPO_PUBLIC_API_URL env var.
+// Android emulator local dev: set to http://10.0.2.2:8000
+// Physical device local dev: set to http://<your-local-ip>:8000
+export const API_BASE =
+  process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

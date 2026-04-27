@@ -10,3 +10,4 @@ build/
 *.mobileprovision
 .env
 .env.local
+secrets/
