@@ -88,6 +88,9 @@ export default function LeaderboardPage() {
                       <span className="ml-2 text-xs text-zinc-500 font-normal">you</span>
                     )}
                   </span>
+                  <span className="md:hidden text-xs text-zinc-500 mt-0.5 block tabular-nums">
+                    Lv {entry.level} · {entry.total_xp.toLocaleString()} XP · {entry.streak_days}d
+                  </span>
                 </div>
 
                 <span className="hidden md:block text-sm text-zinc-400 text-right tabular-nums">

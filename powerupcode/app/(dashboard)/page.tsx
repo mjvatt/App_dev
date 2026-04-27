@@ -29,19 +29,22 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [me, setMe] = useState<UserMe | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [resendMessage, setResendMessage] = useState("");
 
   useEffect(() => {
     const token = getToken();
     if (!token) return;
+    setError(null);
+    setProgress(null);
     authedRequest<UserProgress>("/api/progress/me", token)
       .then(setProgress)
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load progress")
       );
     authedRequest<UserMe>("/api/auth/me", token).then(setMe).catch(() => null);
-  }, []);
+  }, [retryCount]);
 
   async function handleResend() {
     const token = getToken();
@@ -63,7 +66,13 @@ export default function DashboardPage() {
     return (
       <div className="p-8">
         <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-red-400 mb-4">{error}</p>
+        <button
+          onClick={() => setRetryCount((n) => n + 1)}
+          className="text-xs text-white border border-zinc-700 rounded-lg px-3 py-1.5 hover:bg-zinc-800 transition-colors"
+        >
+          Try again
+        </button>
       </div>
     );
   }
