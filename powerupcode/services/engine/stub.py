@@ -38,16 +38,21 @@ _STUB_CHALLENGE = ChallengeData(
 
 
 class StubEngine(GameEngine):
+    def __init__(self) -> None:
+        self._last_difficulty: dict[str, Difficulty] = {}
+
     async def next_challenge(
         self,
         user_id: str,
         topic: Optional[Topic] = None,
         difficulty: Optional[Difficulty] = None,
     ) -> ChallengeData:
+        diff = difficulty or _STUB_CHALLENGE.difficulty
+        self._last_difficulty[_STUB_CHALLENGE.id] = diff
         return ChallengeData(
             id=_STUB_CHALLENGE.id,
             topic=topic or _STUB_CHALLENGE.topic,
-            difficulty=difficulty or _STUB_CHALLENGE.difficulty,
+            difficulty=diff,
             title=_STUB_CHALLENGE.title,
             prompt=_STUB_CHALLENGE.prompt,
             constraints=_STUB_CHALLENGE.constraints,
@@ -61,6 +66,7 @@ class StubEngine(GameEngine):
         solution: str,
         time_ms: int = 0,
     ) -> AttemptResult:
+        diff = self._last_difficulty.get(challenge_id, _STUB_CHALLENGE.difficulty)
         return AttemptResult(
             attempt_id=str(uuid.uuid4()),
             passed=False,
@@ -69,7 +75,7 @@ class StubEngine(GameEngine):
             hints_used=0,
             time_ms=time_ms,
             topic=_STUB_CHALLENGE.topic,
-            difficulty=_STUB_CHALLENGE.difficulty,
+            difficulty=diff,
         )
 
     async def generate_hint(

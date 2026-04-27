@@ -26,6 +26,14 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   boss: "text-red-400",
 };
 
+const DIFFICULTY_OPTIONS: { value: Difficulty | ""; label: string; color: string }[] = [
+  { value: "", label: "Auto", color: "text-zinc-400" },
+  { value: "easy", label: "Easy", color: "text-green-400" },
+  { value: "medium", label: "Medium", color: "text-yellow-400" },
+  { value: "hard", label: "Hard", color: "text-orange-400" },
+  { value: "boss", label: "Boss", color: "text-red-400" },
+];
+
 export default function ArcadePage() {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [language, setLanguage] = useState<Language>("python");
@@ -156,19 +164,23 @@ export default function ArcadePage() {
 
           {/* Left pane: challenge description + result */}
           <div className="w-2/5 min-w-64 border-r border-zinc-900 overflow-y-auto p-6 flex flex-col gap-5">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-zinc-600 shrink-0">Difficulty</span>
-              <select
-                value={selectedDifficulty}
-                onChange={(e) => handleDifficultyChange(e.target.value as Difficulty | "")}
-                className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none"
-              >
-                <option value="">Adaptive</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-                <option value="boss">Boss</option>
-              </select>
+              <div className="flex items-center gap-1">
+                {DIFFICULTY_OPTIONS.map(({ value, label, color }) => (
+                  <button
+                    key={value}
+                    onClick={() => handleDifficultyChange(value)}
+                    className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                      selectedDifficulty === value
+                        ? `${color} bg-zinc-800`
+                        : "text-zinc-600 hover:text-zinc-400"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
             {fetching && (
               <p className="text-zinc-600 text-sm">Loading challenge...</p>

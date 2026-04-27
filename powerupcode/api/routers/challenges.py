@@ -47,12 +47,13 @@ async def _suggest_difficulty(db: AsyncSession, user_id: str) -> Difficulty:
         return Difficulty.EASY
 
     passed_count = sum(1 for row in recent if row.passed)
+    recent_diffs = {row.difficulty for row in recent}
+    at_top_tier = bool(recent_diffs & {Difficulty.HARD.value, Difficulty.BOSS.value})
 
     if passed_count == len(recent):
-        had_hard = any(row.difficulty == Difficulty.HARD.value for row in recent)
-        return Difficulty.BOSS if had_hard else Difficulty.HARD
+        return Difficulty.BOSS if at_top_tier else Difficulty.HARD
     if passed_count >= _MEDIUM_PASS_THRESHOLD:
-        return Difficulty.MEDIUM
+        return Difficulty.HARD if at_top_tier else Difficulty.MEDIUM
     return Difficulty.EASY
 
 
