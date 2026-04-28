@@ -179,6 +179,20 @@ export default function ArcadePage() {
     }
   }
 
+  // Cmd/Ctrl + Enter submits, regardless of which pane has focus.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+      if (!challenge || submitting || fetching) return;
+      e.preventDefault();
+      handleSubmit();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // handleSubmit closes over code/challenge; rebinding on each render is cheap.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [challenge, submitting, fetching, code, language]);
+
   return (
     <AuthGuard>
       <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
@@ -351,10 +365,12 @@ export default function ArcadePage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !challenge || fetching}
+                title="Submit (Ctrl/Cmd + Enter)"
                 className="px-5 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {submitting ? "Running..." : "Submit"}
               </button>
+              <span className="text-xs text-zinc-700 hidden sm:inline">⌘/Ctrl + Enter</span>
               {result && !submitting && (
                 <span className={`text-sm font-medium ${result.passed ? "text-green-400" : "text-zinc-500"}`}>
                   {result.passed ? "Passed" : "Try again"}
