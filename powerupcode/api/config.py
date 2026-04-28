@@ -3,12 +3,16 @@ from typing import Annotated
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
+_DEV_SECRET_KEY_DEFAULT = "dev-secret-change-in-production"
+_NON_PROD_ENVS = frozenset({"dev", "development", "local", "test", "ci"})
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    env: str = "dev"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5434/powerupcode"
-    secret_key: str = "dev-secret-change-in-production"
+    secret_key: str = _DEV_SECRET_KEY_DEFAULT
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
     stripe_price_weekly: str = ""
@@ -34,4 +38,18 @@ class Settings(BaseSettings):
         return v
 
 
+def _enforce_production_secret(s: Settings) -> None:
+    """Refuse to boot in production with the dev secret key default."""
+    env_normalized = (s.env or "").strip().lower()
+    if env_normalized in _NON_PROD_ENVS:
+        return
+    if s.secret_key == _DEV_SECRET_KEY_DEFAULT or len(s.secret_key) < 32:
+        raise RuntimeError(
+            f"SECRET_KEY must be set to a non-default value of at least 32 chars when "
+            f"ENV='{s.env}'. Generate one with: python -c \"import secrets; "
+            f"print(secrets.token_urlsafe(48))\""
+        )
+
+
 settings = Settings()
+_enforce_production_secret(settings)
