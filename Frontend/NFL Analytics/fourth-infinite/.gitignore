@@ -1,3 +1,10 @@
 notes/
 data/sleeper_predictions.json
 data/oracle_predictions.json
+.env
+.env.*
+data/.cfbd_api_key
+data/college_cache/
+data/college_fetch.log
+data/overnight_chain.sh
+data/overnight_summary.log
