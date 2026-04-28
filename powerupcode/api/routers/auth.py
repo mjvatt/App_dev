@@ -4,7 +4,7 @@ from typing import Annotated
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from sqlalchemy import select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
@@ -43,6 +43,22 @@ _RESET_TTL = timedelta(minutes=15)
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+async def _purge_stale_tokens(db: AsyncSession, user_id: str, token_type: str) -> None:
+    """Drop any used or expired tokens of the given type for this user.
+    Called opportunistically when we issue a fresh token, so the
+    email_tokens table stays bounded without a separate cron job."""
+    await db.execute(
+        delete(EmailToken).where(
+            EmailToken.user_id == user_id,
+            EmailToken.token_type == token_type,
+            or_(
+                EmailToken.used_at.is_not(None),
+                EmailToken.expires_at < _now(),
+            ),
+        )
+    )
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -148,6 +164,7 @@ async def resend_verification(
             detail="Please wait a few minutes before requesting another verification email",
         )
 
+    await _purge_stale_tokens(db, user_id, "verify")
     token = EmailToken(
         user_id=user_id,
         token_type="verify",
@@ -199,6 +216,7 @@ async def forgot_password(
     user = await db.scalar(select(User).where(User.email == body.email))
 
     if user is not None:
+        await _purge_stale_tokens(db, user.id, "reset")
         reset_token = EmailToken(
             user_id=user.id,
             token_type="reset",
