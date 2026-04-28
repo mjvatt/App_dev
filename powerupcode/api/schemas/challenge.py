@@ -10,7 +10,7 @@ class ChallengeResponse(BaseModel):
     title: str
     prompt: str
     constraints: list[str]
-    examples: list[dict]  # type: ignore[type-arg]
+    examples: list[dict[str, str]]
 
 
 class AttemptRequest(BaseModel):

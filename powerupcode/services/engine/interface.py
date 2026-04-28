@@ -29,7 +29,7 @@ class ChallengeData:
     title: str
     prompt: str
     constraints: list[str] = field(default_factory=list)
-    examples: list[dict] = field(default_factory=list)  # type: ignore[type-arg]
+    examples: list[dict[str, str]] = field(default_factory=list)
 
 
 @dataclass

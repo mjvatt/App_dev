@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from testcontainers.postgres import PostgresContainer
 
 # Defaults for test runs that don't need a real DB. DB-backed fixtures
@@ -60,7 +60,7 @@ def pg_url() -> Iterator[str]:
 
 
 @pytest.fixture
-async def db_engine(pg_url: str) -> AsyncGenerator:  # type: ignore[type-arg]
+async def db_engine(pg_url: str) -> AsyncGenerator[AsyncEngine, None]:
     """Function-scoped so each test gets an engine bound to its own asyncio
     loop. The Postgres container is session-scoped because spinning it up
     per test is too slow; the engine is cheap to recreate.
@@ -86,7 +86,7 @@ async def db_engine(pg_url: str) -> AsyncGenerator:  # type: ignore[type-arg]
 
 
 @pytest.fixture
-async def db_session(db_engine) -> AsyncGenerator[AsyncSession, None]:  # type: ignore[no-untyped-def]
+async def db_session(db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
     Session = async_sessionmaker(db_engine, expire_on_commit=False)
     async with Session() as session:
         yield session
@@ -94,7 +94,7 @@ async def db_session(db_engine) -> AsyncGenerator[AsyncSession, None]:  # type: 
 
 @pytest.fixture
 async def integration_client(
-    db_engine,  # type: ignore[no-untyped-def]
+    db_engine: AsyncEngine,
 ) -> AsyncGenerator[AsyncClient, None]:
     """An httpx client bound to the FastAPI app, with get_db overridden so
     every request uses the testcontainers Postgres."""
