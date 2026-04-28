@@ -1267,6 +1267,7 @@
           <td>${r.made_playoffs ? '<span style="color:var(--accent)">Yes</span>' : '<span style="color:var(--text-muted)">No</span>'}</td>
           <td style="color:${r.point_diff_pg >= 0 ? '#10b981' : '#ef4444'}">${r.point_diff_pg >= 0 ? '+' : ''}${r.point_diff_pg.toFixed(2)}</td>
           <td style="color:var(--text-sub)">${r.draft_capital.toFixed(1)}</td>
+          <td style="color:var(--text-sub)">${r.cap_space_m != null ? r.cap_space_m.toFixed(1) : '—'}</td>
         </tr>`).join('');
     }
 
@@ -1321,9 +1322,9 @@
     );
 
     document.getElementById('oracle-model-notes').innerHTML = `
-      <p><strong style="color:var(--text)">What this model does well:</strong> captures mean-reversion toward league average (the NFL's salary cap and scheduling create strong parity), weights point differential as a better signal of true team quality than raw wins, and incorporates draft capital as a forward-looking roster investment signal.</p>
-      <p style="margin-top:10px"><strong style="color:var(--text)">Limitations:</strong> CV R² = ${meta.cv_r2_mean} reflects genuine NFL unpredictability — coaching changes, injuries, and free agency are not modeled. Individual predictions carry ±3–4 win uncertainty. The model should be read as a probability-weighted central estimate, not a precise forecast.</p>
-      <p style="margin-top:10px"><strong style="color:var(--text)">Training data:</strong> ${meta.n_train.toLocaleString()} franchise-seasons, ${meta.train_from}–${meta.train_to}.</p>`;
+      <p><strong style="color:var(--text)">What this model does well:</strong> captures mean-reversion toward league average (the NFL's salary cap and scheduling create strong parity), weights point differential as a better signal of true team quality than raw wins, incorporates draft capital as a forward-looking roster investment signal, and uses prior-year cap space as a measure of roster-building flexibility.</p>
+      <p style="margin-top:10px"><strong style="color:var(--text)">Limitations:</strong> CV R² = ${meta.cv_r2_mean} reflects genuine NFL unpredictability — coaching changes, injuries, and free agency are not modeled. Individual predictions carry ±3–4 win uncertainty. Cap space data is available from 2013 onward; earlier seasons use a neutral fill. The model should be read as a probability-weighted central estimate, not a precise forecast.</p>
+      <p style="margin-top:10px"><strong style="color:var(--text)">Training data:</strong> ${meta.n_train.toLocaleString()} franchise-seasons, ${meta.train_from}–${meta.train_to}. Cap space feature: Spotrac, 2013–2025.</p>`;
 
     // ── Tab activation ───────────────────────────────────────────────
     function activateOracleTab(id) {

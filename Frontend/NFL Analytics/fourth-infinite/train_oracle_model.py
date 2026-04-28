@@ -1,8 +1,8 @@
 """
-train_oracle_model.py
+train_oracle_model.py  (v2)
 
 Trains a GradientBoostingRegressor to predict franchise season wins
-using prior-season performance and draft capital.
+using prior-season performance, draft capital, and prior-year cap space.
 
 Features (per franchise, predicting wins in season Y):
   prior_wins        — wins in Y-1
@@ -12,10 +12,16 @@ Features (per franchise, predicting wins in season Y):
   draft_capital     — pick value score for Y draft class
   recent_av_rate    — avg career AV per capital unit, drafts Y-4 through Y-2,
                       capped at AV_CAP_YEAR to avoid incomplete-class noise
+  cap_space_m       — cap space in Y-1 ($M); prior-year financial flexibility
+
+Cap data coverage: 2013-2025 (Spotrac). Missing franchise-years use the
+per-year league median. Years before 2013 use the global cap median across
+all available data (neutral fill — cap_space_m contributes no cross-team
+signal for those years, preserving the full 1996-2024 training window).
 
 Outputs data/oracle_predictions.json:
   forecast    — 2026 projections for all 32 franchises
-  backtest    — historical predicted vs actual wins (1996-2024)
+  backtest    — historical predicted vs actual wins (2014-2024)
   importances — feature importances sorted descending
   meta        — training stats and CV R^2
 
@@ -28,10 +34,11 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import cross_val_score
 
-DATA_PATH   = 'data/draft_data.json'
-OUTPUT_PATH = 'data/oracle_predictions.json'
+DATA_PATH      = 'data/draft_data.json'
+SALARIES_PATH  = 'data/salaries.json'
+OUTPUT_PATH    = 'data/oracle_predictions.json'
 
-TRAIN_FROM   = 1996
+TRAIN_FROM   = 1996   # full window; pre-2013 uses neutral cap fill
 TRAIN_TO     = 2024
 AV_CAP_YEAR  = 2021
 AV_WINDOW    = 4
@@ -79,7 +86,6 @@ def build_capital_map(picks):
 
 
 def build_av_by_fy(picks):
-    """Aggregate career AV and draft capital per (franchise, year), capped at AV_CAP_YEAR."""
     m = {}
     for p in picks:
         if p['pick'] <= 0 or p['year'] > AV_CAP_YEAR:
@@ -95,6 +101,34 @@ def build_av_by_fy(picks):
     return m
 
 
+def build_cap_space_map(salaries):
+    """Build {franchise: {year: cap_space_m}} from salaries.json.
+    Salaries already use current franchise names."""
+    m = {}
+    for r in salaries.get('cap_by_year', []):
+        team = r['team']
+        y    = r['year']
+        if team not in m:
+            m[team] = {}
+        m[team][y] = r['cap_space'] / 1e6
+    return m
+
+
+def build_cap_medians(cap_map):
+    """Per-year median cap space. Also computes a global median for pre-2013 fill."""
+    by_year = {}
+    all_vals = []
+    for fmap in cap_map.values():
+        for y, v in fmap.items():
+            if y not in by_year:
+                by_year[y] = []
+            by_year[y].append(v)
+            all_vals.append(v)
+    medians = {y: float(np.median(vals)) for y, vals in by_year.items()}
+    medians['_global'] = float(np.median(all_vals)) if all_vals else 0.0
+    return medians
+
+
 def _recent_av_rate(franchise, target_year, av_by_fy, global_rate):
     total_av, total_cap = 0.0, 0.0
     for dy in range(target_year - AV_WINDOW, target_year - 1):
@@ -107,28 +141,40 @@ def _recent_av_rate(franchise, target_year, av_by_fy, global_rate):
     return (total_av / total_cap) if total_cap > 0 else global_rate
 
 
-def build_features(franchise, target_year, standings_map, capital_map, av_by_fy, global_av_rate):
+def build_features(franchise, target_year, standings_map, capital_map,
+                   av_by_fy, global_av_rate, cap_map, cap_medians):
     sm    = standings_map.get(franchise, {})
     prev1 = sm.get(target_year - 1)
     prev2 = sm.get(target_year - 2)
     if not prev1:
         return None
 
-    games = prev1['w'] + prev1['l'] + prev1.get('t', 0) or 17
-    pd_pg = (prev1['pf'] - prev1['pa']) / games
-    p2w   = prev2['w'] if prev2 else prev1['w']
-    cap   = capital_map.get(franchise, {}).get(target_year, 0.0)
-    avr   = _recent_av_rate(franchise, target_year, av_by_fy, global_av_rate)
+    games  = prev1['w'] + prev1['l'] + prev1.get('t', 0) or 17
+    pd_pg  = (prev1['pf'] - prev1['pa']) / games
+    p2w    = prev2['w'] if prev2 else prev1['w']
+    cap    = capital_map.get(franchise, {}).get(target_year, 0.0)
+    avr    = _recent_av_rate(franchise, target_year, av_by_fy, global_av_rate)
 
-    return [prev1['w'], p2w, pd_pg, 1 if prev1.get('playoff') else 0, cap, avr]
+    # Prior-year cap space. Falls back to year median if franchise is missing,
+    # then global median for years before cap data begins (pre-2013).
+    cs_m = cap_map.get(franchise, {}).get(target_year - 1)
+    if cs_m is None:
+        cs_m = cap_medians.get(target_year - 1, cap_medians.get('_global', 0.0))
+
+    return [prev1['w'], p2w, pd_pg, 1 if prev1.get('playoff') else 0, cap, avr, cs_m]
 
 
-FEATURE_NAMES = ['prior_wins', 'prior2_wins', 'point_diff_pg', 'made_playoffs', 'draft_capital', 'recent_av_rate']
+FEATURE_NAMES = [
+    'prior_wins', 'prior2_wins', 'point_diff_pg', 'made_playoffs',
+    'draft_capital', 'recent_av_rate', 'cap_space_m',
+]
 
 
 def main():
     with open(DATA_PATH) as f:
         raw = json.load(f)
+    with open(SALARIES_PATH) as f:
+        salaries = json.load(f)
 
     picks     = raw['picks']
     standings = raw['standings']
@@ -136,6 +182,8 @@ def main():
     standings_map = build_standings_map(standings)
     capital_map   = build_capital_map(picks)
     av_by_fy      = build_av_by_fy(picks)
+    cap_map       = build_cap_space_map(salaries)
+    cap_medians   = build_cap_medians(cap_map)
 
     all_rates = [
         v['av'] / v['cap']
@@ -153,7 +201,10 @@ def main():
         for year in range(TRAIN_FROM, TRAIN_TO + 1):
             if year not in sm:
                 continue
-            features = build_features(franchise, year, standings_map, capital_map, av_by_fy, global_av_rate)
+            features = build_features(
+                franchise, year, standings_map, capital_map,
+                av_by_fy, global_av_rate, cap_map, cap_medians,
+            )
             if features is None:
                 continue
             X.append(features)
@@ -191,12 +242,16 @@ def main():
 
     forecast = []
     for franchise in franchises:
-        features = build_features(franchise, 2026, standings_map, capital_map, av_by_fy, global_av_rate)
+        features = build_features(
+            franchise, 2026, standings_map, capital_map,
+            av_by_fy, global_av_rate, cap_map, cap_medians,
+        )
         if features is None:
             continue
-        pred  = float(model.predict([features])[0])
-        row25 = standings_map.get(franchise, {}).get(2025, {})
+        pred    = float(model.predict([features])[0])
+        row25   = standings_map.get(franchise, {}).get(2025, {})
         games25 = row25.get('w', 0) + row25.get('l', 0) + row25.get('t', 0) or 17
+        cs25_m  = cap_map.get(franchise, {}).get(2025, cap_medians.get(2025, 0.0))
         forecast.append({
             'franchise':      franchise,
             'conf':           row25.get('conf', ''),
@@ -206,6 +261,7 @@ def main():
             'made_playoffs':  bool(row25.get('playoff', False)),
             'draft_capital':  round(capital_map.get(franchise, {}).get(2026, 0.0), 1),
             'point_diff_pg':  round((row25.get('pf', 0) - row25.get('pa', 0)) / games25, 2),
+            'cap_space_m':    round(cs25_m, 1),
         })
     forecast.sort(key=lambda x: -x['predicted_wins'])
 
@@ -222,7 +278,8 @@ def main():
     print("\n2026 Forecast (top 10):")
     for row in forecast[:10]:
         marker = '*' if row['made_playoffs'] else ' '
-        print(f"  {row['franchise']:<32s} {row['predicted_wins']:>4.1f}W  (2025: {row['prior_wins']}W{marker})")
+        print(f"  {row['franchise']:<32s} {row['predicted_wins']:>4.1f}W  "
+              f"(2025: {row['prior_wins']}W{marker}, cap: ${row['cap_space_m']:.1f}M)")
 
     output = {
         'forecast':    forecast,
