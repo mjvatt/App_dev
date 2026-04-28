@@ -75,22 +75,32 @@ async def get_my_history(
     attempts = result.scalars().all()
 
     engine = get_engine()
-    items: list[AttemptHistoryItem] = []
-    for attempt in attempts:
-        challenge = await engine.get_challenge(attempt.challenge_id)
-        items.append(
-            AttemptHistoryItem(
-                attempt_id=attempt.id,
-                challenge_id=attempt.challenge_id,
-                challenge_title=challenge.title if challenge else None,
-                topic=challenge.topic.value if challenge else None,
-                difficulty=attempt.difficulty or (challenge.difficulty.value if challenge else None),
-                passed=attempt.passed,
-                xp_earned=attempt.xp_earned,
-                hints_used=attempt.hints_used,
-                time_ms=attempt.time_ms,
-                submitted_at=attempt.submitted_at,
-            )
+    challenge_ids = list({a.challenge_id for a in attempts})
+    challenges = await engine.get_challenges(challenge_ids) if challenge_ids else {}
+
+    items: list[AttemptHistoryItem] = [
+        AttemptHistoryItem(
+            attempt_id=attempt.id,
+            challenge_id=attempt.challenge_id,
+            challenge_title=challenges[attempt.challenge_id].title
+            if attempt.challenge_id in challenges
+            else None,
+            topic=challenges[attempt.challenge_id].topic.value
+            if attempt.challenge_id in challenges
+            else None,
+            difficulty=attempt.difficulty
+            or (
+                challenges[attempt.challenge_id].difficulty.value
+                if attempt.challenge_id in challenges
+                else None
+            ),
+            passed=attempt.passed,
+            xp_earned=attempt.xp_earned,
+            hints_used=attempt.hints_used,
+            time_ms=attempt.time_ms,
+            submitted_at=attempt.submitted_at,
         )
+        for attempt in attempts
+    ]
 
     return AttemptHistoryResponse(items=items)

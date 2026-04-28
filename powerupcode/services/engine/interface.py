@@ -90,5 +90,18 @@ class GameEngine(ABC):
     @abstractmethod
     async def get_challenge(self, challenge_id: str) -> Optional[ChallengeData]: ...
 
+    async def get_challenges(
+        self, challenge_ids: list[str]
+    ) -> dict[str, ChallengeData]:
+        """Batch fetch. Override for engines backed by a real datastore;
+        the default falls back to per-id lookups, which is fine for
+        in-memory engines but N+1 for DB-backed ones."""
+        result: dict[str, ChallengeData] = {}
+        for cid in challenge_ids:
+            challenge = await self.get_challenge(cid)
+            if challenge is not None:
+                result[cid] = challenge
+        return result
+
     @abstractmethod
     async def get_user_level(self, user_id: str) -> UserLevel: ...
