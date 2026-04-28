@@ -12,10 +12,16 @@ _VERIFY_EXPIRY_HOURS = 24
 _RESET_EXPIRY_MINUTES = 15
 
 
+_BODY_STYLE = (
+    "margin:0;padding:0;background:#000000;"
+    "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"
+)
+
+
 def _build_html(heading: str, username: str, body: str, cta_url: str, cta_text: str) -> str:
     return f"""<!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#000000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="{_BODY_STYLE}">
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center" style="padding:40px 16px;">
       <table width="480" cellpadding="0" cellspacing="0"
@@ -102,7 +108,10 @@ async def send_password_reset_email(to_email: str, username: str, token: str) ->
     html = _build_html(
         heading="Reset your password",
         username=username,
-        body=f"click the button below to reset your password. This link expires in {_RESET_EXPIRY_MINUTES} minutes.",
+        body=(
+            "click the button below to reset your password. "
+            f"This link expires in {_RESET_EXPIRY_MINUTES} minutes."
+        ),
         cta_url=url,
         cta_text="Reset Password",
     )

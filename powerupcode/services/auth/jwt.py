@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from jose import JWTError, jwt
 
@@ -10,17 +9,17 @@ _EXPIRE_MINUTES = 60 * 24  # 24 hours
 def create_access_token(
     user_id: str,
     secret_key: str,
-    expires_delta: Optional[timedelta] = None,
+    expires_delta: timedelta | None = None,
 ) -> str:
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=_EXPIRE_MINUTES))
+    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=_EXPIRE_MINUTES))
     encoded: str = jwt.encode({"sub": user_id, "exp": expire}, secret_key, algorithm=_ALGORITHM)
     return encoded
 
 
-def verify_token(token: str, secret_key: str) -> Optional[str]:
+def verify_token(token: str, secret_key: str) -> str | None:
     try:
         payload = jwt.decode(token, secret_key, algorithms=[_ALGORITHM])
-        sub: Optional[str] = payload.get("sub")
+        sub: str | None = payload.get("sub")
         return sub
     except JWTError:
         return None

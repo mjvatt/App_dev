@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import bcrypt
@@ -44,7 +44,7 @@ _RESET_TTL = timedelta(minutes=15)
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 async def _purge_stale_tokens(db: AsyncSession, user_id: str, token_type: str) -> None:

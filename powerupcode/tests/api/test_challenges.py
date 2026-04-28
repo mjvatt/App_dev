@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 from httpx import AsyncClient
 
@@ -7,7 +7,7 @@ from api.routers.challenges import _REVIEW_XP_CAP, _award_xp, _update_streak
 
 
 def _utc(year: int, month: int, day: int, hour: int = 12) -> datetime:
-    return datetime(year, month, day, hour, tzinfo=timezone.utc)
+    return datetime(year, month, day, hour, tzinfo=UTC)
 
 
 def test_streak_starts_at_one_for_new_user() -> None:

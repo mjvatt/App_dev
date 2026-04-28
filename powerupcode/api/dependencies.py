@@ -1,4 +1,5 @@
-from typing import Annotated, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -14,7 +15,7 @@ _SessionLocal = async_sessionmaker(_engine, expire_on_commit=False)
 _security = HTTPBearer()
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession]:
     async with _SessionLocal() as session:
         yield session
 

@@ -1,6 +1,6 @@
 import pytest
 
-from api.config import Settings, _DEV_SECRET_KEY_DEFAULT, _enforce_production_secret
+from api.config import _DEV_SECRET_KEY_DEFAULT, Settings, _enforce_production_secret
 
 
 def _settings(**overrides: object) -> Settings:

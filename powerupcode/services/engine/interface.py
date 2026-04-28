@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 
-class Difficulty(str, Enum):
+class Difficulty(StrEnum):
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
     BOSS = "boss"
 
 
-class Topic(str, Enum):
+class Topic(StrEnum):
     ARRAYS = "arrays"
     STRINGS = "strings"
     LINKED_LISTS = "linked_lists"
@@ -40,9 +39,9 @@ class AttemptResult:
     feedback: str
     hints_used: int
     time_ms: int
-    topic: Optional[Topic] = None
-    difficulty: Optional[Difficulty] = None
-    next_difficulty: Optional[Difficulty] = None
+    topic: Topic | None = None
+    difficulty: Difficulty | None = None
+    next_difficulty: Difficulty | None = None
 
 
 @dataclass
@@ -66,8 +65,8 @@ class GameEngine(ABC):
     async def next_challenge(
         self,
         user_id: str,
-        topic: Optional[Topic] = None,
-        difficulty: Optional[Difficulty] = None,
+        topic: Topic | None = None,
+        difficulty: Difficulty | None = None,
     ) -> ChallengeData: ...
 
     @abstractmethod
@@ -88,7 +87,7 @@ class GameEngine(ABC):
     ) -> HintResult: ...
 
     @abstractmethod
-    async def get_challenge(self, challenge_id: str) -> Optional[ChallengeData]: ...
+    async def get_challenge(self, challenge_id: str) -> ChallengeData | None: ...
 
     async def get_challenges(
         self, challenge_ids: list[str]

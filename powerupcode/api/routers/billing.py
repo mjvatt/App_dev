@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -108,7 +108,7 @@ async def stripe_webhook(
                     tier=plan,
                     status=sub_obj["status"],
                     current_period_end=datetime.fromtimestamp(
-                        sub_obj["current_period_end"], tz=timezone.utc
+                        sub_obj["current_period_end"], tz=UTC
                     ),
                 )
         case "customer.subscription.updated":
@@ -117,7 +117,7 @@ async def stripe_webhook(
                 stripe_sub_id=sub_obj["id"],
                 status=sub_obj["status"],
                 current_period_end=datetime.fromtimestamp(
-                    sub_obj["current_period_end"], tz=timezone.utc
+                    sub_obj["current_period_end"], tz=UTC
                 ),
             )
         case "customer.subscription.deleted":
@@ -127,7 +127,7 @@ async def stripe_webhook(
                 stripe_sub_id=sub_obj["id"],
                 status="canceled",
                 current_period_end=(
-                    datetime.fromtimestamp(stripe_period_end, tz=timezone.utc)
+                    datetime.fromtimestamp(stripe_period_end, tz=UTC)
                     if stripe_period_end
                     else None
                 ),

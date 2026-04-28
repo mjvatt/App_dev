@@ -11,7 +11,6 @@ production engine_core is responsible for persisting any state that needs
 to survive across requests or workers.
 """
 import uuid
-from typing import Optional
 
 from services.engine.interface import (
     AttemptResult,
@@ -54,8 +53,8 @@ class StubEngine(GameEngine):
     async def next_challenge(
         self,
         user_id: str,
-        topic: Optional[Topic] = None,
-        difficulty: Optional[Difficulty] = None,
+        topic: Topic | None = None,
+        difficulty: Difficulty | None = None,
     ) -> ChallengeData:
         diff = difficulty or _STUB_CHALLENGE.difficulty
         self._last_difficulty[(user_id, _STUB_CHALLENGE.id)] = diff
@@ -98,7 +97,7 @@ class StubEngine(GameEngine):
     ) -> HintResult:
         return HintResult(hint="Hints are not available in stub mode.", hints_remaining=0)
 
-    async def get_challenge(self, challenge_id: str) -> Optional[ChallengeData]:
+    async def get_challenge(self, challenge_id: str) -> ChallengeData | None:
         if challenge_id == _STUB_CHALLENGE.id:
             return _STUB_CHALLENGE
         return None

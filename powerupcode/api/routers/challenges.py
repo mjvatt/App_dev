@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -92,12 +92,12 @@ def _update_streak(progress: UserProgress, now: datetime | None = None) -> None:
     at least one attempt within consecutive UTC calendar days. Server local time
     is intentionally ignored so users in different timezones see the same
     rollover boundary."""
-    current = now or datetime.now(timezone.utc)
+    current = now or datetime.now(UTC)
     today_utc = current.date()
     if progress.last_active is None:
         progress.streak_days = 1
     else:
-        last_active_utc = progress.last_active.astimezone(timezone.utc).date()
+        last_active_utc = progress.last_active.astimezone(UTC).date()
         delta = (today_utc - last_active_utc).days
         if delta == 1:
             progress.streak_days += 1

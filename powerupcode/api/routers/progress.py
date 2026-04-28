@@ -6,7 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db
 from api.models.challenge import Attempt, UserProgress
-from api.schemas.progress import AttemptHistoryItem, AttemptHistoryResponse, DifficultyStats, UserProgressResponse
+from api.schemas.progress import (
+    AttemptHistoryItem,
+    AttemptHistoryResponse,
+    DifficultyStats,
+    UserProgressResponse,
+)
 from services.engine import get_engine
 
 router = APIRouter()
@@ -26,7 +31,7 @@ async def get_my_progress(
         select(
             Attempt.difficulty,
             func.count().label("attempts"),
-            func.sum(case((Attempt.passed == True, 1), else_=0)).label("passed"),
+            func.sum(case((Attempt.passed.is_(True), 1), else_=0)).label("passed"),
         )
         .where(Attempt.user_id == user_id, Attempt.difficulty.isnot(None))
         .group_by(Attempt.difficulty)
