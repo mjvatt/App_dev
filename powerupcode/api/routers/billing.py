@@ -1,15 +1,19 @@
+import logging
 from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db
-from api.models.user import Subscription
+from api.models.user import ProcessedStripeEvent, Subscription
 from api.schemas.billing import SubscriptionStatusResponse
 from services.billing.stripe_client import create_checkout_session, handle_webhook
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -70,6 +74,23 @@ async def stripe_webhook(
         event = handle_webhook(payload, sig)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid payload or signature")
+
+    event_id = event.get("id")
+    if not event_id:
+        # Stripe always sends an id; treat its absence as a malformed payload.
+        raise HTTPException(status_code=400, detail="Missing event id")
+
+    # Atomic dedupe: try to claim the event_id. If another concurrent delivery
+    # already inserted it, rowcount == 0 and we ack without re-processing.
+    claim = await db.execute(
+        pg_insert(ProcessedStripeEvent)
+        .values(event_id=event_id)
+        .on_conflict_do_nothing(index_elements=["event_id"])
+    )
+    if claim.rowcount == 0:
+        await db.rollback()
+        logger.info("Stripe event %s already processed; skipping", event_id)
+        return {"received": True, "duplicate": True}
 
     sub_obj = event["data"]["object"]  # type: ignore[index]
 
