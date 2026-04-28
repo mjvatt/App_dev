@@ -1267,19 +1267,27 @@
 
       const subtitleEl = document.getElementById('ghost-ml-subtitle');
       if (subtitleEl && result.modelMeta) {
-        const r2     = result.modelMeta.cv_r2_mean;
-        const ntrain = result.modelMeta.n_train;
-        const r2Note = (r2 !== undefined && r2 < 0.02)
-          ? ` · CV R² ≈ ${r2} (signal is weak — rankings are directional, not predictive)`
-          : ` · CV R² = ${r2}`;
-        subtitleEl.textContent =
-          `Picks ranked by predicted career AV surplus above slot · GBR · trained on ${ntrain ? ntrain.toLocaleString() : '?'} picks ≤ ${result.modelMeta.train_cutoff}${r2Note} · top 30`;
+        const m      = result.modelMeta;
+        const auc    = m.cv_auc_mean;
+        const ntrain = m.n_train;
+        const thresh = m.hit_threshold;
+        const hr     = m.hit_rate;
+        if (auc !== undefined) {
+          subtitleEl.textContent =
+            `Picks ranked by predicted hit probability · GBR classifier · `
+            + `trained on ${ntrain ? ntrain.toLocaleString() : '?'} picks `
+            + `(${m.train_from}–${m.train_cutoff}) · `
+            + `hit = career AV surplus > ${thresh} (base rate ${(hr * 100).toFixed(1)}%) · `
+            + `held-out CV AUC = ${auc.toFixed(3)} · top 30`;
+        }
       }
 
-      const rankLabel = mode === 'surprise' ? 'Actual − Predicted Surplus' : 'Predicted Career AV Surplus';
+      const rankLabel = mode === 'surprise'
+        ? 'Hit Surprise (actual − predicted)'
+        : 'Predicted Hit Probability';
       const xLabel    = mode === 'surprise'
-        ? 'Career AV above slot expectation minus model prediction'
-        : 'Predicted career AV above slot expectation';
+        ? 'Completed picks: actual hit (1/0) minus predicted probability'
+        : 'Probability of exceeding slot expectation by the hit threshold';
 
       DraftCharts.ghostLeaderboard('chart-mlRankings', {
         labels:      result.picks.map(p => `${p.player} (${p.year})`),
@@ -1288,18 +1296,19 @@
         metricLabel: rankLabel,
         xLabel,
         meta:        result.picks.map(p => ({
-          team:               p.team,
-          year:               p.year,
-          pos:                p.pos,
-          round:              p.round,
-          pick:               p.pick,
-          college:            p.college,
-          draft_av:           p.draft_av,
-          career_av:          p.career_av,
-          pro_bowls:          p.pro_bowls,
-          predicted_surplus:  p.predicted_surplus,
-          actual_surplus:     p.actual_surplus,
-          incomplete:         p.incomplete,
+          team:             p.team,
+          year:             p.year,
+          pos:              p.pos,
+          round:            p.round,
+          pick:             p.pick,
+          college:          p.college,
+          draft_av:         p.draft_av,
+          career_av:        p.career_av,
+          pro_bowls:        p.pro_bowls,
+          predicted_prob:   p.predicted_prob,
+          actual_surplus:   p.actual_surplus,
+          actual_hit:       p.actual_hit,
+          incomplete:       p.incomplete,
         })),
       });
 
@@ -1513,18 +1522,26 @@
           </div>`).join('')
       : '<div style="color:var(--text-muted);font-size:13px">No comps with complete data found</div>';
 
-    const mlHtml = mlPick ? `
+    const meta = mlResult.modelMeta || {};
+    const hitThresh = meta.hit_threshold;
+    const baseRate  = meta.hit_rate;
+    const mlHtml = mlPick && mlPick.predicted_prob !== undefined ? `
       <div class="profile-section">
-        <h4>GHOST · ML Prediction</h4>
+        <h4>GHOST · Hit Probability</h4>
         <div class="profile-context-row">
-          <span>Predicted career AV surplus</span>
-          <span class="profile-val">${mlPick.predicted_surplus}</span>
+          <span>Probability of exceeding slot by ${hitThresh ?? '—'} AV</span>
+          <span class="profile-val">${(mlPick.predicted_prob * 100).toFixed(1)}%</span>
         </div>
-        ${!mlPick.incomplete ? `
+        ${baseRate !== undefined ? `
         <div class="profile-context-row">
-          <span>Actual surplus</span>
-          <span class="profile-val ${mlPick.actual_surplus >= 0 ? 'pos' : 'neg'}">
-            ${mlPick.actual_surplus >= 0 ? '+' : ''}${mlPick.actual_surplus}
+          <span>League base rate</span>
+          <span class="profile-val">${(baseRate * 100).toFixed(1)}%</span>
+        </div>` : ''}
+        ${!mlPick.incomplete && mlPick.actual_hit !== null && mlPick.actual_hit !== undefined ? `
+        <div class="profile-context-row">
+          <span>Actual outcome</span>
+          <span class="profile-val ${mlPick.actual_hit ? 'pos' : 'neg'}">
+            ${mlPick.actual_hit ? 'Hit' : 'Miss'}
           </span>
         </div>` : ''}
       </div>` : '';

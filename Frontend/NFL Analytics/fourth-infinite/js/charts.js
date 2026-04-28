@@ -905,9 +905,13 @@ const DraftCharts = (() => {
                 if (m.avgPick !== undefined) lines.push(`Avg draft slot: #${m.avgPick}`);
                 if (m.avgPB !== undefined)    lines.push(`Avg Pro Bowls/pick: ${m.avgPB}`);
                 if (m.college)               lines.push(`College: ${m.college}`);
+                if (m.predicted_prob !== undefined) lines.push(`Predicted hit probability: ${(m.predicted_prob * 100).toFixed(1)}%`);
                 if (m.predicted_surplus !== undefined) lines.push(`Predicted surplus: ${m.predicted_surplus}`);
                 if (m.actual_surplus !== undefined && !m.incomplete) lines.push(`Actual surplus: ${m.actual_surplus}`);
-                if (m.incomplete) lines.push('Career data incomplete (2021+)');
+                if (m.actual_hit !== undefined && m.actual_hit !== null && !m.incomplete) {
+                  lines.push(`Actual outcome: ${m.actual_hit ? 'Hit' : 'Miss'}`);
+                }
+                if (m.incomplete) lines.push('Career data incomplete (2022+)');
                 return lines;
               },
             },

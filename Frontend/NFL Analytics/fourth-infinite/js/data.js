@@ -926,6 +926,10 @@ const DraftData = (() => {
     }
   }
 
+  /* GHOST classifier rankings.
+     mode = 'predicted' → ranked by model-predicted hit probability
+     mode = 'surprise'  → ranked by (actual_hit - predicted_prob), showing
+                          completed picks the model badly under-rated */
   function sleeperModelRankings(filter = {}, topN = 30, mode = 'predicted') {
     if (!_sleeperPreds) return { picks: [], importances: [], modelMeta: {} };
     let preds = _sleeperPreds.predictions;
@@ -935,12 +939,20 @@ const DraftData = (() => {
     if (filter.pos_group) preds = preds.filter(p => p.pos_group === filter.pos_group);
     if (filter.round)     preds = preds.filter(p => p.round     === +filter.round);
 
-    const scored = preds.map(p => ({
-      ...p,
-      displayScore: mode === 'surprise'
-        ? +(p.actual_surplus - p.predicted_surplus).toFixed(2)
-        : p.predicted_surplus,
-    }));
+    const scored = preds.map(p => {
+      let displayScore;
+      if (mode === 'surprise') {
+        // Skip incomplete careers — actual_hit is null until INCOMPLETE_YEAR.
+        if (p.incomplete || p.actual_hit === null || p.actual_hit === undefined) {
+          displayScore = -1;  // sorts to bottom
+        } else {
+          displayScore = +(((p.actual_hit ? 1 : 0) - p.predicted_prob)).toFixed(3);
+        }
+      } else {
+        displayScore = p.predicted_prob;
+      }
+      return { ...p, displayScore };
+    });
 
     return {
       picks:       scored.sort((a, b) => b.displayScore - a.displayScore).slice(0, topN),
