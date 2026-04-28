@@ -19,6 +19,8 @@ from api.schemas.user import (
     UserCreate,
     UserLogin,
     UserMeResponse,
+    VerifyEmailRequest,
+    VerifyEmailStatusResponse,
 )
 from services.auth.jwt import create_access_token
 from services.email.client import send_password_reset_email, send_verification_email
@@ -181,12 +183,33 @@ async def resend_verification(
     return MessageResponse(message="Verification email sent")
 
 
-@router.get("/verify-email", response_model=MessageResponse)
-async def verify_email(
+@router.get("/verify-email", response_model=VerifyEmailStatusResponse)
+async def verify_email_status(
     token: Annotated[str, Query()],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> MessageResponse:
+) -> VerifyEmailStatusResponse:
+    """Read-only token check. Email scanners and link prefetchers can hit
+    this freely — it never mutates the token. The actual verification is
+    performed via POST /verify-email, which the frontend triggers from a
+    user-clicked button."""
     record = await db.get(EmailToken, token)
+    if record is None or record.token_type != "verify":
+        return VerifyEmailStatusResponse(status="invalid")
+    if record.used_at is not None:
+        return VerifyEmailStatusResponse(status="used")
+    if record.expires_at < _now():
+        return VerifyEmailStatusResponse(status="expired")
+    return VerifyEmailStatusResponse(status="pending")
+
+
+@router.post("/verify-email", response_model=MessageResponse)
+@limiter.limit("10/15minute")
+async def verify_email(
+    request: Request,
+    body: VerifyEmailRequest,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> MessageResponse:
+    record = await db.get(EmailToken, body.token)
     if (
         record is None
         or record.token_type != "verify"

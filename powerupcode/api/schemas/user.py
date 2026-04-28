@@ -53,6 +53,14 @@ class MessageResponse(BaseModel):
     message: str
 
 
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+class VerifyEmailStatusResponse(BaseModel):
+    status: str  # one of: "pending", "expired", "used", "invalid"
+
+
 class UserMeResponse(BaseModel):
     user_id: str
     username: str
