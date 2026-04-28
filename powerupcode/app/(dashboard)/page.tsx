@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getToken } from "@/lib/auth";
 import { authedRequest } from "@/lib/api";
@@ -110,10 +111,28 @@ export default function DashboardPage() {
   }
 
   const xpInLevel = XP_PER_LEVEL - progress.xp_to_next;
+  const isBrandNew = progress.total_xp === 0 && progress.streak_days === 0;
 
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+
+      {isBrandNew && (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl px-6 py-6 mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-1">
+            <p className="text-base font-semibold text-white">Welcome to PowerUpCode</p>
+            <p className="text-sm text-zinc-400">
+              Solve your first challenge to earn XP, start a streak, and climb the leaderboard.
+            </p>
+          </div>
+          <Link
+            href="/arcade"
+            className="self-start md:self-auto shrink-0 px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+          >
+            Start your first challenge →
+          </Link>
+        </div>
+      )}
 
       {me && !me.is_verified && (
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl px-5 py-4 mb-6 flex items-center justify-between gap-4">
