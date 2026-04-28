@@ -749,9 +749,11 @@ body { display: flex; overflow: hidden; }
 .profile-av-bars { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
 .profile-av-bar-row { display: flex; align-items: center; gap: 10px; }
 .profile-av-bar-label { font-size: 12px; color: var(--text-muted); width: 92px; flex-shrink: 0; }
-.profile-av-bar-track { flex: 1; height: 10px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.profile-av-bar-track { flex: 1; height: 10px; background: var(--bg); border-radius: 4px; overflow: hidden; position: relative; }
 .profile-av-bar-fill { height: 100%; border-radius: 4px; }
+.profile-av-bar-tick { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--text-muted); opacity: 0.85; pointer-events: none; }
 .profile-av-bar-val { font-size: 13px; font-weight: 600; width: 30px; text-align: right; flex-shrink: 0; }
+.profile-av-bar-legend { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
 
 .draft-table tbody tr { cursor: pointer; }
 .draft-table tbody tr:hover { background: var(--accent-dim); }

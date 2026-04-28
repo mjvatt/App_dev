@@ -1512,8 +1512,22 @@
 
     let avBreakdownHtml = '';
     if (ctx && p.career_av > 0) {
-      const earlyPct = Math.round(ctx.earlyAv / p.career_av * 100);
-      const latePct  = Math.round(ctx.lateAv  / p.career_av * 100);
+      // Shared linear scale: scale_max ensures the player's own bars fit and
+      // leaves headroom around the position median so the median tick lands
+      // in a readable spot. A journeyman fills less than the median tick;
+      // an All-Pro overflows past it. Scale resets the misleading
+      // self-normalization where every player filled 100%.
+      const median   = ctx.posMedianAv || 0;
+      const scaleMax = Math.max(p.career_av, median * 2.5, 10);
+      const earlyPct = Math.round(ctx.earlyAv / scaleMax * 100);
+      const latePct  = Math.round(ctx.lateAv  / scaleMax * 100);
+      const tickPct  = median > 0 ? Math.min(99, Math.round(median / scaleMax * 100)) : null;
+      const tickHtml = tickPct !== null
+        ? `<div class="profile-av-bar-tick" style="left:${tickPct}%" title="Position median career AV: ${median}"></div>`
+        : '';
+      const tickLegend = tickPct !== null
+        ? `<div class="profile-av-bar-legend">Tick = median career AV for ${ctx.posGroup} (${median})</div>`
+        : '';
       avBreakdownHtml = `
         <div class="profile-section">
           <h4>Career AV Breakdown</h4>
@@ -1522,6 +1536,7 @@
               <span class="profile-av-bar-label">Seasons 1–4</span>
               <div class="profile-av-bar-track">
                 <div class="profile-av-bar-fill" style="width:${earlyPct}%;background:var(--ghost)"></div>
+                ${tickHtml}
               </div>
               <span class="profile-av-bar-val">${ctx.earlyAv}</span>
             </div>
@@ -1529,10 +1544,12 @@
               <span class="profile-av-bar-label">Seasons 5+</span>
               <div class="profile-av-bar-track">
                 <div class="profile-av-bar-fill" style="width:${latePct}%;background:var(--accent)"></div>
+                ${tickHtml}
               </div>
               <span class="profile-av-bar-val">${ctx.lateAv}</span>
             </div>
           </div>
+          ${tickLegend}
         </div>`;
     }
 

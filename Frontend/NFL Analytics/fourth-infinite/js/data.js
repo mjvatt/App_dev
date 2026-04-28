@@ -495,6 +495,29 @@ const DraftData = (() => {
     return { pick: p, pickValue, slotAvg, avSurplus, comps };
   }
 
+  /* median career AV by position group, computed on completed careers only.
+     Used as a reference scale for the modal Career AV Breakdown bars. */
+  let _posMedianAv = null;
+  function _buildPosMedianAv() {
+    if (_posMedianAv) return _posMedianAv;
+    const buckets = {};
+    _picks
+      .filter(p => p.pick > 0 && p.year <= 2021 && p.career_av > 0 && p.pos_group)
+      .forEach(p => {
+        if (!buckets[p.pos_group]) buckets[p.pos_group] = [];
+        buckets[p.pos_group].push(p.career_av);
+      });
+    _posMedianAv = {};
+    Object.entries(buckets).forEach(([g, vals]) => {
+      vals.sort((a, b) => a - b);
+      const mid = Math.floor(vals.length / 2);
+      _posMedianAv[g] = vals.length % 2
+        ? vals[mid]
+        : (vals[mid - 1] + vals[mid]) / 2;
+    });
+    return _posMedianAv;
+  }
+
   /* career context for the player profile modal */
   function playerContext(year, pick) {
     const p = _picks.find(pk => pk.year === +year && pk.pick === +pick);
@@ -526,6 +549,9 @@ const DraftData = (() => {
       posRank = posRankIdx >= 0 ? posRankIdx + 1 : null;
     }
 
+    const posMedians  = _buildPosMedianAv();
+    const posMedianAv = +(posMedians[p.pos_group] || 0).toFixed(1);
+
     return {
       earlyAv,
       lateAv,
@@ -538,6 +564,7 @@ const DraftData = (() => {
       posRank,
       posRankTotal,
       posGroup: p.pos_group,
+      posMedianAv,
     };
   }
 
