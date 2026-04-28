@@ -1,13 +1,9 @@
-export type Topic =
-  | "arrays"
-  | "strings"
-  | "linked_lists"
-  | "trees"
-  | "graphs"
-  | "dynamic_programming"
-  | "system_design";
+import type { components } from "./api-types.generated";
 
-export type Difficulty = "easy" | "medium" | "hard" | "boss";
+// Source of truth for the cross-language enums lives in the FastAPI schema.
+// Regenerate with `npm run codegen:api` after backend changes.
+export type Topic = components["schemas"]["Topic"];
+export type Difficulty = components["schemas"]["Difficulty"];
 
 export interface Challenge {
   id: string;
