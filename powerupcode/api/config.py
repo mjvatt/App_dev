@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     smtp_username: str = ""
     smtp_password: str = ""
     smtp_from_email: str = "noreply@powerupcode.com"
-    app_url: str = "http://localhost:3000"
+    app_url: str = "http://localhost:3001"
 
     @field_validator("cors_origins", mode="before")
     @classmethod
