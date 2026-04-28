@@ -3,13 +3,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.dependencies import get_current_user, get_db
 from api.models.user import EmailToken, User
+from api.rate_limit import limiter
 from api.schemas.user import (
     ForgotPasswordRequest,
     MessageResponse,
@@ -45,7 +46,9 @@ def _now() -> datetime:
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/15minute")
 async def register(
+    request: Request,
     body: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
@@ -85,7 +88,9 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/15minute")
 async def login(
+    request: Request,
     body: UserLogin,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
@@ -116,7 +121,9 @@ _RESEND_COOLDOWN = timedelta(minutes=5)
 
 
 @router.post("/resend-verification", response_model=MessageResponse)
+@limiter.limit("3/15minute")
 async def resend_verification(
+    request: Request,
     user_id: Annotated[str, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> MessageResponse:
@@ -183,7 +190,9 @@ async def verify_email(
 
 
 @router.post("/forgot-password", response_model=MessageResponse)
+@limiter.limit("3/15minute")
 async def forgot_password(
+    request: Request,
     body: ForgotPasswordRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> MessageResponse:
@@ -207,7 +216,9 @@ async def forgot_password(
 
 
 @router.post("/reset-password", response_model=MessageResponse)
+@limiter.limit("5/15minute")
 async def reset_password(
+    request: Request,
     body: ResetPasswordRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> MessageResponse:
