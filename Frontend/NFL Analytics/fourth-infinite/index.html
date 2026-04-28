@@ -988,11 +988,28 @@
           <div class="chart-card wide">
             <div class="chart-card-header">
               <div>
-                <h3>2026 Win Projections — All 32 Franchises</h3>
+                <h3 id="oracle-forecast-title">2026 Win Projections — All 32 Franchises</h3>
                 <p>Ranked by predicted wins &nbsp;·&nbsp; <span style="color:#3b82f6;font-weight:600">■ AFC</span> &nbsp; <span style="color:#ef4444;font-weight:600">■ NFC</span> &nbsp;·&nbsp; <span style="color:var(--text-sub)">★ = made 2025 playoffs</span></p>
               </div>
             </div>
-            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-oracle-forecast"></canvas></div>
+            <div class="oracle-filters">
+              <div class="oracle-filter-group">
+                <button class="oracle-filter-btn active" data-conf="" data-div="">All</button>
+                <button class="oracle-filter-btn" data-conf="AFC" data-div="">AFC</button>
+                <button class="oracle-filter-btn" data-conf="NFC" data-div="">NFC</button>
+              </div>
+              <div class="oracle-filter-group">
+                <button class="oracle-filter-btn" data-conf="AFC" data-div="East">AFC East</button>
+                <button class="oracle-filter-btn" data-conf="AFC" data-div="North">AFC North</button>
+                <button class="oracle-filter-btn" data-conf="AFC" data-div="South">AFC South</button>
+                <button class="oracle-filter-btn" data-conf="AFC" data-div="West">AFC West</button>
+                <button class="oracle-filter-btn" data-conf="NFC" data-div="East">NFC East</button>
+                <button class="oracle-filter-btn" data-conf="NFC" data-div="North">NFC North</button>
+                <button class="oracle-filter-btn" data-conf="NFC" data-div="South">NFC South</button>
+                <button class="oracle-filter-btn" data-conf="NFC" data-div="West">NFC West</button>
+              </div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg" id="oracle-forecast-wrap"><canvas id="chart-oracle-forecast"></canvas></div>
           </div>
         </div>
         <div class="chart-card wide" style="margin-top:16px">

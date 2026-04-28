@@ -709,6 +709,22 @@ body { display: flex; overflow: hidden; }
 .profile-comp-meta { color: var(--text-muted); font-size: 12px; }
 .profile-comp-av { font-weight: 600; color: var(--accent); white-space: nowrap; }
 
+.oracle-filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: center; }
+.oracle-filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+.oracle-filter-group + .oracle-filter-group { padding-left: 10px; border-left: 1px solid var(--border); }
+.oracle-filter-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.oracle-filter-btn:hover { border-color: var(--oracle); color: var(--oracle); }
+.oracle-filter-btn.active { background: var(--oracle); border-color: var(--oracle); color: #000; font-weight: 600; }
+
 .profile-av-bars { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
 .profile-av-bar-row { display: flex; align-items: center; gap: 10px; }
 .profile-av-bar-label { font-size: 12px; color: var(--text-muted); width: 92px; flex-shrink: 0; }

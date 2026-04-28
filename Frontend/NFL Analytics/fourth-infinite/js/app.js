@@ -1238,31 +1238,57 @@
     document.getElementById('oracle-r2').textContent      = meta.cv_r2_mean.toFixed(3);
     document.getElementById('oracle-n-train').textContent = meta.n_train.toLocaleString();
 
-    // ── Tab 1: Forecast bar chart ────────────────────────────────────
+    // ── Tab 1: Forecast bar chart + filter buttons ───────────────────
     const AFC_COLOR = '#3b82f6';
     const NFC_COLOR = '#ef4444';
-    const barColors = forecast.map(r => (r.conf === 'AFC' ? AFC_COLOR : NFC_COLOR) + 'cc');
-    const forecastLabels = forecast.map(r => r.made_playoffs ? `${r.franchise} ★` : r.franchise);
 
-    DraftCharts.hbar(
-      'chart-oracle-forecast',
-      { labels: forecastLabels, values: forecast.map(r => r.predicted_wins) },
-      barColors,
-      'Predicted Wins',
-    );
+    function renderForecast(subset) {
+      const n    = subset.length;
+      const wrap = document.getElementById('oracle-forecast-wrap');
+      wrap.style.height = Math.max(200, Math.min(520, n * 22 + 60)) + 'px';
 
-    // Forecast table
-    document.getElementById('oracle-forecast-body').innerHTML = forecast.map((r, i) => `
-      <tr>
-        <td style="color:var(--text-muted)">${i + 1}</td>
-        <td><strong>${r.franchise}</strong></td>
-        <td><span style="color:${r.conf === 'AFC' ? AFC_COLOR : NFC_COLOR};font-weight:600;font-size:12px">${r.conf}</span></td>
-        <td style="font-weight:600;color:var(--oracle)">${r.predicted_wins}</td>
-        <td>${r.prior_wins}</td>
-        <td>${r.made_playoffs ? '<span style="color:var(--accent)">Yes</span>' : '<span style="color:var(--text-muted)">No</span>'}</td>
-        <td style="color:${r.point_diff_pg >= 0 ? '#10b981' : '#ef4444'}">${r.point_diff_pg >= 0 ? '+' : ''}${r.point_diff_pg.toFixed(2)}</td>
-        <td style="color:var(--text-sub)">${r.draft_capital.toFixed(1)}</td>
-      </tr>`).join('');
+      const colors = subset.map(r => (r.conf === 'AFC' ? AFC_COLOR : NFC_COLOR) + 'cc');
+      const labels = subset.map(r => r.made_playoffs ? `${r.franchise} ★` : r.franchise);
+
+      DraftCharts.hbar(
+        'chart-oracle-forecast',
+        { labels, values: subset.map(r => r.predicted_wins) },
+        colors,
+        'Predicted Wins',
+      );
+
+      document.getElementById('oracle-forecast-body').innerHTML = subset.map((r, i) => `
+        <tr>
+          <td style="color:var(--text-muted)">${i + 1}</td>
+          <td><strong>${r.franchise}</strong></td>
+          <td><span style="color:${r.conf === 'AFC' ? AFC_COLOR : NFC_COLOR};font-weight:600;font-size:12px">${r.conf}</span></td>
+          <td style="font-weight:600;color:var(--oracle)">${r.predicted_wins}</td>
+          <td>${r.prior_wins}</td>
+          <td>${r.made_playoffs ? '<span style="color:var(--accent)">Yes</span>' : '<span style="color:var(--text-muted)">No</span>'}</td>
+          <td style="color:${r.point_diff_pg >= 0 ? '#10b981' : '#ef4444'}">${r.point_diff_pg >= 0 ? '+' : ''}${r.point_diff_pg.toFixed(2)}</td>
+          <td style="color:var(--text-sub)">${r.draft_capital.toFixed(1)}</td>
+        </tr>`).join('');
+    }
+
+    renderForecast(forecast);
+
+    const filterBtns = document.querySelectorAll('.oracle-filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const conf = btn.dataset.conf;
+        const div  = btn.dataset.div;
+        const label = btn.textContent.trim();
+        document.getElementById('oracle-forecast-title').textContent =
+          `2026 Win Projections — ${conf && div ? label : conf ? `${conf} (16 teams)` : 'All 32 Franchises'}`;
+        const subset = forecast.filter(r =>
+          (!conf || r.conf === conf) &&
+          (!div  || r.div  === div)
+        );
+        renderForecast(subset);
+      });
+    });
 
     // ── Tab 2: Backtest ──────────────────────────────────────────────
     DraftCharts.oracleBacktestScatter('chart-oracle-backtest', backtest);
