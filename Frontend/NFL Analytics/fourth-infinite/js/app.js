@@ -7,7 +7,7 @@
 
   /* ── Navigation ───────────────────────────────────────────────────── */
   const VIEW_TITLES = {
-    dashboard:  ['Dashboard',        '32 seasons · 8,116 picks · all NFL teams'],
+    dashboard:  ['Dashboard',        `${meta.years.length} seasons · ${meta.total_picks.toLocaleString()} picks · all NFL teams`],
     draftboard: ['Draft Board',      'Search and filter every pick from 1994–2026'],
     teams:      ['Team Hub',         'Draft history and tendencies by franchise'],
     class2026:  ['2026 Draft Class', 'NFL Draft · April 24–26, 2026'],
@@ -275,7 +275,10 @@
     const rows     = DraftData.teamStandings(team);
     const totalW   = rows.reduce((s, r) => s + r.w, 0);
     const totalL   = rows.reduce((s, r) => s + r.l, 0);
-    const winPct   = rows.length ? ((totalW / (totalW + totalL)) * 100).toFixed(1) + '%' : '—';
+    const totalT   = rows.reduce((s, r) => s + (r.t || 0), 0);
+    const games    = totalW + totalL + totalT;
+    // NFL win pct treats a tie as half a win, half a loss.
+    const winPct   = games ? (((totalW + 0.5 * totalT) / games) * 100).toFixed(1) + '%' : '—';
     const playoffs = rows.filter(r => r.playoff).length;
     const bestRow  = rows.slice().sort((a, b) => b.w - a.w)[0];
     const bestSeason = bestRow ? `${bestRow.year} (${bestRow.w}W)` : '—';

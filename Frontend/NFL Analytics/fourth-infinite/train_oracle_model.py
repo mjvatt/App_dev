@@ -36,7 +36,6 @@ Usage:
 import json
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import cross_val_score
 
 DATA_PATH      = 'data/draft_data.json'
 SALARIES_PATH  = 'data/salaries.json'
