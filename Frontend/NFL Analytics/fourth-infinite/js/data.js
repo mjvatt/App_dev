@@ -6,7 +6,6 @@ const DraftData = (() => {
   let _standings    = [];
   let _meta         = {};
   let _trades       = null;
-  let _expectedAv   = null;
   let _sleeperPreds = null;
   let _oraclePreds  = null;
   let _teamStats    = null;
@@ -476,9 +475,12 @@ const DraftData = (() => {
     };
   }
 
-  /* expose expected AV for a single pick slot */
-  function expectedAvForPick(pick) {
-    return _buildExpectedAv()[+pick] || 0;
+  /* expose expected AV for a single pick slot.
+     posGroup optional — if provided, uses the position-specific slot curve
+     with global fallback for thin late-round samples. If omitted, returns
+     the pooled-across-positions curve (legacy behavior). */
+  function expectedAvForPick(pick, posGroup = null) {
+    return _buildExpectedAv(posGroup)[+pick] || 0;
   }
 
   /* full player profile: pick data + pick value + slot context + comps */
@@ -486,7 +488,7 @@ const DraftData = (() => {
     const p = _findPick(year, pick);
     if (!p) return null;
 
-    const expAv      = _buildExpectedAv();
+    const expAv      = _buildExpectedAv(p.pos_group);
     const pickValue  = +(100 * Math.pow(p.pick, -0.66)).toFixed(1);
     const slotAvg    = +(expAv[p.pick] || 0).toFixed(1);
     const avSurplus  = +(p.career_av - slotAvg).toFixed(1);
@@ -579,25 +581,49 @@ const DraftData = (() => {
     };
   }
 
-  /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2021) */
-  function _buildExpectedAv() {
-    if (_expectedAv) return _expectedAv;
+  /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2021).
+     posGroup=null returns the pooled-across-positions curve.
+     posGroup='QB' (etc.) returns the QB-specific curve, with a wider window
+     to compensate for thinner samples and a fallback to the pooled curve at
+     pick slots where the position-specific count is below MIN_N. Cached per
+     position group on first call. */
+  const _expectedAvCache = {};
+  function _buildExpectedAv(posGroup = null) {
+    const key = posGroup || '_pooled';
+    if (_expectedAvCache[key]) return _expectedAvCache[key];
+
+    const WINDOW = posGroup ? 24 : 12;
+    const MIN_N  = 5;
     const slots = {};
-    _picks.filter(p => p.pick > 0 && p.year <= 2021).forEach(p => {
-      if (!slots[p.pick]) slots[p.pick] = { sum: 0, n: 0 };
-      slots[p.pick].sum += p.draft_av;
-      slots[p.pick].n++;
-    });
-    const WINDOW = 12;
-    _expectedAv = {};
+    _picks
+      .filter(p => p.pick > 0 && p.year <= 2021 && (!posGroup || p.pos_group === posGroup))
+      .forEach(p => {
+        if (!slots[p.pick]) slots[p.pick] = { sum: 0, n: 0 };
+        slots[p.pick].sum += p.draft_av;
+        slots[p.pick].n++;
+      });
+
+    // Build the pooled curve first (or reuse cached) so position-specific
+    // curves can fall back to it when samples are sparse.
+    const pooled = posGroup ? _buildExpectedAv(null) : null;
+
+    const result = {};
     for (let pick = 1; pick <= 256; pick++) {
       let sum = 0, n = 0;
       for (let j = Math.max(1, pick - WINDOW); j <= Math.min(256, pick + WINDOW); j++) {
         if (slots[j]) { sum += slots[j].sum; n += slots[j].n; }
       }
-      if (n > 0) _expectedAv[pick] = +(sum / n).toFixed(1);
+      if (n >= MIN_N) {
+        result[pick] = +(sum / n).toFixed(1);
+      } else if (pooled && pooled[pick] !== undefined) {
+        result[pick] = pooled[pick];
+      } else if (n > 0) {
+        result[pick] = +(sum / n).toFixed(1);
+      }
     }
-    return _expectedAv;
+
+    _expectedAvCache[key] = result;
+    return result;
   }
 
   /* power-law pick value curve — V(pick) = 100 * (1/pick)^0.66, normalized to pick #1 = 100 */
@@ -609,10 +635,11 @@ const DraftData = (() => {
   }
 
   /* player-vs-slot grade scatter
-     Expected curve: rolling avg draft_av per pick slot, calibrated on drafts ≤ 2020.
+     Expected curve: rolling avg draft_av per pick slot, calibrated on drafts ≤ 2021.
+     If filter.pos_group is set, the curve is that position group's; otherwise pooled.
      Scatter points: filtered via filter arg. */
   function slotGradeScatter(filter = {}) {
-    const expAv = _buildExpectedAv();
+    const expAv = _buildExpectedAv(filter.pos_group || null);
     const curve = Object.entries(expAv)
       .map(([p, v]) => ({ x: +p, y: v }))
       .sort((a, b) => a.x - b.x);
@@ -746,12 +773,16 @@ const DraftData = (() => {
     });
   }
 
-  /* G1.1 — R4-R7 picks with highest Draft AV above slot expectation */
+  /* G1.1 — R4-R7 picks with highest Draft AV above slot expectation
+     Surplus is now position-aware: a 5th-round WR is judged against the
+     WR slot curve, not the pooled curve. */
   function lateRoundSteals(filter = {}, topN = 30) {
-    const expAv = _buildExpectedAv();
     return picks(filter)
       .filter(p => p.round >= 4 && p.pick > 0 && p.draft_av > 0)
-      .map(p => ({ ...p, expected: expAv[p.pick] || 0, surplus: +(p.draft_av - (expAv[p.pick] || 0)).toFixed(1) }))
+      .map(p => {
+        const exp = _buildExpectedAv(p.pos_group)[p.pick] || 0;
+        return { ...p, expected: exp, surplus: +(p.draft_av - exp).toFixed(1) };
+      })
       .filter(p => p.surplus > 0)
       .sort((a, b) => b.surplus - a.surplus)
       .slice(0, topN);
@@ -759,11 +790,11 @@ const DraftData = (() => {
 
   /* G1.2 — R3-R7 picks ranked by sleeper score (AV surplus + Pro Bowl bonus) */
   function sleeperScores(filter = {}, topN = 30) {
-    const expAv = _buildExpectedAv();
     return picks(filter)
       .filter(p => p.round >= 3 && p.pick > 0 && p.draft_av > 0)
       .map(p => {
-        const surplus = p.draft_av - (expAv[p.pick] || 0);
+        const exp = _buildExpectedAv(p.pos_group)[p.pick] || 0;
+        const surplus = p.draft_av - exp;
         return { ...p, surplus: +surplus.toFixed(1), score: +(surplus + p.pro_bowls * 10).toFixed(1) };
       })
       .filter(p => p.score > 0)
@@ -821,12 +852,12 @@ const DraftData = (() => {
 
   /* G1.5 — position groups ranked by avg Draft AV surplus per R4–R7 pick */
   function posLateRoundEfficiency(filter = {}) {
-    const expAv = _buildExpectedAv();
     const byPos = {};
     picks(filter)
       .filter(p => p.round >= 4 && p.pick > 0)
       .forEach(p => {
-        const surplus = p.draft_av - (expAv[p.pick] || 0);
+        const exp = _buildExpectedAv(p.pos_group)[p.pick] || 0;
+        const surplus = p.draft_av - exp;
         if (!byPos[p.pos_group]) byPos[p.pos_group] = { surplusSum: 0, n: 0, totalAV: 0 };
         byPos[p.pos_group].surplusSum += surplus;
         byPos[p.pos_group].n++;
@@ -844,12 +875,12 @@ const DraftData = (() => {
 
   /* G1.4 — franchises ranked by avg Draft AV surplus per R4–R7 pick */
   function teamLateRoundEfficiency(filter = {}, minPicks = 10) {
-    const expAv = _buildExpectedAv();
     const byTeam = {};
     picks(filter)
       .filter(p => p.round >= 4 && p.pick > 0)
       .forEach(p => {
-        const surplus = p.draft_av - (expAv[p.pick] || 0);
+        const exp = _buildExpectedAv(p.pos_group)[p.pick] || 0;
+        const surplus = p.draft_av - exp;
         if (!byTeam[p.franchise]) byTeam[p.franchise] = { surplusSum: 0, n: 0, totalAV: 0 };
         byTeam[p.franchise].surplusSum += surplus;
         byTeam[p.franchise].n++;
@@ -868,12 +899,12 @@ const DraftData = (() => {
 
   /* G — colleges ranked by avg career AV surplus above slot expectation */
   function collegeSlotSurplus(filter = {}, minPicks = 20, topN = 30) {
-    const expAv = _buildExpectedAv();
     const byCollege = {};
 
     picks(filter).filter(p => p.college && p.pick > 0).forEach(p => {
+      const exp = _buildExpectedAv(p.pos_group)[p.pick] || 0;
       if (!byCollege[p.college]) byCollege[p.college] = { surplusSum: 0, avSum: 0, pickSum: 0, n: 0 };
-      byCollege[p.college].surplusSum += p.career_av - (expAv[p.pick] || 0);
+      byCollege[p.college].surplusSum += p.career_av - exp;
       byCollege[p.college].avSum      += p.career_av;
       byCollege[p.college].pickSum    += p.pick;
       byCollege[p.college].n++;

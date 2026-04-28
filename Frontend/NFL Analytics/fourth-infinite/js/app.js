@@ -409,7 +409,7 @@
           <td><strong>${p.player}</strong></td>
           <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
           <td>${p.college}</td>
-          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick).toFixed(1) : '—'}</td>
+          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1) : '—'}</td>
           <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
         </tr>`).join('');
     }
@@ -518,7 +518,7 @@
           <td><strong>${p.player}</strong></td>
           <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
           <td>${p.college}</td>
-          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick).toFixed(1) : '—'}</td>
+          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1) : '—'}</td>
           <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
         </tr>`).join('');
     }

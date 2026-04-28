@@ -65,27 +65,62 @@ POS_GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB', 'ST']
 COMBINE_FIELDS = ['ht_in', 'wt', 'forty', 'bench',
                   'vertical', 'broad_jump', 'cone', 'shuttle']
 
+# College career production fields. Missing values imputed as 0
+# (distinct from combine, which gets per-position median because absence
+# of a combine event is opt-in noise). For college stats, absence usually
+# means the player didn't play that role — 0 is the right semantic.
+CFB_FIELDS = [
+    'cfb_seasons',
+    'cfb_pass_yards', 'cfb_pass_tds', 'cfb_pass_ints',
+    'cfb_pass_att',   'cfb_pass_cmp',
+    'cfb_rush_yards', 'cfb_rush_tds', 'cfb_rush_atts',
+    'cfb_rec_yards',  'cfb_rec_tds',  'cfb_receptions',
+    'cfb_def_tackles','cfb_def_sacks','cfb_def_ints',
+]
 
-def build_expected_av(picks):
-    """Rolling-average draft_av by pick slot, calibrated on picks <= TRAIN_CUTOFF."""
+
+def build_expected_av(picks, pos_group=None):
+    """Rolling-average draft_av by pick slot, calibrated on picks <= TRAIN_CUTOFF.
+    pos_group=None -> pooled curve. pos_group='QB' (etc.) -> position-specific
+    curve with global fallback for slots where the local sample is below MIN_N.
+    Cached implicitly by callers via build_expected_av_map below."""
+    window = 24 if pos_group else WINDOW
+    min_n  = 5
     slots = {}
     for p in picks:
-        if p['pick'] > 0 and p['year'] <= TRAIN_CUTOFF:
-            s = p['pick']
-            if s not in slots:
-                slots[s] = {'sum': 0, 'n': 0}
-            slots[s]['sum'] += p['draft_av']
-            slots[s]['n']   += 1
+        if p['pick'] <= 0 or p['year'] > TRAIN_CUTOFF:
+            continue
+        if pos_group is not None and p.get('pos_group') != pos_group:
+            continue
+        s = p['pick']
+        if s not in slots:
+            slots[s] = {'sum': 0, 'n': 0}
+        slots[s]['sum'] += p['draft_av']
+        slots[s]['n']   += 1
+
+    pooled = build_expected_av(picks, None) if pos_group else None
     expected = {}
     for pick in range(1, 257):
         total, n = 0.0, 0
-        for j in range(max(1, pick - WINDOW), min(256, pick + WINDOW) + 1):
+        for j in range(max(1, pick - window), min(256, pick + window) + 1):
             if j in slots:
                 total += slots[j]['sum']
                 n     += slots[j]['n']
-        if n > 0:
+        if n >= min_n:
+            expected[pick] = total / n
+        elif pooled and pick in pooled:
+            expected[pick] = pooled[pick]
+        elif n > 0:
             expected[pick] = total / n
     return expected
+
+
+def build_expected_av_map(picks):
+    """Build {pos_group or '_pooled': {pick -> expected_av}} once, reuse everywhere."""
+    out = {'_pooled': build_expected_av(picks, None)}
+    for g in POS_GROUPS:
+        out[g] = build_expected_av(picks, g)
+    return out
 
 
 def year_era(year):
@@ -154,6 +189,13 @@ def build_feature_row(p, college_enc, college_global_mean, imputers):
     imputed = _impute(p, imputers)
     for f in COMBINE_FIELDS:
         feats.append(imputed[f])
+    # College production: 0-impute when missing, plus a present-flag so
+    # the model doesn't conflate "0 yards" with "no record found."
+    cfb_present = 1 if p.get('cfb_seasons') else 0
+    feats.append(cfb_present)
+    for f in CFB_FIELDS:
+        v = p.get(f)
+        feats.append(float(v) if v is not None else 0.0)
     return feats
 
 
@@ -161,6 +203,8 @@ FEATURE_NAMES = (
     ['round', 'pick', 'college_enc', 'age', 'era']
     + [f'pos_{g}' for g in POS_GROUPS]
     + COMBINE_FIELDS
+    + ['cfb_present']
+    + CFB_FIELDS
 )
 
 
@@ -169,10 +213,11 @@ def main():
         raw = json.load(f)
     picks = raw['picks']
 
-    expected_av = build_expected_av(picks)
+    expected_map = build_expected_av_map(picks)
 
     def surplus(p):
-        return p['career_av'] - expected_av.get(p['pick'], 0.0)
+        curve = expected_map.get(p.get('pos_group')) or expected_map['_pooled']
+        return p['career_av'] - curve.get(p['pick'], 0.0)
 
     valid = [
         p for p in picks
