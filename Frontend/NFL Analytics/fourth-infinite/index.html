@@ -1076,6 +1076,24 @@
             </div>
             <div class="chart-wrap" style="height:260px"><canvas id="chart-mlImportances"></canvas></div>
           </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>AUC by Position Group <span style="font-size:11px;color:var(--text-muted);font-weight:400">in-sample</span></h3>
+                <p id="ghost-auc-sub">Training-set fit per position. Optimistic vs the held-out CV AUC shown above — useful for spotting where signal concentrates, not for predicting on new picks. 0.5 = coin flip.</p>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chart-mlAucByPos"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>Calibration <span style="font-size:11px;color:var(--text-muted);font-weight:400">in-sample</span></h3>
+                <p>Predicted hit probability vs actual hit rate. Diagonal = perfectly calibrated; below = under-confident, above = over-confident. Bubble size ∝ √n.</p>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chart-mlCalibration"></canvas></div>
+          </div>
         </div>
       </div>
 

@@ -1321,6 +1321,82 @@
           meta:        result.importances.map(f => ({ totalPicks: undefined, totalAV: undefined })),
         });
       }
+
+      _renderGhostDiagnostics();
+    }
+
+    /* Mann-Whitney AUC with average-rank tie handling.
+       scores: array of numbers; labels: array of 0/1 (must match length).
+       Returns null if either class is empty. */
+    function _rocAuc(scores, labels) {
+      const pairs = scores
+        .map((s, i) => ({s, l: labels[i]}))
+        .filter(p => p.l === 0 || p.l === 1)
+        .sort((a, b) => a.s - b.s);
+      const n = pairs.length;
+      const pos = pairs.reduce((c, p) => c + p.l, 0);
+      const neg = n - pos;
+      if (pos === 0 || neg === 0) return null;
+      let sumPosRanks = 0, i = 0;
+      while (i < n) {
+        let j = i;
+        while (j < n && pairs[j].s === pairs[i].s) j++;
+        const avgRank = (i + 1 + j) / 2;  // 1-indexed average of ranks i+1..j
+        for (let k = i; k < j; k++) if (pairs[k].l === 1) sumPosRanks += avgRank;
+        i = j;
+      }
+      return (sumPosRanks - pos * (pos + 1) / 2) / (pos * neg);
+    }
+
+    /* Compute and render per-position AUC + calibration from the predictions
+       JSON. Runs once per GHOST init (data doesn't change unless the model
+       is retrained, in which case the engine reloads). */
+    let _diagnosticsRendered = false;
+    function _renderGhostDiagnostics() {
+      if (_diagnosticsRendered) return;
+      _diagnosticsRendered = true;
+
+      const all = (DraftData.getSleeperPredictions() || []).filter(p =>
+        !p.incomplete && (p.actual_hit === true || p.actual_hit === false)
+      );
+      if (!all.length) return;
+
+      // Per-position AUC
+      const POS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB', 'ST'];
+      const aucs = POS.map(g => {
+        const subset = all.filter(p => p.pos_group === g);
+        return { pos: g, n: subset.length, auc: _rocAuc(
+          subset.map(p => p.predicted_prob),
+          subset.map(p => p.actual_hit ? 1 : 0),
+        )};
+      }).filter(r => r.auc !== null);
+      // Sort highest AUC first; color positions where AUC < 0.55 muted.
+      aucs.sort((a, b) => b.auc - a.auc);
+      DraftCharts.hbar(
+        'chart-mlAucByPos',
+        {
+          labels: aucs.map(r => `${r.pos} (n=${r.n})`),
+          values: aucs.map(r => +r.auc.toFixed(3)),
+        },
+        aucs.map(r => r.auc >= 0.65 ? 'rgba(16,185,129,0.85)'
+                    : r.auc >= 0.55 ? 'rgba(139,92,246,0.75)'
+                    : 'rgba(107,114,128,0.55)'),
+        'AUC',
+      );
+
+      // Calibration: 10 equal-width bins on predicted_prob in [0, 1].
+      const NBINS = 10;
+      const buckets = Array.from({length: NBINS}, () => ({sum: 0, hits: 0, n: 0}));
+      all.forEach(p => {
+        const i = Math.min(NBINS - 1, Math.max(0, Math.floor(p.predicted_prob * NBINS)));
+        buckets[i].sum += p.predicted_prob;
+        buckets[i].hits += p.actual_hit ? 1 : 0;
+        buckets[i].n++;
+      });
+      const bins = buckets
+        .map(b => b.n > 0 ? {predMean: b.sum / b.n, actualRate: b.hits / b.n, n: b.n} : null)
+        .filter(Boolean);
+      DraftCharts.calibrationPlot('chart-mlCalibration', bins);
     }
 
     [mlMode, mlYfrom, mlYto, mlRound, mlPos].forEach(el => el.addEventListener('change', renderMlRankings));

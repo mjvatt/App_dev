@@ -1457,5 +1457,74 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, update };
+  /* ── Calibration plot: predicted prob bins vs actual hit rate ─────── */
+  function calibrationPlot(canvasId, bins) {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const points    = bins.map(b => ({ x: +b.predMean.toFixed(3), y: +b.actualRate.toFixed(3), n: b.n }));
+    const reference = [{ x: 0, y: 0 }, { x: 1, y: 1 }];
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Observed',
+            data: points,
+            backgroundColor: 'rgba(139,92,246,0.85)',
+            borderColor: 'rgba(139,92,246,1)',
+            pointRadius:    points.map(p => Math.max(4, Math.min(14, Math.sqrt(p.n) * 1.4))),
+            pointHoverRadius: points.map(p => Math.max(5, Math.min(16, Math.sqrt(p.n) * 1.6))),
+          },
+          {
+            label: 'Perfect calibration',
+            type: 'line',
+            data: reference,
+            borderColor: TICK_COLOR(),
+            borderDash: [4, 4],
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(true),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              label: item => {
+                if (item.datasetIndex !== 0) return null;
+                const p = points[item.dataIndex];
+                return [
+                  `Predicted ${(p.x * 100).toFixed(1)}%`,
+                  `Actual    ${(p.y * 100).toFixed(1)}%`,
+                  `n = ${p.n}`,
+                ];
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            min: 0, max: 1,
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Predicted hit probability', color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            min: 0, max: 1,
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: 'Actual hit rate', color: TICK_COLOR(), font: { size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
 })();

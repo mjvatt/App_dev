@@ -961,6 +961,10 @@ const DraftData = (() => {
      mode = 'predicted' → ranked by model-predicted hit probability
      mode = 'surprise'  → ranked by (actual_hit - predicted_prob), showing
                           completed picks the model badly under-rated */
+  function getSleeperPredictions() {
+    return _sleeperPreds ? _sleeperPreds.predictions : [];
+  }
+
   function sleeperModelRankings(filter = {}, topN = 30, mode = 'predicted') {
     if (!_sleeperPreds) return { picks: [], importances: [], modelMeta: {} };
     let preds = _sleeperPreds.predictions;
@@ -1040,5 +1044,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, loadOraclePredictions, oracleData, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, getSleeperPredictions, loadOraclePredictions, oracleData, dynastyIndex };
 })();
