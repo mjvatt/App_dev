@@ -228,14 +228,26 @@ def main():
     print(f"Training samples : {len(X)}")
     print(f"CV R2            : {cv_scores.mean():.3f} +/- {cv_scores.std():.3f}")
 
-    preds_all = model.predict(X)
+    # Spread calibration: scale predictions so their std matches historical
+    # win std. Preserves rank order; corrects MSE-driven compression toward mean.
+    preds_raw   = model.predict(X)
+    std_actual  = float(np.std(y))
+    std_raw     = float(np.std(preds_raw))
+    mean_raw    = float(np.mean(preds_raw))
+    spread_factor = (std_actual / std_raw) if std_raw > 0 else 1.0
+    print(f"Spread factor    : {spread_factor:.3f}  (std actual={std_actual:.2f}, predicted={std_raw:.2f})")
+
+    def calibrate(raw):
+        return round(max(1.0, min(17.0, mean_raw + (raw - mean_raw) * spread_factor)), 1)
+
+    preds_all = preds_raw  # raw used for backtest display
     backtest = [
         {
             'franchise':      f,
             'year':           yr,
             'actual_wins':    int(yw),
-            'predicted_wins': round(float(p), 1),
-            'error':          round(float(p) - float(yw), 1),
+            'predicted_wins': calibrate(float(p)),
+            'error':          round(calibrate(float(p)) - float(yw), 1),
         }
         for (f, yr), p, yw in zip(train_meta, preds_all, y)
     ]
@@ -248,7 +260,8 @@ def main():
         )
         if features is None:
             continue
-        pred    = float(model.predict([features])[0])
+        raw_pred = float(model.predict([features])[0])
+        pred     = calibrate(raw_pred)
         row25   = standings_map.get(franchise, {}).get(2025, {})
         games25 = row25.get('w', 0) + row25.get('l', 0) + row25.get('t', 0) or 17
         cs25_m  = cap_map.get(franchise, {}).get(2025, cap_medians.get(2025, 0.0))
@@ -291,6 +304,7 @@ def main():
             'n_train':       len(X),
             'cv_r2_mean':    round(float(cv_scores.mean()), 3),
             'cv_r2_std':     round(float(cv_scores.std()), 3),
+            'spread_factor': round(spread_factor, 3),
             'av_cap_year':   AV_CAP_YEAR,
             'forecast_year': 2026,
         },
