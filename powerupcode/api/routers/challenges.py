@@ -23,6 +23,32 @@ router = APIRouter()
 _ADAPTIVE_WINDOW = 5
 _MEDIUM_PASS_THRESHOLD = 3  # out of _ADAPTIVE_WINDOW
 _MIN_ATTEMPTS_FOR_ADAPT = 3
+_REVIEW_XP_CAP = 5  # XP for repeat passes of an already-solved challenge
+
+
+async def _has_previously_passed(
+    db: AsyncSession, user_id: str, challenge_id: str
+) -> bool:
+    result = await db.execute(
+        select(Attempt.id)
+        .where(
+            Attempt.user_id == user_id,
+            Attempt.challenge_id == challenge_id,
+            Attempt.passed.is_(True),
+        )
+        .limit(1)
+    )
+    return result.scalar_one_or_none() is not None
+
+
+def _award_xp(raw_xp: int, *, passed: bool, is_repeat_pass: bool) -> int:
+    """Pure XP gating logic. Repeat passes of an already-solved challenge
+    yield at most _REVIEW_XP_CAP to prevent farming."""
+    if not passed:
+        return raw_xp
+    if is_repeat_pass:
+        return min(raw_xp, _REVIEW_XP_CAP)
+    return raw_xp
 
 
 async def _has_active_subscription(db: AsyncSession, user_id: str) -> bool:
@@ -106,12 +132,15 @@ async def submit_attempt(
 ) -> AttemptResponse:
     result = await get_engine().evaluate_attempt(user_id, challenge_id, body.solution, body.time_ms)
 
+    is_repeat_pass = result.passed and await _has_previously_passed(db, user_id, challenge_id)
+    awarded_xp = _award_xp(result.xp_earned, passed=result.passed, is_repeat_pass=is_repeat_pass)
+
     attempt = Attempt(
         user_id=user_id,
         challenge_id=challenge_id,
         difficulty=result.difficulty.value if result.difficulty else None,
         passed=result.passed,
-        xp_earned=result.xp_earned,
+        xp_earned=awarded_xp,
         hints_used=result.hints_used,
         time_ms=result.time_ms,
     )
@@ -119,15 +148,15 @@ async def submit_attempt(
 
     progress = await db.get(UserProgress, user_id)
     if progress is None:
-        progress = UserProgress(user_id=user_id, total_xp=result.xp_earned)
+        progress = UserProgress(user_id=user_id, total_xp=awarded_xp)
         db.add(progress)
     else:
-        progress.total_xp += result.xp_earned
+        progress.total_xp += awarded_xp
 
     progress.level = _compute_level(progress.total_xp)
     _update_streak(progress)
 
-    if result.passed and result.topic is not None:
+    if result.passed and result.topic is not None and not is_repeat_pass:
         topics = dict(progress.topics or {})
         key = result.topic.value
         topics[key] = topics.get(key, 0) + 1
@@ -138,7 +167,7 @@ async def submit_attempt(
     return AttemptResponse(
         attempt_id=attempt.id,
         passed=result.passed,
-        xp_earned=result.xp_earned,
+        xp_earned=awarded_xp,
         feedback=result.feedback,
         hints_used=result.hints_used,
         time_ms=result.time_ms,
