@@ -1339,6 +1339,7 @@
     const p          = profile.pick;
     const incomplete = p.year >= 2022;
     const surplus    = profile.avSurplus;
+    const ctx        = DraftData.playerContext(year, pick);
 
     const compsHtml = profile.comps.length
       ? profile.comps.map(c => `
@@ -1365,6 +1366,64 @@
         </div>` : ''}
       </div>` : '';
 
+    let avBreakdownHtml = '';
+    if (ctx && p.career_av > 0) {
+      const earlyPct = Math.round(ctx.earlyAv / p.career_av * 100);
+      const latePct  = Math.round(ctx.lateAv  / p.career_av * 100);
+      avBreakdownHtml = `
+        <div class="profile-section">
+          <h4>Career AV Breakdown</h4>
+          <div class="profile-av-bars">
+            <div class="profile-av-bar-row">
+              <span class="profile-av-bar-label">Seasons 1–4</span>
+              <div class="profile-av-bar-track">
+                <div class="profile-av-bar-fill" style="width:${earlyPct}%;background:var(--ghost)"></div>
+              </div>
+              <span class="profile-av-bar-val">${ctx.earlyAv}</span>
+            </div>
+            <div class="profile-av-bar-row">
+              <span class="profile-av-bar-label">Seasons 5+</span>
+              <div class="profile-av-bar-track">
+                <div class="profile-av-bar-fill" style="width:${latePct}%;background:var(--accent)"></div>
+              </div>
+              <span class="profile-av-bar-val">${ctx.lateAv}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    let peerHtml = '';
+    if (ctx && p.career_av > 0) {
+      const classStr = ctx.classRank ? `#${ctx.classRank} of ${ctx.classRankTotal}` : '—';
+      const roundStr = ctx.roundRank ? `#${ctx.roundRank} of ${ctx.roundRankTotal}` : '—';
+      peerHtml = `
+        <div class="profile-section">
+          <h4>Peer Rankings</h4>
+          <div class="profile-context-row">
+            <span>AV per season</span>
+            <span class="profile-val">${ctx.avPerSeason}</span>
+          </div>
+          ${ctx.starts ? `
+          <div class="profile-context-row">
+            <span>Career starts</span>
+            <span class="profile-val">${ctx.starts}</span>
+          </div>` : ''}
+          <div class="profile-context-row">
+            <span>${p.year} draft class rank</span>
+            <span class="profile-val">${classStr}</span>
+          </div>
+          <div class="profile-context-row">
+            <span>${p.year} Round ${p.round} rank</span>
+            <span class="profile-val">${roundStr}</span>
+          </div>
+          ${ctx.posRank ? `
+          <div class="profile-context-row">
+            <span>All-time ${ctx.posGroup} rank (1994–2021)</span>
+            <span class="profile-val">#${ctx.posRank} of ${ctx.posRankTotal}</span>
+          </div>` : ''}
+        </div>`;
+    }
+
     document.getElementById('playerModalContent').innerHTML = `
       <div class="profile-header">
         <div>
@@ -1385,6 +1444,8 @@
         </div>
       </div>
 
+      ${avBreakdownHtml}
+
       <div class="profile-section">
         <h4>Pick Context</h4>
         <div class="profile-context-row">
@@ -1400,6 +1461,8 @@
           <span class="profile-val ${surplus >= 0 ? 'pos' : 'neg'}">${surplus >= 0 ? '+' : ''}${surplus}</span>
         </div>
       </div>
+
+      ${peerHtml}
 
       ${mlHtml}
 

@@ -488,6 +488,52 @@ const DraftData = (() => {
     return { pick: p, pickValue, slotAvg, avSurplus, comps };
   }
 
+  /* career context for the player profile modal */
+  function playerContext(year, pick) {
+    const p = _picks.find(pk => pk.year === +year && pk.pick === +pick);
+    if (!p) return null;
+
+    const earlyAv     = p.draft_av;
+    const lateAv      = Math.max(0, p.career_av - p.draft_av);
+    const avPerSeason = p.seasons > 0 ? +(p.career_av / p.seasons).toFixed(1) : 0;
+
+    const classPeers = _picks
+      .filter(pk => pk.year === +year && pk.career_av > 0)
+      .sort((a, b) => b.career_av - a.career_av);
+    const classRankIdx   = classPeers.findIndex(pk => pk.pick === +pick);
+    const classRank      = classRankIdx >= 0 ? classRankIdx + 1 : null;
+
+    const roundPeers = _picks
+      .filter(pk => pk.year === +year && pk.round === p.round && pk.career_av > 0)
+      .sort((a, b) => b.career_av - a.career_av);
+    const roundRankIdx   = roundPeers.findIndex(pk => pk.pick === +pick);
+    const roundRank      = roundRankIdx >= 0 ? roundRankIdx + 1 : null;
+
+    let posRank = null, posRankTotal = 0;
+    if (+year <= 2021) {
+      const posPeers = _picks
+        .filter(pk => pk.pos_group === p.pos_group && pk.year <= 2021 && pk.career_av > 0)
+        .sort((a, b) => b.career_av - a.career_av);
+      posRankTotal = posPeers.length;
+      const posRankIdx = posPeers.findIndex(pk => pk.year === +year && pk.pick === +pick);
+      posRank = posRankIdx >= 0 ? posRankIdx + 1 : null;
+    }
+
+    return {
+      earlyAv,
+      lateAv,
+      avPerSeason,
+      starts:        p.starts || 0,
+      classRank,
+      classRankTotal: classPeers.length,
+      roundRank,
+      roundRankTotal: roundPeers.length,
+      posRank,
+      posRankTotal,
+      posGroup: p.pos_group,
+    };
+  }
+
   /* cached rolling-avg Draft AV by pick slot (calibrated on picks ≤ 2021) */
   function _buildExpectedAv() {
     if (_expectedAv) return _expectedAv;
@@ -906,5 +952,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, loadOraclePredictions, oracleData, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, loadOraclePredictions, oracleData, dynastyIndex };
 })();
