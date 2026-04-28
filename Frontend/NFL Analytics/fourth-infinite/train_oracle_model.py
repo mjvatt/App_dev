@@ -15,8 +15,8 @@ Features (per franchise, predicting wins in season Y):
   cap_space_m       — cap space in Y-1 ($M); prior-year financial flexibility
 
 Era weighting: exponential decay (DECAY_RATE) so recent seasons receive
-significantly more influence than older ones. 1994 NFL ≠ 2006 NFL ≠ 2026 NFL.
-With DECAY_RATE=0.08, 2024 is weighted ~9.5x more than 1996.
+more influence than older ones. 1994 NFL ≠ 2006 NFL ≠ 2026 NFL.
+With DECAY_RATE=0.04, 2024 is weighted ~3.1x more than 1996.
 
 Cap data coverage: 2013-2025 (Spotrac). Missing franchise-years use the
 per-year league median. Years before 2013 use the global cap median across
@@ -46,7 +46,7 @@ TRAIN_FROM   = 1996   # full window; pre-2013 uses neutral cap fill
 TRAIN_TO     = 2024
 AV_CAP_YEAR  = 2021
 AV_WINDOW    = 4
-DECAY_RATE   = 0.08   # exponential era weight; 2024 ≈ 9.5x weight of 1996
+DECAY_RATE   = 0.04   # exponential era weight; 2024 ≈ 3.1x weight of 1996 (best CV R²)
 
 PICK_VAL = lambda pick: 100 * (pick ** -0.66)
 
