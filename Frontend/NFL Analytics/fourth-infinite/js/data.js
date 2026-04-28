@@ -2,6 +2,7 @@
 
 const DraftData = (() => {
   let _picks        = [];
+  let _picksByKey   = new Map();  // `${year}|${pick}` -> pick row, for O(1) lookup
   let _standings    = [];
   let _meta         = {};
   let _trades       = null;
@@ -53,7 +54,17 @@ const DraftData = (() => {
     _picks     = json.picks.map(p => ({ ...p, franchise: _franchise(p.team, p.year) }));
     _standings = (json.standings || []).map(s => ({ ...s, franchise: _franchise(s.team, s.year) }));
     _meta      = json.meta;
+
+    // Build (year, pick) -> row index for O(1) lookup. Earlier callers used
+    // _picks.find(...) which scans all 8k+ rows on every modal open.
+    _picksByKey.clear();
+    _picks.forEach(p => { _picksByKey.set(`${p.year}|${p.pick}`, p); });
+
     return json;
+  }
+
+  function _findPick(year, pick) {
+    return _picksByKey.get(`${+year}|${+pick}`) || null;
   }
 
   function franchiseTeams() {
@@ -472,7 +483,7 @@ const DraftData = (() => {
 
   /* full player profile: pick data + pick value + slot context + comps */
   function playerProfile(year, pick) {
-    const p = _picks.find(pk => pk.year === +year && pk.pick === +pick);
+    const p = _findPick(year, pick);
     if (!p) return null;
 
     const expAv      = _buildExpectedAv();
@@ -520,7 +531,7 @@ const DraftData = (() => {
 
   /* career context for the player profile modal */
   function playerContext(year, pick) {
-    const p = _picks.find(pk => pk.year === +year && pk.pick === +pick);
+    const p = _findPick(year, pick);
     if (!p) return null;
 
     const earlyAv     = p.draft_av;
