@@ -7,7 +7,8 @@ OUT_FILE = Path(__file__).parent / "data" / "av_data.csv"
 YEARS = set(range(1994, 2026))
 
 FIELDNAMES = ["year", "pick", "player", "pos", "team", "seasons",
-              "career_av", "draft_av", "pro_bowls", "starts"]
+              "career_av", "draft_av", "pro_bowls", "starts",
+              "pfr_id", "age"]
 
 
 def main():
@@ -25,6 +26,10 @@ def main():
         pick = int(row["pick"]) if row["pick"] else 0
         if not pick:
             continue
+        try:
+            age = int(row["age"]) if row.get("age") else 0
+        except ValueError:
+            age = 0
         rows.append({
             "year":      year,
             "pick":      pick,
@@ -36,6 +41,8 @@ def main():
             "draft_av":  int(row["dr_av"]) if row.get("dr_av") else 0,
             "pro_bowls": int(row["probowls"]) if row.get("probowls") else 0,
             "starts":    int(row["games"]) if row.get("games") else 0,
+            "pfr_id":    row.get("pfr_player_id", "").strip(),
+            "age":       age,
         })
 
     OUT_FILE.parent.mkdir(exist_ok=True)

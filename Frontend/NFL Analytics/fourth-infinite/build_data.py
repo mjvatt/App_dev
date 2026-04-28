@@ -6,6 +6,7 @@ DATA_DIR       = Path(__file__).parent / "Data"
 OUT_FILE       = Path(__file__).parent / "data" / "draft_data.json"
 STANDINGS_FILE = Path(__file__).parent / "data" / "standings.csv"
 AV_FILE        = Path(__file__).parent / "data" / "av_data.csv"
+COMBINE_FILE   = Path(__file__).parent / "data" / "combine_data.csv"
 
 POSITION_GROUPS = {
     "QB": ["QB"],
@@ -35,6 +36,16 @@ def safe_int(val, default=0):
         return default
 
 
+def safe_float(val, default=None):
+    s = (val or "").strip() if isinstance(val, str) else val
+    if s == "" or s is None:
+        return default
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return default
+
+
 # Load AV data — keyed by (year, overall_pick)
 av_lookup = {}
 if AV_FILE.exists():
@@ -47,6 +58,28 @@ if AV_FILE.exists():
                 "draft_av":  safe_int(row.get("draft_av")),
                 "pro_bowls": safe_int(row.get("pro_bowls")),
                 "starts":    safe_int(row.get("starts")),
+                "pfr_id":    (row.get("pfr_id") or "").strip(),
+                "age":       safe_int(row.get("age")) or None,
+            }
+
+
+# Load combine data — keyed by pfr_id
+combine_lookup = {}
+if COMBINE_FILE.exists():
+    with open(COMBINE_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            pid = (row.get("pfr_id") or "").strip()
+            if not pid:
+                continue
+            combine_lookup[pid] = {
+                "ht_in":      safe_float(row.get("ht_in")),
+                "wt":         safe_float(row.get("wt")),
+                "forty":      safe_float(row.get("forty")),
+                "bench":      safe_float(row.get("bench")),
+                "vertical":   safe_float(row.get("vertical")),
+                "broad_jump": safe_float(row.get("broad_jump")),
+                "cone":       safe_float(row.get("cone")),
+                "shuttle":    safe_float(row.get("shuttle")),
             }
 
 picks = []
@@ -58,21 +91,33 @@ for csv_file in sorted(DATA_DIR.glob("NFL_draft_*.csv")):
             pos = row.get("Pos.", "").strip()
             pick_num = safe_int(row.get("Pick #", 0))
             av = av_lookup.get((year, pick_num), {})
+            pfr_id = av.get("pfr_id", "")
+            combine = combine_lookup.get(pfr_id, {}) if pfr_id else {}
             picks.append({
-                "year":      year,
-                "round":     safe_int(row.get("Rnd.", 0)),
-                "pick":      pick_num,
-                "team":      row.get("NFL Team", "").strip(),
-                "player":    row.get("Player", "").strip(),
-                "pos":       pos,
-                "pos_group": get_position_group(pos),
-                "college":   row.get("College", "").strip(),
-                "notes":     row.get("Notes", "").strip(),
-                "seasons":   av.get("seasons", 0),
-                "career_av": av.get("career_av", 0),
-                "draft_av":  av.get("draft_av", 0),
-                "pro_bowls": av.get("pro_bowls", 0),
-                "starts":    av.get("starts", 0),
+                "year":       year,
+                "round":      safe_int(row.get("Rnd.", 0)),
+                "pick":       pick_num,
+                "team":       row.get("NFL Team", "").strip(),
+                "player":     row.get("Player", "").strip(),
+                "pos":        pos,
+                "pos_group":  get_position_group(pos),
+                "college":    row.get("College", "").strip(),
+                "notes":      row.get("Notes", "").strip(),
+                "seasons":    av.get("seasons", 0),
+                "career_av":  av.get("career_av", 0),
+                "draft_av":   av.get("draft_av", 0),
+                "pro_bowls":  av.get("pro_bowls", 0),
+                "starts":     av.get("starts", 0),
+                "pfr_id":     pfr_id,
+                "age":        av.get("age"),
+                "ht_in":      combine.get("ht_in"),
+                "wt":         combine.get("wt"),
+                "forty":      combine.get("forty"),
+                "bench":      combine.get("bench"),
+                "vertical":   combine.get("vertical"),
+                "broad_jump": combine.get("broad_jump"),
+                "cone":       combine.get("cone"),
+                "shuttle":    combine.get("shuttle"),
             })
 
 years     = sorted({p["year"]    for p in picks})
