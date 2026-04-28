@@ -14,6 +14,10 @@ Features (per franchise, predicting wins in season Y):
                       capped at AV_CAP_YEAR to avoid incomplete-class noise
   cap_space_m       — cap space in Y-1 ($M); prior-year financial flexibility
 
+Era weighting: exponential decay (DECAY_RATE) so recent seasons receive
+significantly more influence than older ones. 1994 NFL ≠ 2006 NFL ≠ 2026 NFL.
+With DECAY_RATE=0.08, 2024 is weighted ~9.5x more than 1996.
+
 Cap data coverage: 2013-2025 (Spotrac). Missing franchise-years use the
 per-year league median. Years before 2013 use the global cap median across
 all available data (neutral fill — cap_space_m contributes no cross-team
@@ -21,7 +25,7 @@ signal for those years, preserving the full 1996-2024 training window).
 
 Outputs data/oracle_predictions.json:
   forecast    — 2026 projections for all 32 franchises
-  backtest    — historical predicted vs actual wins (2014-2024)
+  backtest    — historical predicted vs actual wins
   importances — feature importances sorted descending
   meta        — training stats and CV R^2
 
@@ -42,6 +46,7 @@ TRAIN_FROM   = 1996   # full window; pre-2013 uses neutral cap fill
 TRAIN_TO     = 2024
 AV_CAP_YEAR  = 2021
 AV_WINDOW    = 4
+DECAY_RATE   = 0.08   # exponential era weight; 2024 ≈ 9.5x weight of 1996
 
 PICK_VAL = lambda pick: 100 * (pick ** -0.66)
 
@@ -214,6 +219,17 @@ def main():
     X = np.array(X)
     y = np.array(y)
 
+    # Era weights: exponential decay so recent seasons dominate.
+    # Normalized to mean=1 so regularization hyperparams stay meaningful.
+    era_weights = np.array([np.exp(DECAY_RATE * (yr - TRAIN_FROM))
+                            for (_, yr) in train_meta])
+    era_weights /= era_weights.mean()
+
+    min_w = era_weights.min()
+    max_w = era_weights.max()
+    print(f"Era weight range : {min_w:.2f} ({TRAIN_FROM}) -> {max_w:.2f} ({TRAIN_TO})  "
+          f"[decay={DECAY_RATE}, ratio={max_w/min_w:.1f}x]")
+
     model = GradientBoostingRegressor(
         n_estimators=300,
         max_depth=3,
@@ -222,23 +238,37 @@ def main():
         min_samples_leaf=5,
         random_state=42,
     )
-    model.fit(X, y)
+    model.fit(X, y, sample_weight=era_weights)
 
-    cv_scores = cross_val_score(model, X, y, cv=5, scoring='r2')
+    # Manual 5-fold CV with era weights passed through fit
+    from sklearn.model_selection import KFold
+    from sklearn.metrics import r2_score
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    cv_r2s = []
+    for train_idx, val_idx in kf.split(X):
+        m_cv = GradientBoostingRegressor(
+            n_estimators=300, max_depth=3, learning_rate=0.04,
+            subsample=0.8, min_samples_leaf=5, random_state=42,
+        )
+        m_cv.fit(X[train_idx], y[train_idx], sample_weight=era_weights[train_idx])
+        cv_r2s.append(r2_score(y[val_idx], m_cv.predict(X[val_idx])))
+    cv_r2s = np.array(cv_r2s)
     print(f"Training samples : {len(X)}")
-    print(f"CV R2            : {cv_scores.mean():.3f} +/- {cv_scores.std():.3f}")
+    print(f"CV R2 (weighted) : {cv_r2s.mean():.3f} +/- {cv_r2s.std():.3f}")
 
-    # Spread calibration: scale predictions so their std matches historical
-    # win std. Preserves rank order; corrects MSE-driven compression toward mean.
-    preds_raw   = model.predict(X)
-    std_actual  = float(np.std(y))
-    std_raw     = float(np.std(preds_raw))
-    mean_raw    = float(np.mean(preds_raw))
+    # Spread calibration: scale predictions so their weighted std matches
+    # the weighted historical win std. Preserves rank order.
+    preds_raw    = model.predict(X)
+    wmean_actual = float(np.average(y, weights=era_weights))
+    wmean_raw    = float(np.average(preds_raw, weights=era_weights))
+    std_actual   = float(np.sqrt(np.average((y - wmean_actual) ** 2, weights=era_weights)))
+    std_raw      = float(np.sqrt(np.average((preds_raw - wmean_raw) ** 2, weights=era_weights)))
     spread_factor = (std_actual / std_raw) if std_raw > 0 else 1.0
-    print(f"Spread factor    : {spread_factor:.3f}  (std actual={std_actual:.2f}, predicted={std_raw:.2f})")
+    print(f"Spread factor    : {spread_factor:.3f}  "
+          f"(weighted std actual={std_actual:.2f}, predicted={std_raw:.2f})")
 
     def calibrate(raw):
-        return round(max(1.0, min(17.0, mean_raw + (raw - mean_raw) * spread_factor)), 1)
+        return round(max(1.0, min(17.0, wmean_raw + (raw - wmean_raw) * spread_factor)), 1)
 
     preds_all = preds_raw  # raw used for backtest display
     backtest = [
@@ -302,8 +332,8 @@ def main():
             'train_from':    TRAIN_FROM,
             'train_to':      TRAIN_TO,
             'n_train':       len(X),
-            'cv_r2_mean':    round(float(cv_scores.mean()), 3),
-            'cv_r2_std':     round(float(cv_scores.std()), 3),
+            'cv_r2_mean':    round(float(cv_r2s.mean()), 3),
+            'cv_r2_std':     round(float(cv_r2s.std()), 3),
             'spread_factor': round(spread_factor, 3),
             'av_cap_year':   AV_CAP_YEAR,
             'forecast_year': 2026,
