@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getRememberedEmail, rememberEmail, setToken } from "@/lib/auth";
 import PasswordInput from "@/components/ui/PasswordInput";
+import { Events, identify, track } from "@/lib/analytics";
 import type { TokenResponse } from "@/lib/types";
 
 export default function LoginPage() {
@@ -42,6 +43,8 @@ export default function LoginPage() {
       const data: TokenResponse = await res.json();
       setToken(data.access_token);
       rememberEmail(email);
+      identify(email);
+      track(Events.LoginCompleted);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

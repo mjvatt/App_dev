@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { Events, track } from "@/lib/analytics";
 
 type Stage = "checking" | "ready" | "verifying" | "success" | "used" | "expired" | "invalid" | "error";
 
@@ -53,6 +54,7 @@ function VerifyEmailContent() {
       if (res.ok) {
         setStage("success");
         setMessage(data.message ?? "Email verified.");
+        track(Events.EmailVerified);
       } else {
         setStage("error");
         setMessage(data.detail ?? "Verification failed.");

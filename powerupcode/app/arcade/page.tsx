@@ -6,6 +6,7 @@ import AttemptResultPanel from "@/components/game/AttemptResultPanel";
 import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
 import { authedRequest } from "@/lib/api";
+import { Events, track } from "@/lib/analytics";
 import { getToken } from "@/lib/auth";
 import type { AttemptResult, Challenge, Difficulty } from "@/lib/types";
 
@@ -100,6 +101,12 @@ export default function ArcadePage() {
         setChallenge(data);
         setCode(loadDraft(data.id, language));
         startTime.current = Date.now();
+        track(Events.ChallengeFetched, {
+          challenge_id: data.id,
+          topic: data.topic,
+          difficulty: data.difficulty,
+          requested_difficulty: diff || "auto",
+        });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "";
         if (msg === "subscription_required") {
@@ -150,6 +157,11 @@ export default function ArcadePage() {
       );
       setHint(data.hint);
       setHintsRemaining(data.hints_remaining);
+      track(Events.HintRequested, {
+        challenge_id: challenge.id,
+        difficulty: challenge.difficulty,
+        hints_remaining: data.hints_remaining,
+      });
     } catch {
       setHint("Failed to get a hint. Please try again.");
     } finally {
@@ -172,9 +184,19 @@ export default function ArcadePage() {
       );
       setResult(data);
       if (data.passed) clearDraft(challenge.id, language);
+      track(Events.AttemptSubmitted, {
+        challenge_id: challenge.id,
+        topic: challenge.topic,
+        difficulty: challenge.difficulty,
+        language,
+        passed: data.passed,
+        xp_earned: data.xp_earned,
+        time_ms: elapsed,
+      });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       if (msg === "email_verification_required") {
+        track(Events.EmailVerificationBlocked, { surface: "attempt_submit" });
         setError(
           "Verify your email to submit solutions. Check your inbox or resend the link from the dashboard."
         );

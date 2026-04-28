@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
+import { Events, track } from "@/lib/analytics";
 import { getToken } from "@/lib/auth";
 import type { SubscriptionStatus } from "@/lib/types";
 
@@ -54,6 +55,7 @@ export default function BillingPage() {
     if (!token) return;
     setCheckingOut(plan);
     setError(null);
+    track(Events.CheckoutStarted, { plan });
     try {
       const origin = window.location.origin;
       const data = await authedRequest<{ url: string }>("/api/billing/checkout", token, {
@@ -68,6 +70,7 @@ export default function BillingPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       if (msg === "email_verification_required") {
+        track(Events.EmailVerificationBlocked, { surface: "checkout" });
         setError(
           "Verify your email before subscribing. Check your inbox or resend the link from the dashboard."
         );

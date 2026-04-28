@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Events, resetIdentity, track } from "@/lib/analytics";
 import { clearToken } from "@/lib/auth";
 
 export default function LogoutButton({ className }: { className?: string }) {
   const router = useRouter();
 
   function handleLogout() {
+    track(Events.Logout);
+    resetIdentity();
     clearToken();
     router.push("/login");
   }

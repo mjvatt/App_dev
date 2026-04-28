@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PasswordInput from "@/components/ui/PasswordInput";
+import { Events, identify, track } from "@/lib/analytics";
 import { rememberEmail, setToken } from "@/lib/auth";
 import type { TokenResponse } from "@/lib/types";
 
@@ -34,6 +35,10 @@ export default function RegisterPage() {
       const data: TokenResponse = await res.json();
       setLocalToken(data.access_token);
       rememberEmail(email);
+      track(Events.RegisterCompleted, { username });
+      // Identify uses email so the same person across devices ties together
+      // before we have a server-side user_id round-trip in this view.
+      identify(email);
       setRegistered(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
