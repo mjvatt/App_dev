@@ -1,18 +1,19 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from starlette.responses import Response
 
 from api.config import settings
 from api.rate_limit import limiter
 from api.routers import auth, billing, challenges, leaderboard, progress
 
 
-async def _rate_limit_handler(request, exc: RateLimitExceeded):  # type: ignore[no-untyped-def]
-    from fastapi.responses import JSONResponse
-
+async def _rate_limit_handler(request: Request, exc: Exception) -> Response:
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests. Please slow down and try again shortly."},
@@ -20,7 +21,7 @@ async def _rate_limit_handler(request, exc: RateLimitExceeded):  # type: ignore[
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Alembic handles migrations; nothing to init at runtime
     yield
 

@@ -13,7 +13,8 @@ def create_access_token(
     expires_delta: Optional[timedelta] = None,
 ) -> str:
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=_EXPIRE_MINUTES))
-    return jwt.encode({"sub": user_id, "exp": expire}, secret_key, algorithm=_ALGORITHM)
+    encoded: str = jwt.encode({"sub": user_id, "exp": expire}, secret_key, algorithm=_ALGORITHM)
+    return encoded
 
 
 def verify_token(token: str, secret_key: str) -> Optional[str]:

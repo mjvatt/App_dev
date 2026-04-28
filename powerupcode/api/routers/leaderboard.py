@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, TypedDict
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
@@ -9,6 +9,14 @@ from api.dependencies import get_current_user, get_db
 from api.models.challenge import UserProgress
 from api.models.user import User
 from api.schemas.leaderboard import LeaderboardEntry, LeaderboardResponse
+
+
+class _Entry(TypedDict):
+    username: str
+    level: int
+    total_xp: int
+    streak_days: int
+    is_current_user: bool
 
 router = APIRouter()
 
@@ -57,7 +65,7 @@ async def get_leaderboard(
     )
     rows = result.all()
 
-    entries: list[dict] = [
+    entries: list[_Entry] = [
         {
             "username": row.username,
             "level": row.level,

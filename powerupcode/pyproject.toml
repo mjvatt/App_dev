@@ -44,3 +44,22 @@ select = ["E", "F", "I", "UP"]
 python_version = "3.13"
 strict = true
 ignore_missing_imports = true
+exclude = ["services/engine_core/", "alembic/"]
+
+[[tool.mypy.overrides]]
+# Stripe and slowapi ship loose types and don't pay for strict checking.
+module = ["stripe.*", "slowapi.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Boundary modules that interop with the loose Stripe SDK; checking the
+# rest of the code is more valuable than fighting Stripe's typing here.
+module = ["services.billing.stripe_client", "api.routers.billing"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# engine_core is gitignored (proprietary) and not present in CI checkouts;
+# locally we silence its errors so the CI vs. local mypy results match.
+module = ["services.engine_core.*"]
+ignore_errors = true
+follow_imports = "silent"
