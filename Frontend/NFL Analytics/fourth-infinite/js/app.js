@@ -1622,6 +1622,34 @@
         </div>` : ''}
       </div>` : '';
 
+    /* Combine & Bio section — surfaces age + measurables that GHOST uses
+       as features. Only rows with data render; section hides if all blank. */
+    const _ftIn = totalIn => {
+      if (totalIn == null) return null;
+      const n = Math.round(totalIn);
+      return `${Math.floor(n / 12)}'${n % 12}"`;
+    };
+    const _bioRows = [
+      ['Age at draft',  p.age != null ? p.age : null],
+      ['Height',        _ftIn(p.ht_in)],
+      ['Weight',        p.wt != null ? `${Math.round(p.wt)} lb` : null],
+      ['40-yard',       p.forty != null ? `${(+p.forty).toFixed(2)}s` : null],
+      ['Vertical',      p.vertical != null ? `${(+p.vertical).toFixed(1)}"` : null],
+      ['Broad jump',    _ftIn(p.broad_jump)],
+      ['Bench',         p.bench != null ? `${Math.round(p.bench)} reps` : null],
+      ['3-cone',        p.cone != null ? `${(+p.cone).toFixed(2)}s` : null],
+      ['20-yd shuttle', p.shuttle != null ? `${(+p.shuttle).toFixed(2)}s` : null],
+    ].filter(([, v]) => v !== null && v !== undefined && v !== '');
+    const bioHtml = _bioRows.length ? `
+      <div class="profile-section">
+        <h4>Combine & Bio</h4>
+        ${_bioRows.map(([label, val]) => `
+          <div class="profile-context-row">
+            <span>${label}</span>
+            <span class="profile-val">${val}</span>
+          </div>`).join('')}
+      </div>` : '';
+
     let avBreakdownHtml = '';
     if (ctx && p.career_av > 0) {
       // Shared linear scale: scale_max ensures the player's own bars fit and
@@ -1723,6 +1751,8 @@
           <div class="profile-stat"><span class="profile-stat-val">${p.pro_bowls || '—'}</span><span class="profile-stat-label">Pro Bowls</span></div>
         </div>
       </div>
+
+      ${bioHtml}
 
       ${avBreakdownHtml}
 
