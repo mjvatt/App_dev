@@ -16,7 +16,8 @@ Usage:
 import json
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.metrics import r2_score
 
 DATA_PATH   = 'data/draft_data.json'
 OUTPUT_PATH = 'data/sleeper_predictions.json'
@@ -77,23 +78,46 @@ def main():
     valid = [p for p in picks if p['pick'] > 0 and p['pos_group'] in POS_GROUPS]
     train = [p for p in valid if p['year'] <= TRAIN_CUTOFF]
 
-    # Target-encode college: Bayesian smoothing toward global mean surplus
-    global_mean = np.mean([surplus(p) for p in train])
-    college_buckets = {}
-    for p in train:
-        c = p['college']
-        if c not in college_buckets:
-            college_buckets[c] = []
-        college_buckets[c].append(surplus(p))
+    def _build_college_enc(picks_subset):
+        gm = float(np.mean([surplus(p) for p in picks_subset]))
+        buckets = {}
+        for p in picks_subset:
+            buckets.setdefault(p['college'], []).append(surplus(p))
+        enc = {}
+        for college, vals in buckets.items():
+            n = len(vals)
+            m = float(np.mean(vals))
+            enc[college] = (n * m + SMOOTH_K * gm) / (n + SMOOTH_K)
+        return enc, gm
 
-    college_enc = {}
-    for college, vals in college_buckets.items():
-        n = len(vals)
-        mean = float(np.mean(vals))
-        college_enc[college] = (n * mean + SMOOTH_K * global_mean) / (n + SMOOTH_K)
-
-    X_train = np.array([build_feature_row(p, college_enc, global_mean) for p in train])
+    # Honest CV: rebuild college encoding per fold from training indices only.
+    # The previous implementation built college_enc from the full training set
+    # before cross_val_score, leaking each pick's own surplus into its
+    # held-out feature row.
     y_train = np.array([surplus(p) for p in train])
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    cv_r2s = []
+    for fold_idx, (train_idx, val_idx) in enumerate(kf.split(train)):
+        fold_train = [train[i] for i in train_idx]
+        fold_val   = [train[i] for i in val_idx]
+        fold_enc, fold_gm = _build_college_enc(fold_train)
+
+        X_fold_train = np.array([build_feature_row(p, fold_enc, fold_gm) for p in fold_train])
+        X_fold_val   = np.array([build_feature_row(p, fold_enc, fold_gm) for p in fold_val])
+        y_fold_train = y_train[train_idx]
+        y_fold_val   = y_train[val_idx]
+
+        m_cv = GradientBoostingRegressor(
+            n_estimators=200, max_depth=4, learning_rate=0.05,
+            subsample=0.8, random_state=42,
+        )
+        m_cv.fit(X_fold_train, y_fold_train)
+        cv_r2s.append(r2_score(y_fold_val, m_cv.predict(X_fold_val)))
+    cv_r2s = np.array(cv_r2s)
+
+    # Final encoding + model fit on full training set for scoring all picks.
+    college_enc, global_mean = _build_college_enc(train)
+    X_train = np.array([build_feature_row(p, college_enc, global_mean) for p in train])
 
     model = GradientBoostingRegressor(
         n_estimators=200,
@@ -104,9 +128,8 @@ def main():
     )
     model.fit(X_train, y_train)
 
-    cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='r2')
     print(f"Training samples : {len(train)}")
-    print(f"CV R²            : {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+    print(f"CV R2 (no leak)  : {cv_r2s.mean():.3f} +/- {cv_r2s.std():.3f}")
 
     # Score all valid picks
     X_all = np.array([build_feature_row(p, college_enc, global_mean) for p in valid])
@@ -151,8 +174,8 @@ def main():
             'train_cutoff':  TRAIN_CUTOFF,
             'n_train':       len(train),
             'n_scored':      len(results),
-            'cv_r2_mean':    round(float(cv_scores.mean()), 3),
-            'cv_r2_std':     round(float(cv_scores.std()), 3),
+            'cv_r2_mean':    round(float(cv_r2s.mean()), 3),
+            'cv_r2_std':     round(float(cv_r2s.std()), 3),
         },
     }
 

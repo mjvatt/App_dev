@@ -1262,6 +1262,17 @@
       const mode   = mlMode.value;
       const result = DraftData.sleeperModelRankings(filter, 30, mode);
 
+      const subtitleEl = document.getElementById('ghost-ml-subtitle');
+      if (subtitleEl && result.modelMeta) {
+        const r2     = result.modelMeta.cv_r2_mean;
+        const ntrain = result.modelMeta.n_train;
+        const r2Note = (r2 !== undefined && r2 < 0.02)
+          ? ` · CV R² ≈ ${r2} (signal is weak — rankings are directional, not predictive)`
+          : ` · CV R² = ${r2}`;
+        subtitleEl.textContent =
+          `Picks ranked by predicted career AV surplus above slot · GBR · trained on ${ntrain ? ntrain.toLocaleString() : '?'} picks ≤ ${result.modelMeta.train_cutoff}${r2Note} · top 30`;
+      }
+
       const rankLabel = mode === 'surprise' ? 'Actual − Predicted Surplus' : 'Predicted Career AV Surplus';
       const xLabel    = mode === 'surprise'
         ? 'Career AV above slot expectation minus model prediction'
