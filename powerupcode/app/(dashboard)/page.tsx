@@ -137,7 +137,7 @@ export default function DashboardPage() {
       {me && !me.is_verified && (
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl px-5 py-4 mb-6 flex items-center justify-between gap-4">
           <p className="text-sm text-zinc-400">
-            Your email address is not verified. Check your inbox or request a new link.
+            Verify your email to submit solutions and subscribe. Check your inbox or request a new link.
           </p>
           <div className="shrink-0">
             {resendState === "sent" || resendState === "error" ? (

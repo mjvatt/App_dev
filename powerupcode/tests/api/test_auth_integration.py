@@ -52,6 +52,83 @@ async def test_register_rejects_duplicate_email(
     assert "already registered" in second.json()["detail"].lower()
 
 
+async def test_unverified_user_blocked_from_submit_attempt(
+    integration_client: AsyncClient,
+) -> None:
+    reg = await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "unverified@example.com",
+            "username": "unverified",
+            "password": "validpass123",
+        },
+    )
+    token = reg.json()["access_token"]
+
+    res = await integration_client.post(
+        "/api/challenges/stub-001/attempt",
+        json={"solution": "pass", "time_ms": 0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 403
+    assert res.json()["detail"] == "email_verification_required"
+
+
+async def test_unverified_user_blocked_from_billing_checkout(
+    integration_client: AsyncClient,
+) -> None:
+    reg = await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "unverified2@example.com",
+            "username": "unverified2",
+            "password": "validpass123",
+        },
+    )
+    token = reg.json()["access_token"]
+
+    res = await integration_client.post(
+        "/api/billing/checkout",
+        json={
+            "plan": "monthly",
+            "success_url": "http://x/s",
+            "cancel_url": "http://x/c",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 403
+    assert res.json()["detail"] == "email_verification_required"
+
+
+async def test_verified_user_passes_gate(
+    integration_client: AsyncClient, db_session: AsyncSession
+) -> None:
+    reg = await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "verified@example.com",
+            "username": "verifiedu",
+            "password": "validpass123",
+        },
+    )
+    token = reg.json()["access_token"]
+
+    # Flip the verification flag the way our verify-email POST handler would.
+    user = await db_session.scalar(
+        select(User).where(User.email == "verified@example.com")
+    )
+    assert user is not None
+    user.is_verified = True
+    await db_session.commit()
+
+    res = await integration_client.post(
+        "/api/challenges/stub-001/attempt",
+        json={"solution": "pass", "time_ms": 0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 200
+
+
 async def test_login_round_trip(integration_client: AsyncClient) -> None:
     await integration_client.post(
         "/api/auth/register",

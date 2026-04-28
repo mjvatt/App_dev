@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.dependencies import get_current_user, get_db
+from api.dependencies import get_current_user, get_db, require_verified_user
 from api.models.challenge import Attempt, UserProgress
 from api.models.user import Subscription
 from api.schemas.challenge import (
@@ -134,7 +134,7 @@ async def get_next_challenge(
 async def submit_attempt(
     challenge_id: str,
     body: AttemptRequest,
-    user_id: Annotated[str, Depends(get_current_user)],
+    user_id: Annotated[str, Depends(require_verified_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> AttemptResponse:
     result = await get_engine().evaluate_attempt(user_id, challenge_id, body.solution, body.time_ms)

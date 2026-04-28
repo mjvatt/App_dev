@@ -172,8 +172,15 @@ export default function ArcadePage() {
       );
       setResult(data);
       if (data.passed) clearDraft(challenge.id, language);
-    } catch {
-      setError("Submission failed. Try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "email_verification_required") {
+        setError(
+          "Verify your email to submit solutions. Check your inbox or resend the link from the dashboard."
+        );
+      } else {
+        setError("Submission failed. Try again.");
+      }
     } finally {
       setSubmitting(false);
     }

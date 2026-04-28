@@ -30,3 +30,20 @@ async def get_current_user(
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account disabled")
     return user_id
+
+
+async def require_verified_user(
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> str:
+    """Tighter version of get_current_user that also checks is_verified.
+    Use on routes that affect public ranking (XP / attempts / leaderboard
+    standings) or that touch real money (billing checkout). Returns 403
+    with a stable detail string the frontend can match against."""
+    user = await db.get(User, user_id)
+    if user is None or not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="email_verification_required",
+        )
+    return user_id

@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.dependencies import get_current_user, get_db
+from api.dependencies import get_current_user, get_db, require_verified_user
 from api.models.user import ProcessedStripeEvent, Subscription
 from api.schemas.billing import SubscriptionStatusResponse
 from services.billing.stripe_client import create_checkout_session, handle_webhook
@@ -33,7 +33,7 @@ class CheckoutResponse(BaseModel):
 @router.post("/checkout", response_model=CheckoutResponse)
 async def create_checkout(
     body: CheckoutRequest,
-    user_id: Annotated[str, Depends(get_current_user)],
+    user_id: Annotated[str, Depends(require_verified_user)],
 ) -> CheckoutResponse:
     if body.plan not in _VALID_PLANS:
         raise HTTPException(status_code=400, detail=f"plan must be one of {_VALID_PLANS}")

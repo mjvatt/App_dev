@@ -66,7 +66,14 @@ export default function BillingPage() {
       });
       window.location.href = data.url;
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Checkout failed. Try again.");
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "email_verification_required") {
+        setError(
+          "Verify your email before subscribing. Check your inbox or resend the link from the dashboard."
+        );
+      } else {
+        setError(msg || "Checkout failed. Try again.");
+      }
       setCheckingOut(null);
     }
   }
