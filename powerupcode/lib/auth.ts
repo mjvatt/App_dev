@@ -1,4 +1,5 @@
 const TOKEN_KEY = "puc_token";
+const LAST_EMAIL_KEY = "puc_last_email";
 
 export function setToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
@@ -15,4 +16,22 @@ export function clearToken(): void {
 
 export function isAuthenticated(): boolean {
   return !!getToken();
+}
+
+export function rememberEmail(email: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LAST_EMAIL_KEY, email);
+  } catch {
+    // best-effort
+  }
+}
+
+export function getRememberedEmail(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return localStorage.getItem(LAST_EMAIL_KEY) ?? "";
+  } catch {
+    return "";
+  }
 }

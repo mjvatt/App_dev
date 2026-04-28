@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { setToken } from "@/lib/auth";
+import { useEffect, useRef, useState } from "react";
+import { getRememberedEmail, rememberEmail, setToken } from "@/lib/auth";
 import type { TokenResponse } from "@/lib/types";
 
 export default function LoginPage() {
@@ -12,6 +12,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const remembered = getRememberedEmail();
+    if (remembered) {
+      setEmail(remembered);
+      // Skip the email field and put cursor in password — the most likely flow
+      // for a returning user.
+      passwordRef.current?.focus();
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,6 +40,7 @@ export default function LoginPage() {
       }
       const data: TokenResponse = await res.json();
       setToken(data.access_token);
+      rememberEmail(email);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -52,6 +64,7 @@ export default function LoginPage() {
             required
           />
           <input
+            ref={passwordRef}
             type="password"
             placeholder="Password"
             value={password}

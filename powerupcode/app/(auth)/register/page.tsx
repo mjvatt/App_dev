@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setToken } from "@/lib/auth";
+import { rememberEmail, setToken } from "@/lib/auth";
 import type { TokenResponse } from "@/lib/types";
 
 export default function RegisterPage() {
@@ -32,6 +32,7 @@ export default function RegisterPage() {
       }
       const data: TokenResponse = await res.json();
       setLocalToken(data.access_token);
+      rememberEmail(email);
       setRegistered(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
