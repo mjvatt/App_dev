@@ -433,8 +433,13 @@
       const rows2025 = DraftData.standings({ year: 2025 })
         .sort((a, b) => a.w - b.w || b.l - a.l);
 
-      // Non-playoff teams pick before playoff teams within the same win tier;
-      // among playoff teams, worst record picks first.
+      // Approximation: non-playoff teams ordered worst-record-first, then
+      // playoff teams ordered best-record-last. The actual NFL rule for
+      // picks 21-32 is by round of elimination (Wild Card losers, then
+      // Divisional, then Conference, then Super Bowl), not regular-season
+      // record. We don't have elimination-round data here, so record is
+      // used as a stand-in. Tiebreakers (strength of schedule) are also
+      // not modeled.
       const nonPlayoff = rows2025.filter(r => !r.playoff);
       const playoff    = rows2025.filter(r =>  r.playoff).reverse();
       const ordered    = [...nonPlayoff, ...playoff];
