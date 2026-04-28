@@ -41,7 +41,7 @@ const DraftData = (() => {
   };
 
   async function load() {
-    const resp = await fetch('data/draft_data.json');
+    const resp = await fetch('data/draft_data.json', { cache: 'no-store' });
     const json = await resp.json();
     _picks     = json.picks.map(p => ({ ...p, franchise: _franchise(p.team, p.year) }));
     _standings = (json.standings || []).map(s => ({ ...s, franchise: _franchise(s.team, s.year) }));
@@ -850,7 +850,7 @@ const DraftData = (() => {
   async function loadTeamStats() {
     if (_teamStats !== null) return;
     try {
-      const resp = await fetch('data/team_stats.json');
+      const resp = await fetch('data/team_stats.json', { cache: 'no-store' });
       const json = await resp.json();
       _teamStats = {};
       json.stats.forEach(s => {
@@ -874,7 +874,7 @@ const DraftData = (() => {
   async function loadSleeperPredictions() {
     if (_sleeperPreds !== null) return;
     try {
-      const resp = await fetch('data/sleeper_predictions.json');
+      const resp = await fetch('data/sleeper_predictions.json', { cache: 'no-store' });
       _sleeperPreds = await resp.json();
     } catch (_) {
       _sleeperPreds = { predictions: [], importances: [], meta: {} };
@@ -907,7 +907,7 @@ const DraftData = (() => {
   async function loadOraclePredictions() {
     if (_oraclePreds !== null) return;
     try {
-      const resp = await fetch('data/oracle_predictions.json');
+      const resp = await fetch('data/oracle_predictions.json', { cache: 'no-store' });
       _oraclePreds = await resp.json();
     } catch (_) {
       _oraclePreds = { forecast: [], backtest: [], importances: [], meta: {} };
@@ -919,7 +919,7 @@ const DraftData = (() => {
   async function loadSalaries() {
     if (_salaries !== null) return;
     try {
-      const resp = await fetch('data/salaries.json');
+      const resp = await fetch('data/salaries.json', { cache: 'no-store' });
       _salaries = await resp.json();
     } catch (_) {
       _salaries = { cap_by_year: [], top_earners: [] };
@@ -941,7 +941,7 @@ const DraftData = (() => {
   async function loadTrades() {
     if (_trades !== null) return;
     try {
-      const resp = await fetch('data/trades.json');
+      const resp = await fetch('data/trades.json', { cache: 'no-store' });
       _trades = await resp.json();
     } catch (_) {
       _trades = [];
