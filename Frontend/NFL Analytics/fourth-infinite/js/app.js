@@ -1686,12 +1686,13 @@
   document.querySelectorAll('.theme-switch-opt').forEach(btn => {
     btn.addEventListener('click', () => {
       applyTheme(btn.dataset.t);
-      _sageInited     = false;
-      _ghostInited    = false;
-      _ghostTabInited = {};
-      _atlasInited    = false;
-      _atlasTabInited = {};
-      _oracleInited   = false;
+      _sageInited       = false;
+      _ghostInited      = false;
+      _ghostTabInited   = {};
+      _atlasInited      = false;
+      _atlasTabInited   = {};
+      _oracleInited     = false;
+      _class2027Inited  = false;
       showView(_currentView);
     });
   });
