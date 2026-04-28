@@ -1396,12 +1396,17 @@
         const conf = btn.dataset.conf;
         const div  = btn.dataset.div;
         const label = btn.textContent.trim();
-        document.getElementById('oracle-forecast-title').textContent =
-          `2026 Win Projections — ${conf && div ? label : conf ? `${conf} (16 teams)` : 'All 32 Franchises'}`;
         const subset = forecast.filter(r =>
           (!conf || r.conf === conf) &&
           (!div  || r.div  === div)
         );
+        const titleSuffix = conf && div
+          ? label
+          : conf
+            ? `${conf} (${subset.length} team${subset.length !== 1 ? 's' : ''})`
+            : `All ${subset.length} Franchises`;
+        document.getElementById('oracle-forecast-title').textContent =
+          `2026 Win Projections — ${titleSuffix}`;
         renderForecast(subset);
       });
     });
