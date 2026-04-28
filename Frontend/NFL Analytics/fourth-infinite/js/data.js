@@ -268,8 +268,9 @@ const DraftData = (() => {
       if (!byFranchise[s.franchise]) byFranchise[s.franchise] = {};
       ERAS.forEach(era => {
         if (s.year < era.from || s.year > era.to) return;
-        if (!byFranchise[s.franchise][era.label]) byFranchise[s.franchise][era.label] = { w: 0, g: 0 };
+        if (!byFranchise[s.franchise][era.label]) byFranchise[s.franchise][era.label] = { w: 0, t: 0, g: 0 };
         byFranchise[s.franchise][era.label].w += s.w;
+        byFranchise[s.franchise][era.label].t += s.t || 0;
         byFranchise[s.franchise][era.label].g += s.w + s.l + s.t;
       });
     });
@@ -279,7 +280,8 @@ const DraftData = (() => {
       const winPcts = {};
       eraLabels.forEach(era => {
         const d = eras[era];
-        winPcts[era] = d && d.g > 0 ? +(d.w / d.g * 100).toFixed(1) : null;
+        // Tie counts as half-win, half-loss in NFL win pct.
+        winPcts[era] = d && d.g > 0 ? +(((d.w + 0.5 * d.t) / d.g) * 100).toFixed(1) : null;
       });
       const nonNull = eraLabels.map(e => winPcts[e]).filter(v => v !== null);
       const avgPct  = nonNull.length ? +(nonNull.reduce((s, v) => s + v, 0) / nonNull.length).toFixed(1) : 0;
@@ -365,7 +367,8 @@ const DraftData = (() => {
       .filter(([, d]) => d.seasons >= 3)
       .map(([team, d]) => {
         const games       = d.w + d.l + d.t || 1;
-        const winPct      = d.w / games;
+        // Standard NFL win pct: tie counts as half-win, half-loss.
+        const winPct      = (d.w + 0.5 * d.t) / games;
         const playoffRate = d.playoffs / d.seasons;
         const dd          = byTeamDraft[team] || { avSum: 0, capSum: 1 };
         const draftEff    = dd.capSum > 0 ? dd.avSum / dd.capSum : 0;
