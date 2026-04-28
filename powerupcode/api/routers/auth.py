@@ -2,8 +2,8 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,8 +23,18 @@ from services.auth.jwt import create_access_token
 from services.email.client import send_password_reset_email, send_verification_email
 
 router = APIRouter()
-_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 logger = logging.getLogger(__name__)
+
+
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def _verify_password(password: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+    except ValueError:
+        return False
 
 _VERIFY_TTL = timedelta(hours=24)
 _RESET_TTL = timedelta(minutes=15)
@@ -52,7 +62,7 @@ async def register(
     user = User(
         email=body.email,
         username=body.username,
-        hashed_password=_pwd.hash(body.password),
+        hashed_password=_hash_password(body.password),
     )
     db.add(user)
     await db.flush()
@@ -80,7 +90,7 @@ async def login(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
     user = await db.scalar(select(User).where(User.email == body.email))
-    if not user or not _pwd.verify(body.password, user.hashed_password):
+    if not user or not _verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     return TokenResponse(access_token=create_access_token(user.id, settings.secret_key))
@@ -214,7 +224,7 @@ async def reset_password(
     if user is None:
         raise HTTPException(status_code=400, detail="Invalid or expired reset link")
 
-    user.hashed_password = _pwd.hash(body.new_password)
+    user.hashed_password = _hash_password(body.new_password)
     record.used_at = _now()
     await db.commit()
 
