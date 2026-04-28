@@ -17,5 +17,4 @@ limiter = Limiter(
     key_func=get_remote_address,
     storage_uri=_storage_uri,
     default_limits=[],
-    headers_enabled=True,
 )
