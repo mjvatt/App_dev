@@ -2,6 +2,13 @@
 Stub engine for local development and CI.
 All evaluation and hint logic returns placeholder responses.
 Replace at runtime by setting ENGINE_MODULE in the environment.
+
+NOTE: Transient state (the user's last-fetched difficulty per challenge)
+is held in a per-process dict. This is fine for single-worker dev and CI;
+under multi-worker production, a user that fetches on worker A and submits
+on worker B will fall back to the challenge's default difficulty. The
+production engine_core is responsible for persisting any state that needs
+to survive across requests or workers.
 """
 import uuid
 from typing import Optional
@@ -39,7 +46,10 @@ _STUB_CHALLENGE = ChallengeData(
 
 class StubEngine(GameEngine):
     def __init__(self) -> None:
-        self._last_difficulty: dict[str, Difficulty] = {}
+        # Keyed by (user_id, challenge_id) so concurrent users don't clobber
+        # each other on the same challenge. Still per-process state — see
+        # the module docstring.
+        self._last_difficulty: dict[tuple[str, str], Difficulty] = {}
 
     async def next_challenge(
         self,
@@ -48,7 +58,7 @@ class StubEngine(GameEngine):
         difficulty: Optional[Difficulty] = None,
     ) -> ChallengeData:
         diff = difficulty or _STUB_CHALLENGE.difficulty
-        self._last_difficulty[_STUB_CHALLENGE.id] = diff
+        self._last_difficulty[(user_id, _STUB_CHALLENGE.id)] = diff
         return ChallengeData(
             id=_STUB_CHALLENGE.id,
             topic=topic or _STUB_CHALLENGE.topic,
@@ -66,7 +76,9 @@ class StubEngine(GameEngine):
         solution: str,
         time_ms: int = 0,
     ) -> AttemptResult:
-        diff = self._last_difficulty.get(challenge_id, _STUB_CHALLENGE.difficulty)
+        diff = self._last_difficulty.get(
+            (user_id, challenge_id), _STUB_CHALLENGE.difficulty
+        )
         return AttemptResult(
             attempt_id=str(uuid.uuid4()),
             passed=False,
