@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import PasswordInput from "@/components/ui/PasswordInput";
 
 function ResetPasswordContent() {
   const params = useSearchParams();
@@ -73,8 +74,7 @@ function ResetPasswordContent() {
           <>
             {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <input
-                type="password"
+              <PasswordInput
                 placeholder="New password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -82,8 +82,7 @@ function ResetPasswordContent() {
                 required
                 minLength={8}
               />
-              <input
-                type="password"
+              <PasswordInput
                 placeholder="Confirm new password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}

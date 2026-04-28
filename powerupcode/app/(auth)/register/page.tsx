@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import PasswordInput from "@/components/ui/PasswordInput";
 import { rememberEmail, setToken } from "@/lib/auth";
 import type { TokenResponse } from "@/lib/types";
 
@@ -88,8 +89,7 @@ export default function RegisterPage() {
             className="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white"
             required
           />
-          <input
-            type="password"
+          <PasswordInput
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

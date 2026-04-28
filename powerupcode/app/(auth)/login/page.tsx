@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getRememberedEmail, rememberEmail, setToken } from "@/lib/auth";
+import PasswordInput from "@/components/ui/PasswordInput";
 import type { TokenResponse } from "@/lib/types";
 
 export default function LoginPage() {
@@ -63,9 +64,8 @@ export default function LoginPage() {
             className="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white"
             required
           />
-          <input
+          <PasswordInput
             ref={passwordRef}
-            type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
