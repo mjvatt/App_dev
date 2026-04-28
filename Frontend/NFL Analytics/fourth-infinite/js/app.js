@@ -11,6 +11,7 @@
     draftboard: ['Draft Board',      'Search and filter every pick from 1994–2026'],
     teams:      ['Team Hub',         'Draft history and tendencies by franchise'],
     class2026:  ['2026 Draft Class', 'NFL Draft · April 24–26, 2026'],
+    class2027:  ['2027 Draft Class', 'NFL Draft · April – May 2027'],
     positions:  ['Position Trends',  'How position drafting has evolved over 32 years'],
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
@@ -36,6 +37,7 @@
     if (id === 'dashboard')  initDashboard();
     if (id === 'teams')      initTeamHub();
     if (id === 'class2026')  initClass2026();
+    if (id === 'class2027')  initClass2027();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -410,6 +412,110 @@
     }
 
     renderBoard();
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     2027 DRAFT CLASS
+  ═══════════════════════════════════════════════════════════════════ */
+  let _class2027Inited = false;
+
+  function initClass2027() {
+    if (_class2027Inited) return;
+    _class2027Inited = true;
+
+    const picks2027 = DraftData.picks({ year: 2027 });
+
+    if (picks2027.length === 0) {
+      // Pre-draft: show projected R1 order from 2025 standings
+      document.getElementById('c27-predraft').style.display = '';
+      document.getElementById('c27-live').style.display     = 'none';
+
+      const rows2025 = DraftData.standings({ year: 2025 })
+        .sort((a, b) => a.w - b.w || b.l - a.l);
+
+      // Non-playoff teams pick before playoff teams within the same win tier;
+      // among playoff teams, worst record picks first.
+      const nonPlayoff = rows2025.filter(r => !r.playoff);
+      const playoff    = rows2025.filter(r =>  r.playoff).reverse();
+      const ordered    = [...nonPlayoff, ...playoff];
+
+      document.getElementById('c27-proj-body').innerHTML = ordered.map((r, i) => `
+        <tr>
+          <td style="color:var(--text-muted);font-weight:600">${i + 1}</td>
+          <td><strong>${r.franchise || r.team}</strong></td>
+          <td style="color:var(--text-muted)">${r.conf}</td>
+          <td style="color:var(--text-muted)">${r.div}</td>
+          <td style="font-weight:600">${r.w}</td>
+          <td style="color:var(--text-muted)">${r.l}</td>
+          <td>${r.playoff
+            ? '<span style="color:var(--accent)">Yes</span>'
+            : '<span style="color:var(--text-muted)">No</span>'}</td>
+          <td style="color:var(--text-muted)">${DraftData.expectedAvForPick(i + 1).toFixed(1)}</td>
+        </tr>`).join('');
+      return;
+    }
+
+    // Post-draft: full view identical to 2026 class
+    document.getElementById('c27-predraft').style.display = 'none';
+    document.getElementById('c27-live').style.display     = '';
+
+    const r1        = picks2027.filter(p => p.round === 1).length;
+    const teamCount = new Set(picks2027.map(p => p.team)).size;
+    const colCount  = new Set(picks2027.map(p => p.college).filter(Boolean)).size;
+
+    document.getElementById('c27-kpi-picks').textContent    = picks2027.length;
+    document.getElementById('c27-kpi-teams').textContent    = teamCount;
+    document.getElementById('c27-kpi-colleges').textContent = colCount;
+    document.getElementById('c27-kpi-r1').textContent       = r1;
+
+    DraftCharts.hbar('chart-c27-capital', DraftData.teamCapitalByYear(2027), '#3b82f6', 'Draft Capital Score');
+    DraftCharts.donut('chart-c27-pos', DraftData.byPosGroup({ year: 2027 }), 'Picks');
+
+    const ROUNDS = [1, 2, 3, 4, 5, 6, 7];
+    DraftCharts.vbar('chart-c27-rounds', {
+      labels: ROUNDS.map(r => `R${r}`),
+      values: ROUNDS.map(r => picks2027.filter(p => p.round === r).length),
+    });
+
+    DraftCharts.hbar('chart-c27-colleges', DraftData.topColleges(20, { year: 2027 }));
+
+    const rndSel  = document.getElementById('c27-rnd');
+    const teamSel = document.getElementById('c27-team');
+    const search  = document.getElementById('c27-search');
+
+    if (rndSel.options.length === 1) {
+      ROUNDS.forEach(r => rndSel.add(new Option(`Round ${r}`, r)));
+      [...new Set(picks2027.map(p => p.team).filter(Boolean))].sort()
+        .forEach(t => teamSel.add(new Option(t, t)));
+      [rndSel, teamSel].forEach(el => el.addEventListener('change', renderBoard27));
+      search.addEventListener('input', renderBoard27);
+    }
+
+    function renderBoard27() {
+      const r = rndSel.value  ? +rndSel.value : 0;
+      const t = teamSel.value || '';
+      const q = search.value.trim().toLowerCase();
+      const filtered = picks2027.filter(p =>
+        (!r || p.round === r) &&
+        (!t || p.team  === t) &&
+        (!q || p.player.toLowerCase().includes(q) || p.college.toLowerCase().includes(q))
+      );
+      document.getElementById('c27-board-count').textContent =
+        `${filtered.length.toLocaleString()} pick${filtered.length !== 1 ? 's' : ''}`;
+      document.getElementById('c27-board-body').innerHTML = filtered.map(p => `
+        <tr data-year="${p.year}" data-pick="${p.pick}">
+          <td>${p.round}</td>
+          <td>${p.pick}</td>
+          <td>${p.team}</td>
+          <td><strong>${p.player}</strong></td>
+          <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
+          <td>${p.college}</td>
+          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick).toFixed(1) : '—'}</td>
+          <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
+        </tr>`).join('');
+    }
+
+    renderBoard27();
   }
 
   /* ═══════════════════════════════════════════════════════════════════

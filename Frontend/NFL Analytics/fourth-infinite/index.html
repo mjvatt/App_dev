@@ -45,7 +45,10 @@
         </a>
         <a href="#" class="nav-item" data-view="class2026">
           <i class="fas fa-clipboard-list"></i><span>2026 Class</span>
-          <span class="engine-badge new-badge">NEW</span>
+        </a>
+        <a href="#" class="nav-item" data-view="class2027">
+          <i class="fas fa-calendar-plus"></i><span>2027 Class</span>
+          <span class="engine-badge new-badge">UPCOMING</span>
         </a>
         <a href="#" class="nav-item" data-view="positions">
           <i class="fas fa-arrow-trend-up"></i><span>Position Trends</span>
@@ -384,6 +387,117 @@
             </table>
           </div>
           <div class="table-footer"><span id="c26-board-count">— picks</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 2027 DRAFT CLASS VIEW ─── -->
+    <section class="view" id="view-class2027">
+      <!-- Pre-draft state: shown when no 2027 picks exist yet -->
+      <div id="c27-predraft">
+        <div class="c27-predraft-hero">
+          <div class="c27-predraft-badge">UPCOMING</div>
+          <h2>2027 NFL Draft</h2>
+          <p>April – May 2027 &nbsp;·&nbsp; Pick data will populate after draft day &nbsp;·&nbsp; Projected order below is based on 2025 season results</p>
+        </div>
+        <div class="charts-grid" style="margin-top:20px">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div>
+                <h3>Projected 2027 Round 1 Draft Order</h3>
+                <p>Estimated from 2025 regular season records · worst record picks first · actual order determined by 2026 season results</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="draft-table">
+                <thead>
+                  <tr>
+                    <th>Proj. Pick</th>
+                    <th>Franchise</th>
+                    <th>Conf</th>
+                    <th>Div</th>
+                    <th>2025 W</th>
+                    <th>2025 L</th>
+                    <th>Playoffs</th>
+                    <th>Slot Avg AV</th>
+                  </tr>
+                </thead>
+                <tbody id="c27-proj-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live state: shown after 2027 pick data is scraped -->
+      <div id="c27-live" style="display:none">
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-user-check"></i></div>
+            <div class="kpi-body"><span class="kpi-value" id="c27-kpi-picks">—</span><span class="kpi-label">Total Picks</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-shield-halved"></i></div>
+            <div class="kpi-body"><span class="kpi-value" id="c27-kpi-teams">—</span><span class="kpi-label">Teams</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-graduation-cap"></i></div>
+            <div class="kpi-body"><span class="kpi-value" id="c27-kpi-colleges">—</span><span class="kpi-label">Colleges</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
+            <div class="kpi-body"><span class="kpi-value" id="c27-kpi-r1">—</span><span class="kpi-label">Round 1 Picks</span></div>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div><h3>Team Draft Capital</h3><p>Franchises ranked by total pick value score</p></div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-c27-capital"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div><h3>Position Distribution</h3><p>Picks by position group</p></div>
+            </div>
+            <div class="chart-wrap chart-wrap--donut"><canvas id="chart-c27-pos"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div><h3>Picks by Round</h3><p>Total selections per round</p></div>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-c27-rounds"></canvas></div>
+          </div>
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div><h3>College Pipeline</h3><p>Top 20 programs by picks in the 2027 class</p></div>
+            </div>
+            <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-c27-colleges"></canvas></div>
+          </div>
+          <div class="chart-card wide">
+            <div class="chart-card-header">
+              <div><h3>2027 Pick Board</h3><p>Every selection · career data will populate in future seasons</p></div>
+            </div>
+            <div class="filter-bar" style="padding:0 0 12px">
+              <select id="c27-rnd" class="filter-select"><option value="">All Rounds</option></select>
+              <select id="c27-team" class="filter-select"><option value="">All Teams</option></select>
+              <input type="text" id="c27-search" class="filter-input" placeholder="Search player or college…" />
+            </div>
+            <div class="table-wrap">
+              <table class="draft-table">
+                <thead>
+                  <tr>
+                    <th>Rnd</th><th>Pick</th><th>Team</th><th>Player</th>
+                    <th>Pos</th><th>College</th>
+                    <th title="Historical avg career AV at this pick slot (1994–2021 drafts)">Slot Avg AV</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="c27-board-body"></tbody>
+              </table>
+            </div>
+            <div class="table-footer"><span id="c27-board-count">— picks</span></div>
+          </div>
         </div>
       </div>
     </section>

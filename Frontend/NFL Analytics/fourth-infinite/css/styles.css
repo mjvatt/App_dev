@@ -709,6 +709,27 @@ body { display: flex; overflow: hidden; }
 .profile-comp-meta { color: var(--text-muted); font-size: 12px; }
 .profile-comp-av { font-weight: 600; color: var(--accent); white-space: nowrap; }
 
+.c27-predraft-hero {
+  text-align: center;
+  padding: 40px 20px 28px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.c27-predraft-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.c27-predraft-hero h2 { font-size: 26px; font-weight: 700; margin: 0 0 8px; }
+.c27-predraft-hero p  { font-size: 13px; color: var(--text-muted); margin: 0; }
+
 .oracle-filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: center; }
 .oracle-filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
 .oracle-filter-group + .oracle-filter-group { padding-left: 10px; border-left: 1px solid var(--border); }
