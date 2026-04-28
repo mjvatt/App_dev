@@ -240,21 +240,46 @@ def main():
     )
     model.fit(X, y, sample_weight=era_weights)
 
-    # Manual 5-fold CV with era weights passed through fit
+    # Manual 5-fold CV with era weights passed through fit.
+    # Reports two metrics:
+    #   cv_r2_raw  — rank/signal quality of the raw GBR predictions.
+    #   cv_r2_cal  — accuracy of the spread-calibrated predictions actually
+    #                shown in the UI. Spread factor is fit per-fold on the
+    #                training partition only (no leakage from val).
     from sklearn.model_selection import KFold
     from sklearn.metrics import r2_score
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
-    cv_r2s = []
+    cv_r2s_raw = []
+    cv_r2s_cal = []
     for train_idx, val_idx in kf.split(X):
         m_cv = GradientBoostingRegressor(
             n_estimators=300, max_depth=3, learning_rate=0.04,
             subsample=0.8, min_samples_leaf=5, random_state=42,
         )
-        m_cv.fit(X[train_idx], y[train_idx], sample_weight=era_weights[train_idx])
-        cv_r2s.append(r2_score(y[val_idx], m_cv.predict(X[val_idx])))
-    cv_r2s = np.array(cv_r2s)
-    print(f"Training samples : {len(X)}")
-    print(f"CV R2 (weighted) : {cv_r2s.mean():.3f} +/- {cv_r2s.std():.3f}")
+        w_tr = era_weights[train_idx]
+        m_cv.fit(X[train_idx], y[train_idx], sample_weight=w_tr)
+
+        # Raw R^2 on validation fold
+        val_pred_raw = m_cv.predict(X[val_idx])
+        cv_r2s_raw.append(r2_score(y[val_idx], val_pred_raw))
+
+        # Per-fold spread factor fit on training partition only
+        tr_pred_raw  = m_cv.predict(X[train_idx])
+        wmean_y_tr   = float(np.average(y[train_idx], weights=w_tr))
+        wmean_p_tr   = float(np.average(tr_pred_raw, weights=w_tr))
+        std_y_tr     = float(np.sqrt(np.average((y[train_idx]    - wmean_y_tr) ** 2, weights=w_tr)))
+        std_p_tr     = float(np.sqrt(np.average((tr_pred_raw     - wmean_p_tr) ** 2, weights=w_tr)))
+        sf_fold      = (std_y_tr / std_p_tr) if std_p_tr > 0 else 1.0
+
+        val_pred_cal = wmean_p_tr + (val_pred_raw - wmean_p_tr) * sf_fold
+        val_pred_cal = np.clip(val_pred_cal, 1.0, 17.0)
+        cv_r2s_cal.append(r2_score(y[val_idx], val_pred_cal))
+
+    cv_r2s_raw = np.array(cv_r2s_raw)
+    cv_r2s_cal = np.array(cv_r2s_cal)
+    print(f"Training samples     : {len(X)}")
+    print(f"CV R2 raw (signal)   : {cv_r2s_raw.mean():.3f} +/- {cv_r2s_raw.std():.3f}")
+    print(f"CV R2 calibrated     : {cv_r2s_cal.mean():.3f} +/- {cv_r2s_cal.std():.3f}")
 
     # Spread calibration: scale predictions so their weighted std matches
     # the weighted historical win std. Preserves rank order.
@@ -329,14 +354,16 @@ def main():
         'backtest':    backtest,
         'importances': importances,
         'meta': {
-            'train_from':    TRAIN_FROM,
-            'train_to':      TRAIN_TO,
-            'n_train':       len(X),
-            'cv_r2_mean':    round(float(cv_r2s.mean()), 3),
-            'cv_r2_std':     round(float(cv_r2s.std()), 3),
-            'spread_factor': round(spread_factor, 3),
-            'av_cap_year':   AV_CAP_YEAR,
-            'forecast_year': 2026,
+            'train_from':         TRAIN_FROM,
+            'train_to':           TRAIN_TO,
+            'n_train':            len(X),
+            'cv_r2_mean':         round(float(cv_r2s_raw.mean()), 3),
+            'cv_r2_std':          round(float(cv_r2s_raw.std()), 3),
+            'cv_r2_calibrated':   round(float(cv_r2s_cal.mean()), 3),
+            'cv_r2_cal_std':      round(float(cv_r2s_cal.std()), 3),
+            'spread_factor':      round(spread_factor, 3),
+            'av_cap_year':        AV_CAP_YEAR,
+            'forecast_year':      2026,
         },
     }
 

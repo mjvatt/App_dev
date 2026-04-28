@@ -1343,6 +1343,10 @@
 
     document.getElementById('oracle-r2').textContent      = meta.cv_r2_mean.toFixed(3);
     document.getElementById('oracle-n-train').textContent = meta.n_train.toLocaleString();
+    const r2CalEl = document.getElementById('oracle-r2-cal');
+    if (r2CalEl && meta.cv_r2_calibrated !== undefined) {
+      r2CalEl.textContent = meta.cv_r2_calibrated.toFixed(3);
+    }
 
     // ── Tab 1: Forecast bar chart + filter buttons ───────────────────
     const AFC_COLOR = '#3b82f6';
@@ -1427,9 +1431,11 @@
       'Importance',
     );
 
+    const r2Cal = meta.cv_r2_calibrated;
     document.getElementById('oracle-model-notes').innerHTML = `
       <p><strong style="color:var(--text)">What this model does well:</strong> weights point differential as a better signal of true team quality than raw wins, incorporates draft capital as a forward-looking roster investment signal, and uses prior-year cap space as a measure of roster-building flexibility. Predictions are spread-calibrated (factor ${meta.spread_factor ?? '—'}) so the forecast distribution matches historical win variance rather than compressing toward the mean.</p>
-      <p style="margin-top:10px"><strong style="color:var(--text)">Limitations:</strong> CV R² = ${meta.cv_r2_mean} reflects genuine NFL unpredictability — coaching changes, injuries, and free agency are not modeled. Individual predictions carry ±4–5 win uncertainty after spread calibration. Cap space data is available from 2013 onward; earlier seasons use a neutral fill. The model should be read as a probability-weighted central estimate, not a precise forecast.</p>
+      <p style="margin-top:10px"><strong style="color:var(--text)">How to read the two R² values:</strong> the <em>signal</em> R² (${meta.cv_r2_mean}) measures the rank/direction quality of the raw GBR predictions on held-out folds — useful for ordering teams. The <em>calibrated</em> R² (${r2Cal ?? '—'}) measures the absolute accuracy of the spread-calibrated predictions actually displayed. Calibration deliberately amplifies deviation from the mean to make the forecast visually realistic, which trades MSE accuracy for distributional realism. A negative calibrated R² is expected when the underlying signal is weak: a flat "everyone wins 8.5" prediction would score zero, and amplifying weak signal overshoots more often than not.</p>
+      <p style="margin-top:10px"><strong style="color:var(--text)">Limitations:</strong> NFL year-over-year prediction is inherently noisy — coaching changes, injuries, and free agency are not modeled. Individual predictions carry ±4–5 wins of real-world uncertainty. Cap space data is available from 2013 onward; earlier seasons use a neutral fill. Treat the forecast as a probability-weighted central estimate of team strength ordering, not a precise win projection.</p>
       <p style="margin-top:10px"><strong style="color:var(--text)">Training data:</strong> ${meta.n_train.toLocaleString()} franchise-seasons, ${meta.train_from}–${meta.train_to}. Cap space feature: Spotrac, 2013–2025.</p>`;
 
     // ── Tab activation ───────────────────────────────────────────────
