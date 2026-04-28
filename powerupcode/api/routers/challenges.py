@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -87,17 +87,24 @@ def _compute_level(total_xp: int) -> int:
     return total_xp // 100 + 1
 
 
-def _update_streak(progress: UserProgress) -> None:
-    today = date.today()
+def _update_streak(progress: UserProgress, now: datetime | None = None) -> None:
+    """Streak is measured in UTC days. A user keeps their streak by submitting
+    at least one attempt within consecutive UTC calendar days. Server local time
+    is intentionally ignored so users in different timezones see the same
+    rollover boundary."""
+    current = now or datetime.now(timezone.utc)
+    today_utc = current.date()
     if progress.last_active is None:
         progress.streak_days = 1
     else:
-        delta = (today - progress.last_active.date()).days  # type: ignore[union-attr]
+        last_active_utc = progress.last_active.astimezone(timezone.utc).date()
+        delta = (today_utc - last_active_utc).days
         if delta == 1:
             progress.streak_days += 1
         elif delta > 1:
             progress.streak_days = 1
-    progress.last_active = datetime.now(timezone.utc)
+        # delta == 0 (same UTC day): no change
+    progress.last_active = current
 
 
 @router.get("/next", response_model=ChallengeResponse)
