@@ -100,12 +100,15 @@ async def stripe_webhook(
                 ),
             )
         case "customer.subscription.deleted":
+            stripe_period_end = sub_obj.get("current_period_end")
             await _update_subscription(
                 db,
                 stripe_sub_id=sub_obj["id"],
                 status="canceled",
-                current_period_end=datetime.fromtimestamp(
-                    sub_obj.get("current_period_end") or 0, tz=timezone.utc
+                current_period_end=(
+                    datetime.fromtimestamp(stripe_period_end, tz=timezone.utc)
+                    if stripe_period_end
+                    else None
                 ),
             )
 
@@ -146,7 +149,7 @@ async def _update_subscription(
     db: AsyncSession,
     stripe_sub_id: str,
     status: str,
-    current_period_end: datetime,
+    current_period_end: datetime | None,
 ) -> None:
     result = await db.execute(
         select(Subscription).where(Subscription.stripe_subscription_id == stripe_sub_id)
@@ -155,5 +158,6 @@ async def _update_subscription(
     if sub is None:
         return
     sub.status = status
-    sub.current_period_end = current_period_end
+    if current_period_end is not None:
+        sub.current_period_end = current_period_end
     await db.commit()
