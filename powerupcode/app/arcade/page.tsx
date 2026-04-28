@@ -19,6 +19,39 @@ const STARTER: Record<Language, string> = {
   java: "class Solution {\n    public void solution() {\n        // Write your solution here\n    }\n}\n",
 };
 
+const DRAFT_PREFIX = "puc_draft:";
+
+function draftKey(challengeId: string, lang: Language): string {
+  return `${DRAFT_PREFIX}${challengeId}:${lang}`;
+}
+
+function loadDraft(challengeId: string, lang: Language): string {
+  if (typeof window === "undefined") return STARTER[lang];
+  try {
+    return localStorage.getItem(draftKey(challengeId, lang)) ?? STARTER[lang];
+  } catch {
+    return STARTER[lang];
+  }
+}
+
+function saveDraft(challengeId: string, lang: Language, code: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(draftKey(challengeId, lang), code);
+  } catch {
+    // Storage full / private mode — drafts are best-effort.
+  }
+}
+
+function clearDraft(challengeId: string, lang: Language): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(draftKey(challengeId, lang));
+  } catch {
+    // best-effort
+  }
+}
+
 const DIFFICULTY_COLOR: Record<string, string> = {
   easy: "text-green-400",
   medium: "text-yellow-400",
@@ -50,33 +83,44 @@ export default function ArcadePage() {
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
 
-  const loadChallenge = useCallback(async (difficulty?: Difficulty | "") => {
-    const token = getToken();
-    if (!token) return;
-    setFetching(true);
-    setResult(null);
-    setError(null);
-    setHint(null);
-    setHintsRemaining(3);
-    setUpgradeRequired(false);
-    const diff = difficulty !== undefined ? difficulty : selectedDifficultyRef.current;
-    const qs = diff ? `?difficulty=${diff}` : "";
-    try {
-      const data = await authedRequest<Challenge>(`/api/challenges/next${qs}`, token);
-      setChallenge(data);
-      startTime.current = Date.now();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "";
-      if (msg === "subscription_required") {
-        setChallenge(null);
-        setUpgradeRequired(true);
-      } else {
-        setError("Failed to load challenge. Check that the API is running.");
+  const loadChallenge = useCallback(
+    async (difficulty?: Difficulty | "") => {
+      const token = getToken();
+      if (!token) return;
+      setFetching(true);
+      setResult(null);
+      setError(null);
+      setHint(null);
+      setHintsRemaining(3);
+      setUpgradeRequired(false);
+      const diff = difficulty !== undefined ? difficulty : selectedDifficultyRef.current;
+      const qs = diff ? `?difficulty=${diff}` : "";
+      try {
+        const data = await authedRequest<Challenge>(`/api/challenges/next${qs}`, token);
+        setChallenge(data);
+        setCode(loadDraft(data.id, language));
+        startTime.current = Date.now();
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "";
+        if (msg === "subscription_required") {
+          setChallenge(null);
+          setUpgradeRequired(true);
+        } else {
+          setError("Failed to load challenge. Check that the API is running.");
+        }
+      } finally {
+        setFetching(false);
       }
-    } finally {
-      setFetching(false);
-    }
-  }, []);
+    },
+    [language]
+  );
+
+  // Persist code drafts per (challenge, language). Best-effort; throws on
+  // private mode or quota are swallowed by saveDraft.
+  useEffect(() => {
+    if (!challenge) return;
+    saveDraft(challenge.id, language, code);
+  }, [challenge, language, code]);
 
   useEffect(() => {
     loadChallenge();
@@ -90,7 +134,7 @@ export default function ArcadePage() {
 
   function handleLanguageChange(lang: Language) {
     setLanguage(lang);
-    setCode(STARTER[lang]);
+    setCode(challenge ? loadDraft(challenge.id, lang) : STARTER[lang]);
   }
 
   async function handleHint() {
@@ -127,6 +171,7 @@ export default function ArcadePage() {
         { method: "POST", body: JSON.stringify({ solution: code, time_ms: elapsed }) }
       );
       setResult(data);
+      if (data.passed) clearDraft(challenge.id, language);
     } catch {
       setError("Submission failed. Try again.");
     } finally {
@@ -286,7 +331,10 @@ export default function ArcadePage() {
               ))}
               <div className="flex-1" />
               <button
-                onClick={() => setCode(STARTER[language])}
+                onClick={() => {
+                  setCode(STARTER[language]);
+                  if (challenge) clearDraft(challenge.id, language);
+                }}
                 className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors px-2"
               >
                 Reset
