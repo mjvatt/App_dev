@@ -68,22 +68,22 @@ async def get_leaderboard(
         for row in rows
     ]
 
-    if len(rows) < _DUMMY_THRESHOLD:
-        real_usernames = {row.username for row in rows}
+    # Only pad with bots when the board is genuinely empty. Once any real
+    # user has earned XP, hiding bots prevents the awkward "I'm ranked 11
+    # behind kaito_dev who hasn't moved in days" experience.
+    if not rows:
         for dummy in _DUMMY_PLAYERS:
-            if dummy.username not in real_usernames:
-                entries.append(
-                    {
-                        "username": dummy.username,
-                        "level": dummy.level,
-                        "total_xp": dummy.total_xp,
-                        "streak_days": dummy.streak_days,
-                        "is_current_user": False,
-                    }
-                )
-
-    entries.sort(key=lambda e: e["total_xp"], reverse=True)
-    entries = entries[:_LIMIT]
+            entries.append(
+                {
+                    "username": dummy.username,
+                    "level": dummy.level,
+                    "total_xp": dummy.total_xp,
+                    "streak_days": dummy.streak_days,
+                    "is_current_user": False,
+                }
+            )
+        entries.sort(key=lambda e: e["total_xp"], reverse=True)
+        entries = entries[:_LIMIT]
 
     return LeaderboardResponse(
         entries=[
