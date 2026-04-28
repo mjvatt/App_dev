@@ -1527,11 +1527,18 @@
 
     let peerHtml = '';
     if (ctx && p.career_av > 0) {
-      const classStr = ctx.classRank ? `#${ctx.classRank} of ${ctx.classRankTotal}` : '—';
-      const roundStr = ctx.roundRank ? `#${ctx.roundRank} of ${ctx.roundRankTotal}` : '—';
+      const peerSuffix = p.year >= 2022
+        ? ' <span style="color:var(--text-muted);font-weight:400;font-size:11px">· class still accumulating AV</span>'
+        : '';
+      const classStr = ctx.classRank
+        ? `#${ctx.classRank} of ${ctx.classRankTotal} <span style="color:var(--text-muted);font-weight:400">w/ AV</span>`
+        : '—';
+      const roundStr = ctx.roundRank
+        ? `#${ctx.roundRank} of ${ctx.roundRankTotal} <span style="color:var(--text-muted);font-weight:400">w/ AV</span>`
+        : '—';
       peerHtml = `
         <div class="profile-section">
-          <h4>Peer Rankings</h4>
+          <h4>Peer Rankings${peerSuffix}</h4>
           <div class="profile-context-row">
             <span>AV per season</span>
             <span class="profile-val">${ctx.avPerSeason}</span>
