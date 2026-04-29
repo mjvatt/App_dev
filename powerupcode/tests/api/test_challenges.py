@@ -66,6 +66,31 @@ def test_streak_handles_naive_last_active_defensively() -> None:
     assert progress.streak_days == 1
 
 
+from api.routers.challenges import _milestone_just_hit
+
+
+def test_milestone_returns_first_crossed_value() -> None:
+    assert _milestone_just_hit(prior=2, current=3) == 3
+    assert _milestone_just_hit(prior=6, current=7) == 7
+    assert _milestone_just_hit(prior=29, current=30) == 30
+
+
+def test_milestone_returns_none_when_no_threshold_crossed() -> None:
+    assert _milestone_just_hit(prior=5, current=6) is None
+    assert _milestone_just_hit(prior=14, current=15) is None
+    assert _milestone_just_hit(prior=100, current=101) is None
+
+
+def test_milestone_handles_streak_jumps_taking_first_only() -> None:
+    # If a user somehow leaps multiple milestones in one update we surface
+    # the lowest crossed; the modal logic only celebrates one boundary.
+    assert _milestone_just_hit(prior=1, current=10) == 3
+
+
+def test_milestone_returns_none_on_streak_reset() -> None:
+    assert _milestone_just_hit(prior=10, current=1) is None
+
+
 def test_award_xp_failed_attempt_returns_raw_xp() -> None:
     assert _award_xp(0, passed=False, is_repeat_pass=False) == 0
     assert _award_xp(50, passed=False, is_repeat_pass=False) == 50  # engine could still award

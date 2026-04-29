@@ -24,6 +24,8 @@ export interface AttemptResult {
   time_ms: number;
   leveled_up: boolean;
   new_level: number;
+  streak_days: number;
+  streak_milestone: number | null;
 }
 
 export interface DifficultyStats {

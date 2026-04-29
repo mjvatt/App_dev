@@ -27,6 +27,8 @@ class AttemptResponse(BaseModel):
     time_ms: int
     leveled_up: bool = False
     new_level: int = 1
+    streak_days: int = 0
+    streak_milestone: int | None = None  # one of 3, 7, 14, 30, 60, 100 when crossed
 
 
 class HintRequest(BaseModel):

@@ -6,6 +6,7 @@ import AttemptResultPanel from "@/components/game/AttemptResultPanel";
 import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
 import LevelUpOverlay from "@/components/game/LevelUpOverlay";
+import StreakMilestoneOverlay from "@/components/game/StreakMilestoneOverlay";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
 import type { AttemptResult, Challenge, Difficulty } from "@/lib/types";
@@ -84,6 +85,10 @@ export default function ArcadePage() {
   const [levelUp, setLevelUp] = useState<{ open: boolean; level: number }>({
     open: false,
     level: 1,
+  });
+  const [streakMilestone, setStreakMilestone] = useState<{ open: boolean; days: number }>({
+    open: false,
+    days: 0,
   });
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
@@ -180,7 +185,11 @@ export default function ArcadePage() {
       );
       setResult(data);
       if (data.passed) clearDraft(challenge.id, language);
-      if (data.leveled_up) {
+      // Stagger reward overlays so they don't stack: streak first
+      // (faster to dismiss), level up after if both fired this attempt.
+      if (data.streak_milestone) {
+        setStreakMilestone({ open: true, days: data.streak_milestone });
+      } else if (data.leveled_up) {
         setLevelUp({ open: true, level: data.new_level });
       }
       track(Events.AttemptSubmitted, {
@@ -227,6 +236,17 @@ export default function ArcadePage() {
         open={levelUp.open}
         newLevel={levelUp.level}
         onDismiss={() => setLevelUp((s) => ({ ...s, open: false }))}
+      />
+      <StreakMilestoneOverlay
+        open={streakMilestone.open}
+        days={streakMilestone.days}
+        onDismiss={() => {
+          setStreakMilestone((s) => ({ ...s, open: false }));
+          // If the same attempt also leveled up, show that next.
+          if (result?.leveled_up && !levelUp.open) {
+            setLevelUp({ open: true, level: result.new_level });
+          }
+        }}
       />
       <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
 

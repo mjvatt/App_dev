@@ -24,6 +24,15 @@ _ADAPTIVE_WINDOW = 5
 _MEDIUM_PASS_THRESHOLD = 3  # out of _ADAPTIVE_WINDOW
 _MIN_ATTEMPTS_FOR_ADAPT = 3
 _REVIEW_XP_CAP = 5  # XP for repeat passes of an already-solved challenge
+_STREAK_MILESTONES = (3, 7, 14, 30, 60, 100, 365)
+
+
+def _milestone_just_hit(prior: int, current: int) -> int | None:
+    """Return the streak milestone the user just crossed, or None."""
+    for m in _STREAK_MILESTONES:
+        if prior < m <= current:
+            return m
+    return None
 
 
 async def _has_previously_passed(
@@ -156,10 +165,12 @@ async def submit_attempt(
     progress = await db.get(UserProgress, user_id)
     if progress is None:
         prior_level = 1
+        prior_streak = 0
         progress = UserProgress(user_id=user_id, total_xp=awarded_xp)
         db.add(progress)
     else:
         prior_level = progress.level
+        prior_streak = progress.streak_days
         progress.total_xp += awarded_xp
 
     progress.level = _compute_level(progress.total_xp)
@@ -182,6 +193,8 @@ async def submit_attempt(
         time_ms=result.time_ms,
         leveled_up=progress.level > prior_level,
         new_level=progress.level,
+        streak_days=progress.streak_days,
+        streak_milestone=_milestone_just_hit(prior_streak, progress.streak_days),
     )
 
 
