@@ -42,11 +42,17 @@ target-version = "py313"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+# challenge_bank.py is a fixture of narrative content (problem statements,
+# constraints, examples). Wrapping the long descriptive strings adds zero
+# value to the reader and makes diffs noisier.
+"services/engine_core/challenge_bank.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.13"
 strict = true
 ignore_missing_imports = true
-exclude = ["services/engine_core/", "alembic/"]
+exclude = ["alembic/"]
 
 [[tool.mypy.overrides]]
 # Stripe and slowapi ship loose types and don't pay for strict checking.
@@ -60,8 +66,9 @@ module = ["services.billing.stripe_client", "api.routers.billing"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-# engine_core is gitignored (proprietary) and not present in CI checkouts;
-# locally we silence its errors so the CI vs. local mypy results match.
+# engine_core is gitignored (proprietary) so it's absent in CI checkouts,
+# but locally we still want it type-checked. Anthropic SDK content blocks
+# union over many subtypes that don't all carry .text, so allow follow-imports
+# to fall through silently and lean on isinstance checks in the code itself.
 module = ["services.engine_core.*"]
-ignore_errors = true
 follow_imports = "silent"
