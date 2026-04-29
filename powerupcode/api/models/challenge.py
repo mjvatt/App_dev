@@ -21,6 +21,15 @@ class Attempt(Base):
     submitted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    # SHA-256 of the normalized solution. Used to detect copy-paste cheating
+    # without storing the raw code. Nullable for backfill compatibility.
+    solution_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Set when this submission's hash matches a passing submission from a
+    # different user on the same challenge. Internal signal only — the user
+    # is not informed and the attempt still records normally.
+    flagged_duplicate: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
 
 
 class UserProgress(Base):

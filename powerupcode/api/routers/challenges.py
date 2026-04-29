@@ -17,6 +17,7 @@ from api.schemas.challenge import (
 )
 from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
+from services.engine.similarity import hash_solution
 
 router = APIRouter()
 
@@ -44,6 +45,25 @@ async def _has_previously_passed(
             Attempt.user_id == user_id,
             Attempt.challenge_id == challenge_id,
             Attempt.passed.is_(True),
+        )
+        .limit(1)
+    )
+    return result.scalar_one_or_none() is not None
+
+
+async def _is_duplicate_of_another_user(
+    db: AsyncSession, user_id: str, challenge_id: str, solution_hash: str
+) -> bool:
+    """True if any other user has already submitted a passing attempt
+    with this exact normalized hash on this challenge. Internal flag —
+    we never block the submission."""
+    result = await db.execute(
+        select(Attempt.id)
+        .where(
+            Attempt.challenge_id == challenge_id,
+            Attempt.solution_hash == solution_hash,
+            Attempt.passed.is_(True),
+            Attempt.user_id != user_id,
         )
         .limit(1)
     )
@@ -151,6 +171,13 @@ async def submit_attempt(
     is_repeat_pass = result.passed and await _has_previously_passed(db, user_id, challenge_id)
     awarded_xp = _award_xp(result.xp_earned, passed=result.passed, is_repeat_pass=is_repeat_pass)
 
+    sol_hash = hash_solution(body.solution)
+    flagged = (
+        result.passed
+        and bool(sol_hash)
+        and await _is_duplicate_of_another_user(db, user_id, challenge_id, sol_hash)
+    )
+
     attempt = Attempt(
         user_id=user_id,
         challenge_id=challenge_id,
@@ -159,6 +186,8 @@ async def submit_attempt(
         xp_earned=awarded_xp,
         hints_used=result.hints_used,
         time_ms=result.time_ms,
+        solution_hash=sol_hash or None,
+        flagged_duplicate=flagged,
     )
     db.add(attempt)
 
