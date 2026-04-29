@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
-import { getToken } from "@/lib/auth";
 
 interface AttemptHistoryItem {
   attempt_id: string;
@@ -42,9 +41,7 @@ export default function HistoryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    authedRequest<{ items: AttemptHistoryItem[] }>("/api/progress/history", token)
+    authedRequest<{ items: AttemptHistoryItem[] }>("/api/progress/history")
       .then((data) => setItems(data.items))
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load history")

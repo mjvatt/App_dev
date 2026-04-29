@@ -2,15 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { Events, resetIdentity, track } from "@/lib/analytics";
-import { clearToken } from "@/lib/auth";
 
 export default function LogoutButton({ className }: { className?: string }) {
   const router = useRouter();
 
-  function handleLogout() {
+  async function handleLogout() {
     track(Events.Logout);
     resetIdentity();
-    clearToken();
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Best-effort: even if the server call fails the cookies will
+      // expire on their own and the client-side state is gone.
+    }
     router.push("/login");
   }
 

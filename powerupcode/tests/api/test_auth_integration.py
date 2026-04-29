@@ -151,3 +151,115 @@ async def test_login_round_trip(integration_client: AsyncClient) -> None:
     )
     assert me.status_code == 200
     assert me.json()["username"] == "loginuser"
+
+
+async def test_register_sets_auth_cookies(integration_client: AsyncClient) -> None:
+    res = await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "cookie@example.com",
+            "username": "cookieu",
+            "password": "validpass123",
+        },
+    )
+    assert res.status_code == 201
+    assert "puc_access" in res.cookies
+    assert "puc_refresh" in res.cookies
+    # Cookies alone (no Authorization header) should authenticate.
+    me = await integration_client.get("/api/auth/me")
+    assert me.status_code == 200
+
+
+async def test_refresh_rotates_and_invalidates_old_token(
+    integration_client: AsyncClient,
+) -> None:
+    await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "rot@example.com",
+            "username": "rotuser",
+            "password": "validpass123",
+        },
+    )
+    old_refresh = integration_client.cookies.get("puc_refresh")
+    assert old_refresh is not None
+
+    res = await integration_client.post("/api/auth/refresh")
+    assert res.status_code == 200
+    new_refresh = integration_client.cookies.get("puc_refresh")
+    assert new_refresh != old_refresh
+
+    # Replaying the old refresh token must fail.
+    replay = await integration_client.post(
+        "/api/auth/refresh", cookies={"puc_refresh": old_refresh}
+    )
+    assert replay.status_code == 401
+
+
+async def test_logout_revokes_session(integration_client: AsyncClient) -> None:
+    await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "logout@example.com",
+            "username": "logoutu",
+            "password": "validpass123",
+        },
+    )
+    refresh_before = integration_client.cookies.get("puc_refresh")
+
+    out = await integration_client.post("/api/auth/logout")
+    assert out.status_code == 200
+
+    # Even if a stale refresh token surfaces, logout revoked it server-side.
+    replay = await integration_client.post(
+        "/api/auth/refresh", cookies={"puc_refresh": refresh_before}
+    )
+    assert replay.status_code == 401
+
+
+async def test_password_reset_revokes_all_sessions(
+    integration_client: AsyncClient, db_session: AsyncSession
+) -> None:
+    from api.models.user import EmailToken
+
+    await integration_client.post(
+        "/api/auth/register",
+        json={
+            "email": "reset@example.com",
+            "username": "resetuser",
+            "password": "validpass123",
+        },
+    )
+    refresh_before = integration_client.cookies.get("puc_refresh")
+    assert refresh_before is not None
+
+    # Mint a reset token directly (forgot-password is rate-limited and we
+    # only need the side effect under test).
+    user = await db_session.scalar(
+        select(__import__("api.models.user", fromlist=["User"]).User).where(
+            __import__("api.models.user", fromlist=["User"]).User.email
+            == "reset@example.com"
+        )
+    )
+    assert user is not None
+    from datetime import UTC, datetime, timedelta
+
+    reset_row = EmailToken(
+        user_id=user.id,
+        token_type="reset",
+        expires_at=datetime.now(UTC) + timedelta(minutes=15),
+    )
+    db_session.add(reset_row)
+    await db_session.commit()
+
+    res = await integration_client.post(
+        "/api/auth/reset-password",
+        json={"token": reset_row.token, "new_password": "newpass123"},
+    )
+    assert res.status_code == 200
+
+    # The original refresh token should no longer rotate.
+    replay = await integration_client.post(
+        "/api/auth/refresh", cookies={"puc_refresh": refresh_before}
+    )
+    assert replay.status_code == 401

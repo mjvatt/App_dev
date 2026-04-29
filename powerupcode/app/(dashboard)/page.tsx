@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getToken } from "@/lib/auth";
 import { authedRequest } from "@/lib/api";
 import type { UserMe, UserProgress, Topic, Difficulty } from "@/lib/types";
 import XPBar from "@/components/game/XPBar";
@@ -35,24 +34,20 @@ export default function DashboardPage() {
   const [resendMessage, setResendMessage] = useState("");
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
     setError(null);
     setProgress(null);
-    authedRequest<UserProgress>("/api/progress/me", token)
+    authedRequest<UserProgress>("/api/progress/me")
       .then(setProgress)
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load progress")
       );
-    authedRequest<UserMe>("/api/auth/me", token).then(setMe).catch(() => null);
+    authedRequest<UserMe>("/api/auth/me").then(setMe).catch(() => null);
   }, [retryCount]);
 
   async function handleResend() {
-    const token = getToken();
-    if (!token) return;
     setResendState("sending");
     try {
-      await authedRequest<{ message: string }>("/api/auth/resend-verification", token, {
+      await authedRequest<{ message: string }>("/api/auth/resend-verification", {
         method: "POST",
       });
       setResendState("sent");

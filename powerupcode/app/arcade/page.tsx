@@ -7,7 +7,6 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
-import { getToken } from "@/lib/auth";
 import type { AttemptResult, Challenge, Difficulty } from "@/lib/types";
 
 const LANGUAGES = ["python", "javascript", "typescript", "java"] as const;
@@ -86,8 +85,6 @@ export default function ArcadePage() {
 
   const loadChallenge = useCallback(
     async (difficulty?: Difficulty | "") => {
-      const token = getToken();
-      if (!token) return;
       setFetching(true);
       setResult(null);
       setError(null);
@@ -97,7 +94,7 @@ export default function ArcadePage() {
       const diff = difficulty !== undefined ? difficulty : selectedDifficultyRef.current;
       const qs = diff ? `?difficulty=${diff}` : "";
       try {
-        const data = await authedRequest<Challenge>(`/api/challenges/next${qs}`, token);
+        const data = await authedRequest<Challenge>(`/api/challenges/next${qs}`);
         setChallenge(data);
         setCode(loadDraft(data.id, language));
         startTime.current = Date.now();
@@ -146,13 +143,10 @@ export default function ArcadePage() {
 
   async function handleHint() {
     if (!challenge) return;
-    const token = getToken();
-    if (!token) return;
     setHinting(true);
     try {
       const data = await authedRequest<{ hint: string; hints_remaining: number }>(
         `/api/challenges/${challenge.id}/hint`,
-        token,
         { method: "POST", body: JSON.stringify({ current_attempt: code }) }
       );
       setHint(data.hint);
@@ -171,15 +165,12 @@ export default function ArcadePage() {
 
   async function handleSubmit() {
     if (!challenge) return;
-    const token = getToken();
-    if (!token) return;
     setSubmitting(true);
     setResult(null);
     const elapsed = Date.now() - startTime.current;
     try {
       const data = await authedRequest<AttemptResult>(
         `/api/challenges/${challenge.id}/attempt`,
-        token,
         { method: "POST", body: JSON.stringify({ solution: code, time_ms: elapsed }) }
       );
       setResult(data);

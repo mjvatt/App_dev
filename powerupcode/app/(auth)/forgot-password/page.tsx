@@ -18,6 +18,7 @@ export default function ForgotPasswordPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`,
         {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         }

@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { Events, identify, track } from "@/lib/analytics";
-import { rememberEmail, setToken } from "@/lib/auth";
-import type { TokenResponse } from "@/lib/types";
+import { rememberEmail } from "@/lib/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,7 +15,6 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
-  const [token, setLocalToken] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,6 +23,7 @@ export default function RegisterPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password }),
       });
@@ -32,12 +31,9 @@ export default function RegisterPage() {
         const data = await res.json();
         throw new Error(data.detail ?? "Registration failed");
       }
-      const data: TokenResponse = await res.json();
-      setLocalToken(data.access_token);
+      // Tokens are now in HttpOnly cookies; nothing to extract from the body.
       rememberEmail(email);
       track(Events.RegisterCompleted, { username });
-      // Identify uses email so the same person across devices ties together
-      // before we have a server-side user_id round-trip in this view.
       identify(email);
       setRegistered(true);
     } catch (err) {
@@ -48,7 +44,6 @@ export default function RegisterPage() {
   }
 
   function goToDashboard() {
-    setToken(token);
     router.push("/dashboard");
   }
 

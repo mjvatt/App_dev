@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getRememberedEmail, rememberEmail, setToken } from "@/lib/auth";
+import { getRememberedEmail, rememberEmail } from "@/lib/auth";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { Events, identify, track } from "@/lib/analytics";
-import type { TokenResponse } from "@/lib/types";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,6 +32,7 @@ export default function LoginPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
@@ -40,8 +40,8 @@ export default function LoginPage() {
         const data = await res.json();
         throw new Error(data.detail ?? "Login failed");
       }
-      const data: TokenResponse = await res.json();
-      setToken(data.access_token);
+      // Tokens now live in HttpOnly cookies set by the backend; no need
+      // to read or persist the response body's access_token on the web.
       rememberEmail(email);
       identify(email);
       track(Events.LoginCompleted);

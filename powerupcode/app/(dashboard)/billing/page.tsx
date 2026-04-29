@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
-import { getToken } from "@/lib/auth";
 import type { SubscriptionStatus } from "@/lib/types";
 
 const PLANS = [
@@ -42,23 +41,19 @@ export default function BillingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    authedRequest<SubscriptionStatus>("/api/billing/status", token)
+    authedRequest<SubscriptionStatus>("/api/billing/status")
       .then(setStatus)
       .catch(() => setStatus({ active: false, tier: null, status: null, current_period_end: null }))
       .finally(() => setLoading(false));
   }, []);
 
   async function handleSubscribe(plan: PlanId) {
-    const token = getToken();
-    if (!token) return;
     setCheckingOut(plan);
     setError(null);
     track(Events.CheckoutStarted, { plan });
     try {
       const origin = window.location.origin;
-      const data = await authedRequest<{ url: string }>("/api/billing/checkout", token, {
+      const data = await authedRequest<{ url: string }>("/api/billing/checkout", {
         method: "POST",
         body: JSON.stringify({
           plan,

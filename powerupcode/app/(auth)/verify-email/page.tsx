@@ -21,7 +21,8 @@ function VerifyEmailContent() {
     }
 
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+      { credentials: "include" }
     )
       .then(async (res) => {
         if (!res.ok) {
@@ -47,6 +48,7 @@ function VerifyEmailContent() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-email`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });

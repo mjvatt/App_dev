@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
-import { getToken } from "@/lib/auth";
 import type { LeaderboardEntry, LeaderboardResponse } from "@/lib/types";
 
 const RANK_COLOR: Record<number, string> = {
@@ -20,9 +19,7 @@ export default function LeaderboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    authedRequest<LeaderboardResponse>("/api/leaderboard", token)
+    authedRequest<LeaderboardResponse>("/api/leaderboard")
       .then((data) => setEntries(data.entries))
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load leaderboard")
