@@ -628,6 +628,77 @@ body { display: flex; overflow: hidden; }
   overflow-y: auto;
   padding: 28px 28px 24px;
   position: relative;
+  transition: max-width .15s ease;
+}
+.player-modal-card.compare-mode { max-width: 1080px; }
+
+.profile-toolbar { position: relative; margin-bottom: 14px; }
+.profile-compare-search {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.profile-compare-search:focus { border-color: var(--accent-dim); }
+.profile-compare-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 20;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+.profile-compare-result {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-compare-result:last-child { border-bottom: none; }
+.profile-compare-result:hover { background: var(--accent-dim); }
+.profile-compare-result-meta { font-size: 11px; color: var(--text-muted); }
+.profile-compare-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.profile-compare-clear {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.profile-compare-clear:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+
+.profile-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.profile-compare-card { min-width: 0; }
+.profile-compare-card .profile-section { margin-top: 14px; }
+
+@media (max-width: 900px) {
+  .profile-compare-grid { grid-template-columns: 1fr; }
+  .player-modal-card.compare-mode { max-width: 560px; }
 }
 .player-modal-close {
   position: absolute;

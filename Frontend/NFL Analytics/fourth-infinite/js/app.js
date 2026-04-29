@@ -1576,15 +1576,15 @@
   playerModal.addEventListener('click', e => { if (e.target === playerModal) closePlayerModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayerModal(); });
 
-  async function openPlayerModal(year, pick) {
+  /* Build the inner HTML for a single player profile card. compareMode=true
+     drops the Historical Comps section to keep two side-by-side cards
+     comparable in length and avoid horizontal scroll. */
+  function _buildProfileCardHtml(year, pick, mlResult, compareMode = false) {
     const profile = DraftData.playerProfile(year, pick);
-    if (!profile) return;
+    if (!profile) return null;
 
-    await DraftData.loadSleeperPredictions();
-    const mlResult = DraftData.sleeperModelRankings({}, 99999, 'predicted');
     const mlPick   = mlResult.picks.find(p => p.year === +year && p.pick === +pick);
-
-    const p          = profile.pick;
+    const p        = profile.pick;
     const incomplete = p.year >= 2022;
     const surplus    = profile.avSurplus;
     const ctx        = DraftData.playerContext(year, pick);
@@ -1768,7 +1768,13 @@
         </div>`;
     }
 
-    document.getElementById('playerModalContent').innerHTML = `
+    const compsSection = compareMode ? '' : `
+      <div class="profile-section">
+        <h4>Historical Comps · ${p.pos_group} · Picks ${Math.max(1, p.pick - 25)}–${p.pick + 25} · ranked by career AV</h4>
+        <div class="profile-comps">${compsHtml}</div>
+      </div>`;
+
+    return `
       <div class="profile-header">
         <div>
           <h2 class="profile-name">${p.player}</h2>
@@ -1812,13 +1818,92 @@
 
       ${mlHtml}
 
-      <div class="profile-section">
-        <h4>Historical Comps · ${p.pos_group} · Picks ${Math.max(1, p.pick - 25)}–${p.pick + 25} · ranked by career AV</h4>
-        <div class="profile-comps">${compsHtml}</div>
-      </div>
+      ${compsSection}
     `;
+  }
+
+  /* Open the player profile modal. comparePick is optional — when set, the
+     modal renders two cards side-by-side. */
+  async function openPlayerModal(year, pick, compareYear = null, comparePick = null) {
+    await DraftData.loadSleeperPredictions();
+    const mlResult = DraftData.sleeperModelRankings({}, 99999, 'predicted');
+
+    const compareMode = !!(compareYear && comparePick);
+    const primary = _buildProfileCardHtml(year, pick, mlResult, compareMode);
+    if (!primary) return;
+    const secondary = compareMode
+      ? _buildProfileCardHtml(compareYear, comparePick, mlResult, true)
+      : null;
+
+    const toolbar = secondary
+      ? `<div class="profile-toolbar">
+           <button id="profileCompareClear" class="profile-compare-clear" title="Close comparison">× Close comparison</button>
+         </div>`
+      : `<div class="profile-toolbar">
+           <input id="profileCompareSearch" type="search" class="profile-compare-search" placeholder="Compare to another player…" autocomplete="off" />
+           <div id="profileCompareResults" class="profile-compare-results"></div>
+         </div>`;
+
+    const body = secondary
+      ? `<div class="profile-compare-grid">
+           <div class="profile-compare-card">${primary}</div>
+           <div class="profile-compare-card">${secondary}</div>
+         </div>`
+      : primary;
+
+    document.getElementById('playerModalContent').innerHTML = toolbar + body;
+
+    // Toggle wider layout for compare mode
+    const card = document.querySelector('.player-modal-card');
+    if (card) card.classList.toggle('compare-mode', !!secondary);
+
+    // Wire up either the clear button or the search input
+    if (secondary) {
+      const clearBtn = document.getElementById('profileCompareClear');
+      if (clearBtn) clearBtn.addEventListener('click', () => openPlayerModal(year, pick));
+    } else {
+      _wireCompareSearch(year, pick);
+    }
 
     playerModal.classList.add('open');
+  }
+
+  function _wireCompareSearch(primaryYear, primaryPick) {
+    const input   = document.getElementById('profileCompareSearch');
+    const results = document.getElementById('profileCompareResults');
+    if (!input || !results) return;
+
+    let lastQ = '';
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      if (q === lastQ) return;
+      lastQ = q;
+      if (q.length < 2) { results.innerHTML = ''; return; }
+      const matches = DraftData.picks({ search: q })
+        .filter(p => !(p.year === +primaryYear && p.pick === +primaryPick))
+        .slice(0, 12);
+      if (!matches.length) {
+        results.innerHTML = '<div class="profile-compare-empty">No matches</div>';
+        return;
+      }
+      results.innerHTML = matches.map(p => `
+        <div class="profile-compare-result" data-year="${p.year}" data-pick="${p.pick}">
+          <strong>${p.player}</strong>
+          <span class="profile-compare-result-meta">${p.year} · ${p.team} · ${p.pos} · ${p.college}</span>
+        </div>`).join('');
+      results.querySelectorAll('.profile-compare-result').forEach(el => {
+        el.addEventListener('click', () => {
+          openPlayerModal(primaryYear, primaryPick, +el.dataset.year, +el.dataset.pick);
+        });
+      });
+    });
+
+    // Close dropdown on outside click within the modal
+    document.addEventListener('click', e => {
+      if (!input.contains(e.target) && !results.contains(e.target)) {
+        results.innerHTML = '';
+      }
+    }, { once: true });
   }
 
   /* event delegation — works for both draft board and 2026 pick board */
