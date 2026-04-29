@@ -888,6 +888,8 @@
       slotYto.value   = String(Math.min(2022, meta.years[meta.years.length - 1]));
 
       const ALL_POS_GROUPS = ['QB','RB','WR','TE','OL','DL','LB','DB','ST'];
+      const slotCurvesBtn  = document.getElementById('slot-grade-curves-toggle');
+      let _showPosCurves   = false;
 
       function renderSlotGrade() {
         const filter = {
@@ -896,10 +898,26 @@
           pos_group: slotPos.value    || undefined,
         };
         const groups = slotPos.value ? [slotPos.value] : ALL_POS_GROUPS;
-        DraftCharts.slotGradeChart('chart-slotGrade', DraftData.slotGradeScatter(filter), groups);
+        const data   = DraftData.slotGradeScatter(filter);
+        // Position-curve overlay only applies when no specific position is filtered.
+        if (slotPos.value || !_showPosCurves) data.curvesByPos = null;
+        DraftCharts.slotGradeChart('chart-slotGrade', data, groups);
+
+        // Toggle button reflects state + disables when a single position is filtered
+        if (slotCurvesBtn) {
+          slotCurvesBtn.disabled = !!slotPos.value;
+          slotCurvesBtn.textContent = _showPosCurves
+            ? 'Hide position curves'
+            : 'Show position curves';
+          slotCurvesBtn.classList.toggle('active', _showPosCurves && !slotPos.value);
+        }
       }
 
       [slotYfrom, slotYto, slotPos].forEach(el => el.addEventListener('change', renderSlotGrade));
+      if (slotCurvesBtn) slotCurvesBtn.addEventListener('click', () => {
+        _showPosCurves = !_showPosCurves;
+        renderSlotGrade();
+      });
       renderSlotGrade();
 
       // P2.2 — team outcome efficiency

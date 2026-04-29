@@ -529,6 +529,26 @@ const DraftCharts = (() => {
       order: -1,
     });
 
+    // When data.curvesByPos is provided, overlay a thin curve per position
+    // group at low opacity. Marked _isPosCurve so the legend filter below
+    // can hide them — the curves carry the same colors as the scatter
+    // datasets already in the legend, so listing them again is redundant.
+    if (data.curvesByPos) {
+      Object.entries(data.curvesByPos).forEach(([g, cd]) => {
+        datasets.push({
+          label: `${g} curve`,
+          type: 'line',
+          data: cd.points,
+          borderColor: cd.color,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+          order: -2,
+          _isPosCurve: true,
+        });
+      });
+    }
+
     _charts[canvasId] = new Chart(ctx, {
       type: 'scatter',
       data: { datasets },
@@ -538,10 +558,22 @@ const DraftCharts = (() => {
         parsing: false,
         animation: false,
         plugins: {
-          legend: _baseLegend(true),
+          legend: {
+            ..._baseLegend(true),
+            // Per-position reference curves share scatter colors and would
+            // duplicate legend entries — hide them.
+            labels: {
+              ..._baseLegend(true).labels,
+              filter: (legendItem, chartData) => {
+                const ds = chartData.datasets[legendItem.datasetIndex];
+                return !ds || !ds._isPosCurve;
+              },
+            },
+          },
           tooltip: {
             ..._tooltip(),
-            filter: item => item.dataset.label !== 'Expected',
+            // Only show tooltips on scatter points (not on the line curves).
+            filter: item => item.dataset.label !== 'Expected' && !item.dataset._isPosCurve,
             callbacks: {
               title: () => '',
               label: item => {

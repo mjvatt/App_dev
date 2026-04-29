@@ -639,13 +639,34 @@ const DraftData = (() => {
 
   /* player-vs-slot grade scatter
      Expected curve: rolling avg draft_av per pick slot, calibrated on drafts ≤ 2021.
-     If filter.pos_group is set, the curve is that position group's; otherwise pooled.
+     If filter.pos_group is set, the primary curve is that position group's.
+     Otherwise the primary curve is pooled AND curvesByPos returns a thin
+     reference curve per position group so the chart can overlay them.
      Scatter points: filtered via filter arg. */
   function slotGradeScatter(filter = {}) {
-    const expAv = _buildExpectedAv(filter.pos_group || null);
+    const focusPos = filter.pos_group || null;
+    const expAv = _buildExpectedAv(focusPos);
     const curve = Object.entries(expAv)
       .map(([p, v]) => ({ x: +p, y: v }))
       .sort((a, b) => a.x - b.x);
+
+    // When no specific position is filtered, also surface per-position
+    // curves so the chart can overlay them at low opacity. Reveals the
+    // 20+ AV gap between QB and TE expected curves at the top of the
+    // draft that the pooled curve flattens out.
+    let curvesByPos = null;
+    if (!focusPos) {
+      curvesByPos = {};
+      ['QB','RB','WR','TE','OL','DL','LB','DB','ST'].forEach(g => {
+        const c = _buildExpectedAv(g);
+        const points = Object.entries(c)
+          .map(([p, v]) => ({ x: +p, y: v }))
+          .sort((a, b) => a.x - b.x);
+        if (points.length) {
+          curvesByPos[g] = { points, color: posColor(g) };
+        }
+      });
+    }
 
     const byGroup = {};
     picks(filter).filter(p => p.pick > 0).forEach(p => {
@@ -666,7 +687,7 @@ const DraftData = (() => {
       });
     });
 
-    return { byGroup, curve };
+    return { byGroup, curve, curvesByPos };
   }
 
   /* team outcome efficiency — career AV generated per unit of draft capital spent */
