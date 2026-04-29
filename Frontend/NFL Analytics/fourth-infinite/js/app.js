@@ -1601,12 +1601,35 @@
     const meta = mlResult.modelMeta || {};
     const hitThresh = meta.hit_threshold;
     const baseRate  = meta.hit_rate;
+
+    // Percentile rank of this pick's predicted_prob across all scored picks.
+    // O(n) single scan; modal opens are rare so no need to cache the sort.
+    let percentileBadge = '';
+    if (mlPick && mlPick.predicted_prob !== undefined) {
+      const allProbs = (DraftData.getSleeperPredictions() || [])
+        .map(p => p.predicted_prob)
+        .filter(v => v !== undefined && v !== null);
+      if (allProbs.length) {
+        const target = mlPick.predicted_prob;
+        const below  = allProbs.reduce((c, v) => c + (v < target ? 1 : 0), 0);
+        const pct    = +(below / allProbs.length * 100).toFixed(1);
+        let label, color;
+        if      (pct >= 95) { label = 'Top 5%';   color = '#10b981'; }
+        else if (pct >= 90) { label = 'Top 10%';  color = '#10b981'; }
+        else if (pct >= 75) { label = 'Top 25%';  color = '#22c55e'; }
+        else if (pct >= 50) { label = `${Math.round(pct)}th pct`; color = 'var(--text-muted)'; }
+        else if (pct >= 25) { label = `${Math.round(pct)}th pct`; color = 'var(--text-muted)'; }
+        else                { label = `Bottom ${Math.round(100 - pct) || 1}%`; color = '#9ca3af'; }
+        percentileBadge = ` <span style="font-size:11px;font-weight:600;color:${color};margin-left:6px;letter-spacing:0.02em">${label}</span>`;
+      }
+    }
+
     const mlHtml = mlPick && mlPick.predicted_prob !== undefined ? `
       <div class="profile-section">
         <h4>GHOST · Hit Probability</h4>
         <div class="profile-context-row">
           <span>Probability of exceeding slot by ${hitThresh ?? '—'} AV</span>
-          <span class="profile-val">${(mlPick.predicted_prob * 100).toFixed(1)}%</span>
+          <span class="profile-val">${(mlPick.predicted_prob * 100).toFixed(1)}%${percentileBadge}</span>
         </div>
         ${baseRate !== undefined ? `
         <div class="profile-context-row">
