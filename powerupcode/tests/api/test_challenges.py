@@ -3,7 +3,12 @@ from datetime import UTC, datetime, timedelta, timezone
 from httpx import AsyncClient
 
 from api.models.challenge import UserProgress
-from api.routers.challenges import _REVIEW_XP_CAP, _award_xp, _update_streak
+from api.routers.challenges import (
+    _REVIEW_XP_CAP,
+    _award_xp,
+    _milestone_just_hit,
+    _update_streak,
+)
 
 
 def _utc(year: int, month: int, day: int, hour: int = 12) -> datetime:
@@ -64,9 +69,6 @@ def test_streak_handles_naive_last_active_defensively() -> None:
     # 17:00 UTC the same day → still day 1 in UTC, streak unchanged
     _update_streak(progress, now=_utc(2026, 5, 1, 18))
     assert progress.streak_days == 1
-
-
-from api.routers.challenges import _milestone_just_hit
 
 
 def test_milestone_returns_first_crossed_value() -> None:

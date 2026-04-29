@@ -96,6 +96,32 @@ async def send_verification_email(to_email: str, username: str, token: str) -> N
     await _send(to_email, subject, html, plain)
 
 
+async def send_reengagement_email(to_email: str, username: str, prior_streak: int) -> None:
+    url = f"{settings.app_url}/arcade"
+    subject = "Your PowerUpCode streak misses you"
+    streak_line = (
+        f"You had a {prior_streak}-day streak going. "
+        if prior_streak >= 3
+        else "You haven't been by in a couple of days. "
+    )
+    plain = (
+        f"Hi {username},\n\n"
+        f"{streak_line}One challenge today is enough to start a new streak.\n\n"
+        f"Pick up where you left off: {url}\n\n"
+        "You're getting this because you previously registered for PowerUpCode and have an "
+        "active account. Reply to this email or visit your account settings if you'd "
+        "rather not receive these."
+    )
+    html = _build_html(
+        heading="Pick up where you left off",
+        username=username,
+        body=f"{streak_line}One challenge today is enough to start a new streak.",
+        cta_url=url,
+        cta_text="Solve a Challenge",
+    )
+    await _send(to_email, subject, html, plain)
+
+
 async def send_password_reset_email(to_email: str, username: str, token: str) -> None:
     url = f"{settings.app_url}/reset-password?token={token}"
     subject = "Reset your PowerUpCode password"

@@ -34,3 +34,6 @@ class UserProgress(Base):
     topics: Mapped[dict[str, int]] = mapped_column(
         JSON, nullable=False, default=dict, server_default=text("'{}'")
     )
+    last_reengagement_email_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
