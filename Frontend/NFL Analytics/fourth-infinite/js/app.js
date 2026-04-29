@@ -1627,14 +1627,48 @@
   /* ── Player Profile Modal ────────────────────────────────────────── */
   const playerModal      = document.getElementById('playerModal');
   const playerModalClose = document.getElementById('playerModalClose');
+  let _modalOpenerEl     = null;  // element to restore focus to on close
 
   function closePlayerModal() {
+    if (!playerModal.classList.contains('open')) return;
     playerModal.classList.remove('open');
+    if (_modalOpenerEl && typeof _modalOpenerEl.focus === 'function') {
+      _modalOpenerEl.focus();
+      _modalOpenerEl = null;
+    }
   }
 
   playerModalClose.addEventListener('click', closePlayerModal);
   playerModal.addEventListener('click', e => { if (e.target === playerModal) closePlayerModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayerModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!playerModal.classList.contains('open')) return;
+    closePlayerModal();
+  });
+
+  /* Tab-trap inside the modal so keyboard users can't escape into the
+     dimmed background. Cycles between the first and last focusable
+     element. Bound to the modal element directly so it only fires when
+     the modal is open and focused. */
+  playerModal.addEventListener('keydown', e => {
+    if (e.key !== 'Tab' || !playerModal.classList.contains('open')) return;
+    const focusables = Array.from(playerModal.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]),'
+      + ' select:not([disabled]), textarea:not([disabled]),'
+      + ' [tabindex]:not([tabindex="-1"])'
+    )).filter(el => el.offsetParent !== null);  // visible only
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last  = focusables[focusables.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey && (active === first || !playerModal.contains(active))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || !playerModal.contains(active))) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 
   /* Build the inner HTML for a single player profile card. compareMode=true
      drops the Historical Comps section to keep two side-by-side cards
@@ -1925,7 +1959,24 @@
       _wireCompareSearch(year, pick);
     }
 
+    const wasOpen = playerModal.classList.contains('open');
     playerModal.classList.add('open');
+
+    // Focus management: in single mode, focus the search input so keyboard
+    // users can immediately type a name. In compare mode, focus the clear
+    // button. Skip if modal was already open (re-render mid-interaction).
+    if (!wasOpen) {
+      if (typeof document !== 'undefined' && document.activeElement &&
+          document.activeElement !== document.body) {
+        _modalOpenerEl = document.activeElement;
+      }
+    }
+    requestAnimationFrame(() => {
+      const target = secondary
+        ? document.getElementById('profileCompareClear')
+        : document.getElementById('profileCompareSearch');
+      if (target && typeof target.focus === 'function') target.focus();
+    });
   }
 
   function _wireCompareSearch(primaryYear, primaryPick) {
