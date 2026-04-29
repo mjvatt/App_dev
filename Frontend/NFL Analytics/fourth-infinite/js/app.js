@@ -1384,19 +1384,55 @@
         'AUC',
       );
 
-      // Calibration: 10 equal-width bins on predicted_prob in [0, 1].
+      // Calibration bins: 10 equal-width predicted_prob buckets.
+      // Compute once for "all" + once per position group; cache in a closure
+      // so the dropdown can re-render instantly without recomputing.
       const NBINS = 10;
-      const buckets = Array.from({length: NBINS}, () => ({sum: 0, hits: 0, n: 0}));
-      all.forEach(p => {
-        const i = Math.min(NBINS - 1, Math.max(0, Math.floor(p.predicted_prob * NBINS)));
-        buckets[i].sum += p.predicted_prob;
-        buckets[i].hits += p.actual_hit ? 1 : 0;
-        buckets[i].n++;
+      const _calibrationBins = subset => {
+        const buckets = Array.from({length: NBINS}, () => ({sum: 0, hits: 0, n: 0}));
+        subset.forEach(p => {
+          const i = Math.min(NBINS - 1, Math.max(0, Math.floor(p.predicted_prob * NBINS)));
+          buckets[i].sum  += p.predicted_prob;
+          buckets[i].hits += p.actual_hit ? 1 : 0;
+          buckets[i].n++;
+        });
+        return buckets
+          .map(b => b.n > 0 ? {predMean: b.sum / b.n, actualRate: b.hits / b.n, n: b.n} : null)
+          .filter(Boolean);
+      };
+
+      const binsByPos = { '': _calibrationBins(all) };
+      POS.forEach(g => {
+        const subset = all.filter(p => p.pos_group === g);
+        if (subset.length >= 30) binsByPos[g] = _calibrationBins(subset);
       });
-      const bins = buckets
-        .map(b => b.n > 0 ? {predMean: b.sum / b.n, actualRate: b.hits / b.n, n: b.n} : null)
-        .filter(Boolean);
-      DraftCharts.calibrationPlot('chart-mlCalibration', bins);
+
+      const calSel = document.getElementById('ghost-cal-pos');
+      const calSub = document.getElementById('ghost-cal-sub');
+      const renderCal = () => {
+        const pos  = calSel ? calSel.value : '';
+        const bins = binsByPos[pos] || binsByPos[''];
+        const n    = pos ? all.filter(p => p.pos_group === pos).length : all.length;
+        DraftCharts.calibrationPlot('chart-mlCalibration', bins);
+        if (calSub) {
+          const where = pos ? `${pos} only · n=${n}` : `all positions · n=${n}`;
+          calSub.textContent =
+            `Predicted hit probability vs actual hit rate (${where}). `
+            + `Diagonal = perfectly calibrated; below = under-confident, above = over-confident. `
+            + `Bubble size ∝ √n.`;
+        }
+      };
+      if (calSel) {
+        calSel.addEventListener('change', renderCal);
+        // Disable options where there's not enough data (n < 30).
+        Array.from(calSel.options).forEach(opt => {
+          if (opt.value && !(opt.value in binsByPos)) {
+            opt.disabled = true;
+            opt.text += ' (low n)';
+          }
+        });
+      }
+      renderCal();
     }
 
     [mlMode, mlYfrom, mlYto, mlRound, mlPos].forEach(el => el.addEventListener('change', renderMlRankings));

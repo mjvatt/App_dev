@@ -1089,8 +1089,20 @@
             <div class="chart-card-header">
               <div>
                 <h3>Calibration <span style="font-size:11px;color:var(--text-muted);font-weight:400">in-sample</span></h3>
-                <p>Predicted hit probability vs actual hit rate. Diagonal = perfectly calibrated; below = under-confident, above = over-confident. Bubble size ∝ √n.</p>
+                <p id="ghost-cal-sub">Predicted hit probability vs actual hit rate. Diagonal = perfectly calibrated; below = under-confident, above = over-confident. Bubble size ∝ √n.</p>
               </div>
+              <select id="ghost-cal-pos" class="filter-select">
+                <option value="">All positions</option>
+                <option value="QB">QB</option>
+                <option value="RB">RB</option>
+                <option value="WR">WR</option>
+                <option value="TE">TE</option>
+                <option value="OL">OL</option>
+                <option value="DL">DL</option>
+                <option value="LB">LB</option>
+                <option value="DB">DB</option>
+                <option value="ST">ST</option>
+              </select>
             </div>
             <div class="chart-wrap" style="height:260px"><canvas id="chart-mlCalibration"></canvas></div>
           </div>
