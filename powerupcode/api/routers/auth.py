@@ -3,11 +3,12 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
+from api.cookies import REFRESH_COOKIE, clear_auth_cookies, set_auth_cookies
 from api.dependencies import get_current_user, get_db
 from api.models.user import EmailToken, User
 from api.rate_limit import limiter
@@ -22,7 +23,12 @@ from api.schemas.user import (
     VerifyEmailRequest,
     VerifyEmailStatusResponse,
 )
-from services.auth.jwt import create_access_token
+from services.auth.sessions import (
+    create_session,
+    revoke_all_for_user,
+    revoke_session_by_refresh,
+    rotate_session,
+)
 from services.email.client import send_password_reset_email, send_verification_email
 
 router = APIRouter()
@@ -67,6 +73,7 @@ async def _purge_stale_tokens(db: AsyncSession, user_id: str, token_type: str) -
 @limiter.limit("5/15minute")
 async def register(
     request: Request,
+    response: Response,
     body: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
@@ -94,6 +101,10 @@ async def register(
         expires_at=_now() + _VERIFY_TTL,
     )
     db.add(verify_token)
+
+    access_token, refresh_token, _ = await create_session(
+        db, user.id, settings.secret_key, user_agent=request.headers.get("user-agent")
+    )
     await db.commit()
     await db.refresh(user)
 
@@ -102,13 +113,17 @@ async def register(
     except Exception:
         logger.exception("Failed to send verification email to %s", user.email)
 
-    return TokenResponse(access_token=create_access_token(user.id, settings.secret_key))
+    set_auth_cookies(response, access_token, refresh_token)
+    # The body still carries the access token so the mobile client (which
+    # cannot store HttpOnly cookies) keeps working.
+    return TokenResponse(access_token=access_token)
 
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("10/15minute")
 async def login(
     request: Request,
+    response: Response,
     body: UserLogin,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
@@ -116,7 +131,78 @@ async def login(
     if not user or not _verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    return TokenResponse(access_token=create_access_token(user.id, settings.secret_key))
+    access_token, refresh_token, _ = await create_session(
+        db, user.id, settings.secret_key, user_agent=request.headers.get("user-agent")
+    )
+    await db.commit()
+
+    set_auth_cookies(response, access_token, refresh_token)
+    return TokenResponse(access_token=access_token)
+
+
+@router.post("/refresh", response_model=TokenResponse)
+@limiter.limit("30/15minute")
+async def refresh(
+    request: Request,
+    response: Response,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> TokenResponse:
+    """Exchange a valid refresh token for a new access + refresh pair.
+    Reads the refresh token from the puc_refresh cookie (web) or from a
+    JSON body field 'refresh_token' (mobile)."""
+    refresh_token = request.cookies.get(REFRESH_COOKIE)
+    if not refresh_token:
+        try:
+            payload = await request.json()
+        except Exception:
+            payload = None
+        if isinstance(payload, dict):
+            refresh_token = payload.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token"
+        )
+
+    rotated = await rotate_session(
+        db, refresh_token, settings.secret_key, user_agent=request.headers.get("user-agent")
+    )
+    if rotated is None:
+        await db.rollback()
+        clear_auth_cookies(response)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+        )
+    new_access, new_refresh, _ = rotated
+    await db.commit()
+
+    set_auth_cookies(response, new_access, new_refresh)
+    return TokenResponse(access_token=new_access)
+
+
+@router.post("/logout", response_model=MessageResponse)
+async def logout(
+    request: Request,
+    response: Response,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> MessageResponse:
+    """Revoke the current session server-side and clear the cookies.
+    Idempotent: returns 200 even if no session exists."""
+    refresh_token = request.cookies.get(REFRESH_COOKIE)
+    if not refresh_token:
+        try:
+            payload = await request.json()
+        except Exception:
+            payload = None
+        if isinstance(payload, dict):
+            refresh_token = payload.get("refresh_token")
+
+    if refresh_token:
+        await revoke_session_by_refresh(db, refresh_token)
+        await db.commit()
+
+    clear_auth_cookies(response)
+    return MessageResponse(message="Logged out")
 
 
 @router.get("/me", response_model=UserMeResponse)
@@ -278,6 +364,7 @@ async def reset_password(
 
     user.hashed_password = _hash_password(body.new_password)
     record.used_at = _now()
+    await revoke_all_for_user(db, user.id)
     await db.commit()
 
     return MessageResponse(message="Password updated successfully")

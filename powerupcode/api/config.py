@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     smtp_from_email: str = "noreply@powerupcode.com"
     app_url: str = "http://localhost:3001"
 
+    # Cookie auth — set cookie_secure=true and cookie_samesite='none' in
+    # production behind HTTPS with a different frontend domain. Defaults
+    # are tuned for localhost dev where the frontend (3001) and API (8000)
+    # share the localhost site so SameSite=Lax works without HTTPS.
+    cookie_secure: bool = False
+    cookie_samesite: str = "lax"
+    cookie_domain: str = ""
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _parse_cors_origins(cls, v: object) -> object:
