@@ -200,21 +200,23 @@
 
     const slice = _filteredPicks.slice((_currentPage - 1) * PAGE_SIZE, _currentPage * PAGE_SIZE);
     const tbody = document.getElementById('draftTableBody');
-    tbody.innerHTML = slice.map(p => `
-      <tr data-year="${p.year}" data-pick="${p.pick}">
-        <td>${p.year}</td>
-        <td>${p.round}</td>
-        <td>${p.pick}</td>
-        <td>${p.team}</td>
-        <td><strong>${p.player}</strong></td>
-        <td>${p.pos}</td>
-        <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos_group}</span></td>
-        <td>${p.college}</td>
-        <td style="text-align:right">${p.draft_av}</td>
-        <td style="text-align:right">${p.career_av}</td>
-        <td style="text-align:right">${p.pro_bowls || '—'}</td>
-        <td style="color:#7a8caa;font-size:12px">${p.notes}</td>
-      </tr>`).join('');
+    tbody.innerHTML = slice.length
+      ? slice.map(p => `
+        <tr data-year="${p.year}" data-pick="${p.pick}">
+          <td>${p.year}</td>
+          <td>${p.round}</td>
+          <td>${p.pick}</td>
+          <td>${p.team}</td>
+          <td><strong>${p.player}</strong></td>
+          <td>${p.pos}</td>
+          <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos_group}</span></td>
+          <td>${p.college}</td>
+          <td style="text-align:right">${p.draft_av}</td>
+          <td style="text-align:right">${p.career_av}</td>
+          <td style="text-align:right">${p.pro_bowls || '—'}</td>
+          <td style="color:#7a8caa;font-size:12px">${p.notes}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="12" class="empty-state">No picks match the current filters.</td></tr>`;
 
     document.getElementById('db-count').textContent =
       `${total.toLocaleString()} pick${total !== 1 ? 's' : ''}`;
@@ -401,17 +403,19 @@
       );
       document.getElementById('c26-board-count').textContent =
         `${filtered.length.toLocaleString()} pick${filtered.length !== 1 ? 's' : ''}`;
-      document.getElementById('c26-board-body').innerHTML = filtered.map(p => `
-        <tr data-year="${p.year}" data-pick="${p.pick}">
-          <td>${p.round}</td>
-          <td>${p.pick}</td>
-          <td>${p.team}</td>
-          <td><strong>${p.player}</strong></td>
-          <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
-          <td>${p.college}</td>
-          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1) : '—'}</td>
-          <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
-        </tr>`).join('');
+      document.getElementById('c26-board-body').innerHTML = filtered.length
+        ? filtered.map(p => `
+          <tr data-year="${p.year}" data-pick="${p.pick}">
+            <td>${p.round}</td>
+            <td>${p.pick}</td>
+            <td>${p.team}</td>
+            <td><strong>${p.player}</strong></td>
+            <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
+            <td>${p.college}</td>
+            <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1) : '—'}</td>
+            <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="8" class="empty-state">No picks match the current filters.</td></tr>`;
     }
 
     renderBoard();
@@ -510,17 +514,19 @@
       );
       document.getElementById('c27-board-count').textContent =
         `${filtered.length.toLocaleString()} pick${filtered.length !== 1 ? 's' : ''}`;
-      document.getElementById('c27-board-body').innerHTML = filtered.map(p => `
-        <tr data-year="${p.year}" data-pick="${p.pick}">
-          <td>${p.round}</td>
-          <td>${p.pick}</td>
-          <td>${p.team}</td>
-          <td><strong>${p.player}</strong></td>
-          <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
-          <td>${p.college}</td>
-          <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1) : '—'}</td>
-          <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
-        </tr>`).join('');
+      document.getElementById('c27-board-body').innerHTML = filtered.length
+        ? filtered.map(p => `
+          <tr data-year="${p.year}" data-pick="${p.pick}">
+            <td>${p.round}</td>
+            <td>${p.pick}</td>
+            <td>${p.team}</td>
+            <td><strong>${p.player}</strong></td>
+            <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
+            <td>${p.college}</td>
+            <td style="color:var(--text-muted)">${p.pick > 0 ? DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1) : '—'}</td>
+            <td style="color:var(--text-muted);font-size:12px">${p.notes}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="8" class="empty-state">No picks match the current filters.</td></tr>`;
     }
 
     renderBoard27();

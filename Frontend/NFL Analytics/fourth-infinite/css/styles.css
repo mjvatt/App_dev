@@ -458,6 +458,14 @@ body { display: flex; overflow: hidden; }
 .filter-select.active { border-color: var(--accent); color: var(--accent); }
 .filter-select:disabled { opacity: 0.4; cursor: not-allowed; }
 
+td.empty-state {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 13px;
+}
+
 .filter-input {
   background: var(--surface);
   border: 1px solid var(--border-light);
