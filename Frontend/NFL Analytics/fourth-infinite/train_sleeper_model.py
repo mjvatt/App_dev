@@ -57,7 +57,7 @@ OUTPUT_PATH     = 'data/sleeper_predictions.json'
 TRAIN_CUTOFF    = 2021
 INCOMPLETE_YEAR = 2022
 WINDOW          = 12
-COMBINE_FROM    = 2000   # combine data begins
+COMBINE_FROM    = 2000   # combine data begins in 2000
 HIT_THRESHOLD   = 10.0   # surplus AV cut-off for "hit"
 SMOOTH_K        = 10     # college Bayesian smoothing strength
 POS_GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB', 'ST']
@@ -65,18 +65,27 @@ POS_GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB', 'ST']
 COMBINE_FIELDS = ['ht_in', 'wt', 'forty', 'bench',
                   'vertical', 'broad_jump', 'cone', 'shuttle']
 
-# College career production fields. Missing values imputed as 0
-# (distinct from combine, which gets per-position median because absence
-# of a combine event is opt-in noise). For college stats, absence usually
-# means the player didn't play that role — 0 is the right semantic.
-CFB_FIELDS = [
-    'cfb_seasons',
-    'cfb_pass_yards', 'cfb_pass_tds', 'cfb_pass_ints',
-    'cfb_pass_att',   'cfb_pass_cmp',
-    'cfb_rush_yards', 'cfb_rush_tds', 'cfb_rush_atts',
-    'cfb_rec_yards',  'cfb_rec_tds',  'cfb_receptions',
-    'cfb_def_tackles','cfb_def_sacks','cfb_def_ints',
-]
+# Position-relevant college features. Instead of feeding 13 raw stat
+# columns to the model (a QB's cfb_def_tackles is always 0, which dilutes
+# signal), we collapse to two position-aware aggregates per pick:
+#   cfb_pos_volume:  the position's primary "yards" or activity stat
+#   cfb_pos_scoring: the position's primary "scoring" or impact stat
+# Plus two thin global features kept across all positions:
+#   cfb_seasons:     years on the college roster (proxy for development)
+#   cfb_present:     binary "any CFBD record" flag (gates the rest)
+# OL and ST don't accumulate stats so their volume/scoring stay 0; the
+# pos one-hot covers them.
+POS_RELEVANT_STATS = {
+    'QB': ('cfb_pass_yards', 'cfb_pass_tds'),
+    'RB': ('cfb_rush_yards', 'cfb_rush_tds'),
+    'WR': ('cfb_rec_yards',  'cfb_rec_tds'),
+    'TE': ('cfb_rec_yards',  'cfb_rec_tds'),
+    'OL': (None, None),
+    'DL': ('cfb_def_tackles','cfb_def_sacks'),
+    'LB': ('cfb_def_tackles','cfb_def_sacks'),
+    'DB': ('cfb_def_tackles','cfb_def_ints'),
+    'ST': (None, None),
+}
 
 
 def build_expected_av(picks, pos_group=None):
@@ -189,13 +198,13 @@ def build_feature_row(p, college_enc, college_global_mean, imputers):
     imputed = _impute(p, imputers)
     for f in COMBINE_FIELDS:
         feats.append(imputed[f])
-    # College production: 0-impute when missing, plus a present-flag so
-    # the model doesn't conflate "0 yards" with "no record found."
+    # Position-aware college features collapse 13 sparse stat columns into 2.
     cfb_present = 1 if p.get('cfb_seasons') else 0
-    feats.append(cfb_present)
-    for f in CFB_FIELDS:
-        v = p.get(f)
-        feats.append(float(v) if v is not None else 0.0)
+    cfb_seasons = float(p.get('cfb_seasons') or 0)
+    vol_key, sc_key = POS_RELEVANT_STATS.get(p['pos_group'], (None, None))
+    cfb_vol = float(p.get(vol_key) or 0) if vol_key else 0.0
+    cfb_sc  = float(p.get(sc_key)  or 0) if sc_key  else 0.0
+    feats.extend([cfb_present, cfb_seasons, cfb_vol, cfb_sc])
     return feats
 
 
@@ -203,8 +212,7 @@ FEATURE_NAMES = (
     ['round', 'pick', 'college_enc', 'age', 'era']
     + [f'pos_{g}' for g in POS_GROUPS]
     + COMBINE_FIELDS
-    + ['cfb_present']
-    + CFB_FIELDS
+    + ['cfb_present', 'cfb_seasons', 'cfb_pos_volume', 'cfb_pos_scoring']
 )
 
 
