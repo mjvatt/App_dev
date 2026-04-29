@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AttemptResultPanel from "@/components/game/AttemptResultPanel";
 import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
+import BossDefeatedOverlay from "@/components/game/BossDefeatedOverlay";
 import LevelUpOverlay from "@/components/game/LevelUpOverlay";
 import StreakMilestoneOverlay from "@/components/game/StreakMilestoneOverlay";
 import { authedRequest } from "@/lib/api";
@@ -90,6 +91,11 @@ export default function ArcadePage() {
     open: false,
     days: 0,
   });
+  const [bossDefeated, setBossDefeated] = useState<{
+    open: boolean;
+    title: string;
+    xp: number;
+  }>({ open: false, title: "", xp: 0 });
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
 
@@ -185,9 +191,12 @@ export default function ArcadePage() {
       );
       setResult(data);
       if (data.passed) clearDraft(challenge.id, language);
-      // Stagger reward overlays so they don't stack: streak first
-      // (faster to dismiss), level up after if both fired this attempt.
-      if (data.streak_milestone) {
+      // Stagger reward overlays so they don't visually stack. Order is
+      // boss -> streak -> level; the dismiss handler for each opens
+      // the next one if it also fired this attempt.
+      if (data.passed && challenge.difficulty === "boss") {
+        setBossDefeated({ open: true, title: challenge.title, xp: data.xp_earned });
+      } else if (data.streak_milestone) {
         setStreakMilestone({ open: true, days: data.streak_milestone });
       } else if (data.leveled_up) {
         setLevelUp({ open: true, level: data.new_level });
@@ -232,6 +241,20 @@ export default function ArcadePage() {
 
   return (
     <AuthGuard>
+      <BossDefeatedOverlay
+        open={bossDefeated.open}
+        challengeTitle={bossDefeated.title}
+        xpEarned={bossDefeated.xp}
+        onDismiss={() => {
+          setBossDefeated((s) => ({ ...s, open: false }));
+          // Cascade: streak next, then level.
+          if (result?.streak_milestone) {
+            setStreakMilestone({ open: true, days: result.streak_milestone });
+          } else if (result?.leveled_up) {
+            setLevelUp({ open: true, level: result.new_level });
+          }
+        }}
+      />
       <LevelUpOverlay
         open={levelUp.open}
         newLevel={levelUp.level}
@@ -242,7 +265,6 @@ export default function ArcadePage() {
         days={streakMilestone.days}
         onDismiss={() => {
           setStreakMilestone((s) => ({ ...s, open: false }));
-          // If the same attempt also leveled up, show that next.
           if (result?.leveled_up && !levelUp.open) {
             setLevelUp({ open: true, level: result.new_level });
           }
