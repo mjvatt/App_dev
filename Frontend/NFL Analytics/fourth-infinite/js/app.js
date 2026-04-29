@@ -1624,6 +1624,15 @@
       }
     }
 
+    // Data-availability indicator: tells the user what inputs the model
+    // actually saw. Pre-2014 picks have no CFBD record and ride on
+    // combine + age + slot only — the prediction is shakier.
+    const cfbSeasons = p.cfb_seasons;
+    const cfbHasData = cfbSeasons != null && cfbSeasons > 0;
+    const cfbPill = cfbHasData
+      ? `<span style="color:#10b981;font-weight:600">✓ college (${cfbSeasons} season${cfbSeasons !== 1 ? 's' : ''})</span>`
+      : `<span style="color:var(--text-muted);font-weight:600">○ no college data</span>`;
+
     const mlHtml = mlPick && mlPick.predicted_prob !== undefined ? `
       <div class="profile-section">
         <h4>GHOST · Hit Probability</h4>
@@ -1636,6 +1645,10 @@
           <span>League base rate</span>
           <span class="profile-val">${(baseRate * 100).toFixed(1)}%</span>
         </div>` : ''}
+        <div class="profile-context-row">
+          <span>Model inputs</span>
+          <span class="profile-val" style="font-weight:400;font-size:12px">${cfbPill}</span>
+        </div>
         ${!mlPick.incomplete && mlPick.actual_hit !== null && mlPick.actual_hit !== undefined ? `
         <div class="profile-context-row">
           <span>Actual outcome</span>
