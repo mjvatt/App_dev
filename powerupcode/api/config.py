@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     smtp_from_email: str = "noreply@powerupcode.com"
     app_url: str = "http://localhost:3001"
 
+    # Sentry — leave sentry_dsn empty to disable error reporting entirely.
+    sentry_dsn: str = ""
+    sentry_traces_sample_rate: float = 0.0  # bump for perf monitoring
+
     # Cookie auth — set cookie_secure=true and cookie_samesite='none' in
     # production behind HTTPS with a different frontend domain. Defaults
     # are tuned for localhost dev where the frontend (3001) and API (8000)

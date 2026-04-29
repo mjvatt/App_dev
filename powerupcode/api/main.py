@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -11,6 +12,15 @@ from starlette.responses import Response
 from api.config import settings
 from api.rate_limit import limiter
 from api.routers import auth, billing, challenges, leaderboard, progress
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.env,
+        traces_sample_rate=settings.sentry_traces_sample_rate,
+        # Don't send PII unless we explicitly opt in per-event.
+        send_default_pii=False,
+    )
 
 
 async def _rate_limit_handler(request: Request, exc: Exception) -> Response:

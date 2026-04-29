@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4",
+    "@sentry/nextjs": "^10.50.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2",
     "framer-motion": "^12.38.0",

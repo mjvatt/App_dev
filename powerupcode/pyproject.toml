@@ -18,6 +18,7 @@ dependencies = [
     "python-multipart>=0.0.9",
     "aiosmtplib>=3.0",
     "slowapi>=0.1.9",
+    "sentry-sdk[fastapi]>=2.0",
 ]
 
 [project.optional-dependencies]
