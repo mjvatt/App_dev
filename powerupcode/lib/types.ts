@@ -22,6 +22,8 @@ export interface AttemptResult {
   feedback: string;
   hints_used: number;
   time_ms: number;
+  leveled_up: boolean;
+  new_level: number;
 }
 
 export interface DifficultyStats {

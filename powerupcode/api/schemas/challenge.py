@@ -25,6 +25,8 @@ class AttemptResponse(BaseModel):
     feedback: str
     hints_used: int
     time_ms: int
+    leveled_up: bool = False
+    new_level: int = 1
 
 
 class HintRequest(BaseModel):

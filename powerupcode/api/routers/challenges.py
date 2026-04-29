@@ -155,9 +155,11 @@ async def submit_attempt(
 
     progress = await db.get(UserProgress, user_id)
     if progress is None:
+        prior_level = 1
         progress = UserProgress(user_id=user_id, total_xp=awarded_xp)
         db.add(progress)
     else:
+        prior_level = progress.level
         progress.total_xp += awarded_xp
 
     progress.level = _compute_level(progress.total_xp)
@@ -178,6 +180,8 @@ async def submit_attempt(
         feedback=result.feedback,
         hints_used=result.hints_used,
         time_ms=result.time_ms,
+        leveled_up=progress.level > prior_level,
+        new_level=progress.level,
     )
 
 

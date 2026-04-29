@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AttemptResultPanel from "@/components/game/AttemptResultPanel";
 import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
+import LevelUpOverlay from "@/components/game/LevelUpOverlay";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
 import type { AttemptResult, Challenge, Difficulty } from "@/lib/types";
@@ -80,6 +81,10 @@ export default function ArcadePage() {
   const [hinting, setHinting] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | "">("");
+  const [levelUp, setLevelUp] = useState<{ open: boolean; level: number }>({
+    open: false,
+    level: 1,
+  });
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
 
@@ -175,6 +180,9 @@ export default function ArcadePage() {
       );
       setResult(data);
       if (data.passed) clearDraft(challenge.id, language);
+      if (data.leveled_up) {
+        setLevelUp({ open: true, level: data.new_level });
+      }
       track(Events.AttemptSubmitted, {
         challenge_id: challenge.id,
         topic: challenge.topic,
@@ -215,6 +223,11 @@ export default function ArcadePage() {
 
   return (
     <AuthGuard>
+      <LevelUpOverlay
+        open={levelUp.open}
+        newLevel={levelUp.level}
+        onDismiss={() => setLevelUp((s) => ({ ...s, open: false }))}
+      />
       <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
 
         {/* Header */}
