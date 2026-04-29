@@ -952,8 +952,39 @@ const DraftCharts = (() => {
       return                  'rgba(107,114,128,0.60)'; // consistently mediocre
     };
 
+    // Inline plugin: draws quadrant labels at the midpoint of each region
+    // defined by the mean-wins / mean-std crosshairs. Lets the user read
+    // the chart at a glance without decoding the dot colors.
+    const quadrantLabelsPlugin = {
+      id: 'bbQuadrantLabels',
+      afterDraw(chart) {
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        const ca     = chart.chartArea;
+        if (!xScale || !yScale || !ca) return;
+        const cx     = xScale.getPixelForValue(meanWins);
+        const cy     = yScale.getPixelForValue(meanStd);
+        const labels = [
+          { x: (ca.left  + cx) / 2, y: (ca.top    + cy) / 2, text: 'Volatile Strugglers' },
+          { x: (ca.right + cx) / 2, y: (ca.top    + cy) / 2, text: 'Volatile Contenders' },
+          { x: (ca.left  + cx) / 2, y: (ca.bottom + cy) / 2, text: 'Stable Bottom-Feeders' },
+          { x: (ca.right + cx) / 2, y: (ca.bottom + cy) / 2, text: 'Stable Winners' },
+        ];
+        const ctx2 = chart.ctx;
+        ctx2.save();
+        ctx2.font = '600 11px Inter, system-ui, sans-serif';
+        ctx2.fillStyle = TICK_COLOR();
+        ctx2.globalAlpha = 0.55;
+        ctx2.textAlign = 'center';
+        ctx2.textBaseline = 'middle';
+        labels.forEach(l => ctx2.fillText(l.text, l.x, l.y));
+        ctx2.restore();
+      },
+    };
+
     _charts[canvasId] = new Chart(ctx, {
       type: 'scatter',
+      plugins: [quadrantLabelsPlugin],
       data: {
         datasets: [
           {
