@@ -96,6 +96,8 @@ export default function ArcadePage() {
     title: string;
     xp: number;
   }>({ open: false, title: "", xp: 0 });
+  const [reviewMode, setReviewMode] = useState(false);
+  const [noReviewsMessage, setNoReviewsMessage] = useState<string | null>(null);
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
 
@@ -149,7 +151,37 @@ export default function ArcadePage() {
   function handleDifficultyChange(diff: Difficulty | "") {
     selectedDifficultyRef.current = diff;
     setSelectedDifficulty(diff);
+    setReviewMode(false);
+    setNoReviewsMessage(null);
     loadChallenge(diff);
+  }
+
+  async function handleReviewClick() {
+    setFetching(true);
+    setResult(null);
+    setError(null);
+    setHint(null);
+    setHintsRemaining(3);
+    setUpgradeRequired(false);
+    setNoReviewsMessage(null);
+    try {
+      const data = await authedRequest<Challenge>("/api/challenges/review");
+      setChallenge(data);
+      setCode(loadDraft(data.id, language));
+      startTime.current = Date.now();
+      setReviewMode(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.toLowerCase().includes("no reviews due") || msg === "HTTP 404") {
+        setNoReviewsMessage(
+          "No reviews due yet. Finish a few new challenges and come back."
+        );
+      } else {
+        setError("Failed to load review. Try again.");
+      }
+    } finally {
+      setFetching(false);
+    }
   }
 
   function handleLanguageChange(lang: Language) {
@@ -306,7 +338,7 @@ export default function ArcadePage() {
                     key={value}
                     onClick={() => handleDifficultyChange(value)}
                     className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
-                      selectedDifficulty === value
+                      selectedDifficulty === value && !reviewMode
                         ? `${color} bg-zinc-800`
                         : "text-zinc-600 hover:text-zinc-400"
                     }`}
@@ -314,8 +346,23 @@ export default function ArcadePage() {
                     {label}
                   </button>
                 ))}
+                <span className="text-zinc-800 mx-1">|</span>
+                <button
+                  onClick={handleReviewClick}
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                    reviewMode
+                      ? "text-blue-400 bg-zinc-800"
+                      : "text-zinc-600 hover:text-zinc-400"
+                  }`}
+                  title="Solve a challenge that's due for review"
+                >
+                  Review
+                </button>
               </div>
             </div>
+            {noReviewsMessage && (
+              <p className="text-xs text-zinc-500">{noReviewsMessage}</p>
+            )}
             {fetching && (
               <p className="text-zinc-600 text-sm">Loading challenge...</p>
             )}

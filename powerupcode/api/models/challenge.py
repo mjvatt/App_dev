@@ -1,7 +1,18 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Integer, String, func, text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from api.models.base import Base
@@ -45,4 +56,28 @@ class UserProgress(Base):
     )
     last_reengagement_email_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+
+
+class ReviewSchedule(Base):
+    __tablename__ = "review_schedule"
+    __table_args__ = (
+        UniqueConstraint("user_id", "challenge_id", name="uq_review_user_challenge"),
+    )
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(
+        String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    challenge_id: Mapped[str] = mapped_column(String, nullable=False)
+    ease_factor: Mapped[float] = mapped_column(Float, nullable=False, default=2.5)
+    interval_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    repetitions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_quality: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )

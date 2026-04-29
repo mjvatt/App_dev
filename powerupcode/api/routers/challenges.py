@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db, require_verified_user
-from api.models.challenge import Attempt, UserProgress
+from api.models.challenge import Attempt, ReviewSchedule, UserProgress
 from api.models.user import Subscription
 from api.schemas.challenge import (
     AttemptRequest,
@@ -18,6 +18,7 @@ from api.schemas.challenge import (
 from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
 from services.engine.similarity import hash_solution
+from services.review.scheduler import ReviewState, grade_attempt, schedule_next
 
 router = APIRouter()
 
@@ -49,6 +50,56 @@ async def _has_previously_passed(
         .limit(1)
     )
     return result.scalar_one_or_none() is not None
+
+
+async def _update_review_schedule(
+    db: AsyncSession,
+    user_id: str,
+    challenge_id: str,
+    passed: bool,
+    hints_used: int,
+) -> None:
+    """Insert or update the user's review schedule for this challenge
+    using SM-2. Failed attempts reset the cadence; passing keeps it
+    growing."""
+    quality = grade_attempt(passed=passed, hints_used=hints_used)
+    now = datetime.now(UTC)
+
+    row = await db.scalar(
+        select(ReviewSchedule).where(
+            ReviewSchedule.user_id == user_id,
+            ReviewSchedule.challenge_id == challenge_id,
+        )
+    )
+    if row is None:
+        prior = ReviewState(ease_factor=2.5, interval_days=0, repetitions=0)
+        next_state = schedule_next(prior, quality)
+        db.add(
+            ReviewSchedule(
+                user_id=user_id,
+                challenge_id=challenge_id,
+                ease_factor=next_state.ease_factor,
+                interval_days=next_state.interval_days,
+                repetitions=next_state.repetitions,
+                due_at=now + timedelta(days=next_state.interval_days),
+                last_quality=quality,
+                last_reviewed_at=now,
+            )
+        )
+        return
+
+    prior = ReviewState(
+        ease_factor=row.ease_factor,
+        interval_days=row.interval_days,
+        repetitions=row.repetitions,
+    )
+    next_state = schedule_next(prior, quality)
+    row.ease_factor = next_state.ease_factor
+    row.interval_days = next_state.interval_days
+    row.repetitions = next_state.repetitions
+    row.due_at = now + timedelta(days=next_state.interval_days)
+    row.last_quality = quality
+    row.last_reviewed_at = now
 
 
 async def _is_duplicate_of_another_user(
@@ -211,6 +262,10 @@ async def submit_attempt(
         topics[key] = topics.get(key, 0) + 1
         progress.topics = topics
 
+    await _update_review_schedule(
+        db, user_id, challenge_id, passed=result.passed, hints_used=result.hints_used
+    )
+
     await db.commit()
 
     return AttemptResponse(
@@ -224,6 +279,37 @@ async def submit_attempt(
         new_level=progress.level,
         streak_days=progress.streak_days,
         streak_milestone=_milestone_just_hit(prior_streak, progress.streak_days),
+    )
+
+
+@router.get("/review", response_model=ChallengeResponse)
+async def get_next_review(
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ChallengeResponse:
+    """Return the most overdue challenge from the user's review schedule.
+    404 if nothing is due yet — caller should fall back to /next."""
+    now = datetime.now(UTC)
+    row = await db.scalar(
+        select(ReviewSchedule)
+        .where(ReviewSchedule.user_id == user_id, ReviewSchedule.due_at <= now)
+        .order_by(ReviewSchedule.due_at.asc())
+        .limit(1)
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="No reviews due")
+
+    challenge = await get_engine().get_challenge(row.challenge_id)
+    if challenge is None:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    return ChallengeResponse(
+        id=challenge.id,
+        topic=challenge.topic,
+        difficulty=challenge.difficulty,
+        title=challenge.title,
+        prompt=challenge.prompt,
+        constraints=challenge.constraints,
+        examples=challenge.examples,
     )
 
 
