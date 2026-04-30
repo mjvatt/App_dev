@@ -1067,6 +1067,43 @@ const DraftData = (() => {
     return _salaries.top_earners.filter(r => r.team === team);
   }
 
+  /* Salaries.json position codes -> our internal pos_group buckets.
+     Spotrac uses split OL codes (LT/RT/G/C/T) and an ED bucket separate
+     from DL; we collapse into the 9 standard groups. */
+  const _SAL_POS_TO_GROUP = {
+    QB: 'QB',
+    RB: 'RB', FB: 'RB', HB: 'RB',
+    WR: 'WR', FL: 'WR', SE: 'WR',
+    TE: 'TE',
+    LT: 'OL', RT: 'OL', T: 'OL', G: 'OL', LG: 'OL', RG: 'OL', C: 'OL', OL: 'OL', OT: 'OL', OG: 'OL',
+    DL: 'DL', DT: 'DL', NT: 'DL', DE: 'DL', ED: 'DL',
+    LB: 'LB', ILB: 'LB', OLB: 'LB', MLB: 'LB',
+    CB: 'DB', S: 'DB', SS: 'DB', FS: 'DB', DB: 'DB', SAF: 'DB',
+    K: 'ST', P: 'ST', LS: 'ST',
+  };
+
+  /* Per-position cap allocation from the top-15 cap hits for a team in a given year.
+     Returns chart-ready { labels, values_m, colors, totalsM } sorted high to low.
+     Approximation: top-15 typically covers ~70%+ of team cap. Position group
+     groups Spotrac's split OL/edge buckets back into our nine standard groups. */
+  function teamCapAllocation(team, year = 2025) {
+    if (!_salaries) return null;
+    const rows = _salaries.top_earners.filter(r => r.team === team && r.year === year);
+    if (!rows.length) return null;
+    const byGroup = {};
+    rows.forEach(r => {
+      const g = _SAL_POS_TO_GROUP[(r.pos || '').toUpperCase()] || 'Other';
+      byGroup[g] = (byGroup[g] || 0) + (r.cap_hit || 0);
+    });
+    const sorted = Object.entries(byGroup).sort((a, b) => b[1] - a[1]);
+    return {
+      labels:  sorted.map(([g]) => g),
+      values:  sorted.map(([, v]) => +(v / 1e6).toFixed(2)),  // $M
+      colors:  sorted.map(([g]) => posColor(g)),
+      totalM:  +(sorted.reduce((s, [, v]) => s + v, 0) / 1e6).toFixed(2),
+    };
+  }
+
   async function loadTrades() {
     if (_trades !== null) return;
     try {
@@ -1081,5 +1118,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, getSleeperPredictions, loadOraclePredictions, oracleData, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, teamCapAllocation, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, getSleeperPredictions, loadOraclePredictions, oracleData, dynastyIndex };
 })();

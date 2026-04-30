@@ -374,6 +374,15 @@
         meta:   earners.map(() => ({})),
       });
     }
+
+    const alloc = DraftData.teamCapAllocation(team, 2025);
+    if (alloc) {
+      DraftCharts.donut('chart-teamCapAllocation', {
+        labels: alloc.labels,
+        values: alloc.values,
+        colors: alloc.colors,
+      }, `$${alloc.totalM}M total`);
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════════════
