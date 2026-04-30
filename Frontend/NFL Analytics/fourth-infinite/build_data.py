@@ -2,11 +2,63 @@ import csv
 import json
 from pathlib import Path
 
-DATA_DIR       = Path(__file__).parent / "Data"
-OUT_FILE       = Path(__file__).parent / "data" / "draft_data.json"
-STANDINGS_FILE = Path(__file__).parent / "data" / "standings.csv"
-AV_FILE        = Path(__file__).parent / "data" / "av_data.csv"
-COMBINE_FILE   = Path(__file__).parent / "data" / "combine_data.csv"
+import re
+import unicodedata
+
+DATA_DIR        = Path(__file__).parent / "Data"
+OUT_FILE        = Path(__file__).parent / "data" / "draft_data.json"
+STANDINGS_FILE  = Path(__file__).parent / "data" / "standings.csv"
+AV_FILE         = Path(__file__).parent / "data" / "av_data.csv"
+COMBINE_FILE    = Path(__file__).parent / "data" / "combine_data.csv"
+COLLEGE_STATS_FILE = Path(__file__).parent / "data" / "college_stats.csv"
+
+# Some college names differ between PFR (used in our base CSVs) and CFBD.
+# Map our pick college -> CFBD spelling so college stats lookups join.
+COLLEGE_NAME_ALIASES = {
+    "Texas Christian":     "TCU",
+    "Mississippi":         "Ole Miss",
+    "Louisiana State":     "LSU",
+    "Southern California": "USC",
+    "Miami (FL)":          "Miami",
+    "Brigham Young":       "BYU",
+    "Central Florida":     "UCF",
+    "North Carolina State": "NC State",
+    "Pittsburgh":          "Pitt",
+    "Massachusetts":       "UMass",
+    "Nevada-Las Vegas":    "UNLV",
+    "Texas-El Paso":       "UTEP",
+    "Texas-San Antonio":   "UTSA",
+    "Alabama-Birmingham":  "UAB",
+    "Hawaii":              "Hawai'i",
+    "Florida International": "Florida Intl",
+    "Southern Methodist":  "SMU",
+}
+
+
+_SUFFIX_RE = re.compile(r"\b(jr|sr|ii|iii|iv|v)\.?\b", re.IGNORECASE)
+_PUNCT_RE  = re.compile(r"[^\w\s]")
+
+
+def _strip_diacritics(s):
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s)
+        if unicodedata.category(c) != "Mn"
+    )
+
+
+def normalize_name(s):
+    if not s:
+        return ""
+    s = _strip_diacritics(s).lower().strip()
+    s = _SUFFIX_RE.sub("", s)
+    s = _PUNCT_RE.sub("", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def normalize_college(s):
+    if not s:
+        return ""
+    return normalize_name(COLLEGE_NAME_ALIASES.get(s, s))
 
 POSITION_GROUPS = {
     "QB": ["QB"],
@@ -82,6 +134,47 @@ if COMBINE_FILE.exists():
                 "shuttle":    safe_float(row.get("shuttle")),
             }
 
+
+# Load college stats — keyed by (normalized_name, normalized_college).
+# Also build a name-only fallback per college for cases where punctuation/
+# nicknames differ. Within a college, name collisions are rare enough to
+# accept the first match.
+COLLEGE_STAT_FIELDS = [
+    "pass_yards", "pass_tds", "pass_ints", "pass_completions", "pass_attempts",
+    "rush_yards", "rush_tds", "rush_atts",
+    "rec_yards", "rec_tds", "receptions",
+    "def_tackles", "def_sacks", "def_ints",
+    "ko_returns", "ko_return_yards",
+]
+college_lookup       = {}
+college_lookup_loose = {}  # last-name + college fallback
+if COLLEGE_STATS_FILE.exists():
+    with open(COLLEGE_STATS_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            name_n = normalize_name(row.get("player_name", ""))
+            col_n  = normalize_name(row.get("college", ""))
+            if not name_n or not col_n:
+                continue
+            stats = {f: safe_float(row.get(f)) for f in COLLEGE_STAT_FIELDS}
+            stats["seasons_played"] = safe_int(row.get("seasons_played"))
+            stats["last_season"]    = safe_int(row.get("last_season"))
+            college_lookup[(name_n, col_n)] = stats
+            last = name_n.rsplit(" ", 1)[-1] if " " in name_n else name_n
+            college_lookup_loose.setdefault((last, col_n), stats)
+
+
+def lookup_college_stats(player, college):
+    """Try exact match (normalized), then last-name + college fallback."""
+    if not player or not college:
+        return None
+    name_n = normalize_name(player)
+    col_n  = normalize_college(college)
+    hit = college_lookup.get((name_n, col_n))
+    if hit:
+        return hit
+    last = name_n.rsplit(" ", 1)[-1] if " " in name_n else name_n
+    return college_lookup_loose.get((last, col_n))
+
 picks = []
 for csv_file in sorted(DATA_DIR.glob("NFL_draft_*.csv")):
     year = int(csv_file.stem.split("_")[-1])
@@ -93,15 +186,18 @@ for csv_file in sorted(DATA_DIR.glob("NFL_draft_*.csv")):
             av = av_lookup.get((year, pick_num), {})
             pfr_id = av.get("pfr_id", "")
             combine = combine_lookup.get(pfr_id, {}) if pfr_id else {}
+            player_name = row.get("Player", "").strip()
+            college     = row.get("College", "").strip()
+            cstats = lookup_college_stats(player_name, college) or {}
             picks.append({
                 "year":       year,
                 "round":      safe_int(row.get("Rnd.", 0)),
                 "pick":       pick_num,
                 "team":       row.get("NFL Team", "").strip(),
-                "player":     row.get("Player", "").strip(),
+                "player":     player_name,
                 "pos":        pos,
                 "pos_group":  get_position_group(pos),
-                "college":    row.get("College", "").strip(),
+                "college":    college,
                 "notes":      row.get("Notes", "").strip(),
                 "seasons":    av.get("seasons", 0),
                 "career_av":  av.get("career_av", 0),
@@ -118,6 +214,22 @@ for csv_file in sorted(DATA_DIR.glob("NFL_draft_*.csv")):
                 "broad_jump": combine.get("broad_jump"),
                 "cone":       combine.get("cone"),
                 "shuttle":    combine.get("shuttle"),
+                # College career production (None if not joined)
+                "cfb_seasons":     cstats.get("seasons_played"),
+                "cfb_pass_yards":  cstats.get("pass_yards"),
+                "cfb_pass_tds":    cstats.get("pass_tds"),
+                "cfb_pass_ints":   cstats.get("pass_ints"),
+                "cfb_pass_att":    cstats.get("pass_attempts"),
+                "cfb_pass_cmp":    cstats.get("pass_completions"),
+                "cfb_rush_yards":  cstats.get("rush_yards"),
+                "cfb_rush_tds":    cstats.get("rush_tds"),
+                "cfb_rush_atts":   cstats.get("rush_atts"),
+                "cfb_rec_yards":   cstats.get("rec_yards"),
+                "cfb_rec_tds":     cstats.get("rec_tds"),
+                "cfb_receptions":  cstats.get("receptions"),
+                "cfb_def_tackles": cstats.get("def_tackles"),
+                "cfb_def_sacks":   cstats.get("def_sacks"),
+                "cfb_def_ints":    cstats.get("def_ints"),
             })
 
 years     = sorted({p["year"]    for p in picks})

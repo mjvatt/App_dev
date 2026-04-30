@@ -1,10 +1,29 @@
 notes/
-data/sleeper_predictions.json
-data/oracle_predictions.json
+__pycache__/
 .env
 .env.*
+
+# Generated model outputs (gitignored — rebuilt from training scripts)
+data/sleeper_predictions.json
+data/oracle_predictions.json
+Data/sleeper_predictions.json
+Data/oracle_predictions.json
+
+# CFBD pipeline artifacts (key + cache + raw CSV are local-only;
+# college_stats.csv is derivable from fetch_college_stats.py)
 data/.cfbd_api_key
 data/college_cache/
 data/college_fetch.log
+data/college_stats.csv
+data/combine_data.csv
+Data/.cfbd_api_key
+Data/college_cache/
+Data/college_fetch.log
+Data/college_stats.csv
+Data/combine_data.csv
+
+# Overnight chain artifacts
 data/overnight_chain.sh
 data/overnight_summary.log
+Data/overnight_chain.sh
+Data/overnight_summary.log
