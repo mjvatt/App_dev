@@ -40,6 +40,16 @@ class HintResponse(BaseModel):
     hints_remaining: int
 
 
+class ReviewRequest(BaseModel):
+    solution: str
+    language: str
+
+
+class ReviewResponse(BaseModel):
+    review: str
+    available: bool
+
+
 class DailyStatusResponse(BaseModel):
     """Per-user state for today's daily, returned alongside the challenge."""
     solved: bool

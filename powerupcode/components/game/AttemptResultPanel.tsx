@@ -1,14 +1,54 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { authedRequest } from "@/lib/api";
 import type { AttemptResult } from "@/lib/types";
 
 interface AttemptResultPanelProps {
   result: AttemptResult;
+  challengeId: string;
+  solution: string;
+  language: string;
   onNext: () => void;
 }
 
-export default function AttemptResultPanel({ result, onNext }: AttemptResultPanelProps) {
+interface ReviewResponse {
+  review: string;
+  available: boolean;
+}
+
+export default function AttemptResultPanel({
+  result,
+  challengeId,
+  solution,
+  language,
+  onNext,
+}: AttemptResultPanelProps) {
+  const [reviewState, setReviewState] = useState<
+    | { kind: "idle" }
+    | { kind: "loading" }
+    | { kind: "ready"; review: string; available: boolean }
+    | { kind: "error"; message: string }
+  >({ kind: "idle" });
+
+  async function handleReview() {
+    setReviewState({ kind: "loading" });
+    try {
+      const data = await authedRequest<ReviewResponse>(
+        `/api/challenges/${challengeId}/review`,
+        {
+          method: "POST",
+          body: JSON.stringify({ solution, language }),
+        }
+      );
+      setReviewState({ kind: "ready", review: data.review, available: data.available });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Review failed.";
+      setReviewState({ kind: "error", message: msg });
+    }
+  }
+
   return (
     <motion.div
       key={result.attempt_id}
@@ -40,12 +80,58 @@ export default function AttemptResultPanel({ result, onNext }: AttemptResultPane
         )}
       </div>
       <p className="text-zinc-400 text-sm leading-relaxed mb-4">{result.feedback}</p>
-      <button
-        onClick={onNext}
-        className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
-      >
-        Next Challenge
-      </button>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={onNext}
+          className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+        >
+          Next Challenge
+        </button>
+        {result.passed && reviewState.kind === "idle" && (
+          <button
+            onClick={handleReview}
+            className="px-4 py-2 border border-zinc-700 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
+          >
+            Get code review
+          </button>
+        )}
+        {reviewState.kind === "loading" && (
+          <span className="text-xs text-zinc-500">Reviewing your solution…</span>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {reviewState.kind === "ready" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="mt-5 border-t border-zinc-800 pt-4"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 mb-3">
+              Code Review
+            </p>
+            {reviewState.available ? (
+              <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                {reviewState.review}
+              </div>
+            ) : (
+              <p className="text-sm text-zinc-500">{reviewState.review}</p>
+            )}
+          </motion.div>
+        )}
+        {reviewState.kind === "error" && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 text-sm text-red-400"
+          >
+            {reviewState.message}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

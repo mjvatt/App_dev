@@ -52,6 +52,12 @@ class HintResult:
 
 
 @dataclass
+class ReviewResult:
+    review: str
+    available: bool = True
+
+
+@dataclass
 class UserLevel:
     user_id: str
     total_xp: int
@@ -97,6 +103,21 @@ class GameEngine(ABC):
         the same problem. Real engines hash the date against their full
         challenge bank; the stub returns its single challenge."""
         ...
+
+    async def generate_review(
+        self,
+        user_id: str,
+        challenge_id: str,
+        solution: str,
+        language: str,
+    ) -> "ReviewResult":
+        """Optional: generate a post-pass code review. Default is a no-op
+        result so engines that don't support reviews still satisfy the
+        interface. The real engine overrides with a Haiku call."""
+        return ReviewResult(
+            review="Code review is not available in this engine.",
+            available=False,
+        )
 
     async def get_challenges(
         self, challenge_ids: list[str]

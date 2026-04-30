@@ -497,8 +497,14 @@ export default function ArcadePage() {
               </div>
             )}
 
-            {result && (
-              <AttemptResultPanel result={result} onNext={loadChallenge} />
+            {result && challenge && (
+              <AttemptResultPanel
+                result={result}
+                challengeId={challenge.id}
+                solution={code}
+                language={language}
+                onNext={loadChallenge}
+              />
             )}
           </div>
 

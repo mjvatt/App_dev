@@ -1,13 +1,14 @@
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db, require_verified_user
 from api.models.challenge import Attempt, DailyChallenge, ReviewSchedule, UserProgress
 from api.models.user import Subscription, User
+from api.rate_limit import limiter
 from api.schemas.challenge import (
     AttemptRequest,
     AttemptResponse,
@@ -18,6 +19,8 @@ from api.schemas.challenge import (
     DailyStatusResponse,
     HintRequest,
     HintResponse,
+    ReviewRequest,
+    ReviewResponse,
 )
 from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
@@ -442,6 +445,22 @@ async def get_next_review(
         constraints=challenge.constraints,
         examples=challenge.examples,
     )
+
+
+@router.post("/{challenge_id}/review", response_model=ReviewResponse)
+@limiter.limit("20/15minute")
+async def request_review(
+    request: Request,
+    challenge_id: str,
+    body: ReviewRequest,
+    user_id: Annotated[str, Depends(get_current_user)],
+) -> ReviewResponse:
+    """Post-pass code review. Rate limited because each call is a Haiku
+    request and a malicious user spam-clicking would burn API budget."""
+    review = await get_engine().generate_review(
+        user_id, challenge_id, body.solution, body.language
+    )
+    return ReviewResponse(review=review.review, available=review.available)
 
 
 @router.post("/{challenge_id}/hint", response_model=HintResponse)
