@@ -45,8 +45,11 @@ select = ["E", "F", "I", "UP"]
 [tool.ruff.lint.per-file-ignores]
 # challenge_bank.py is a fixture of narrative content (problem statements,
 # constraints, examples). Wrapping the long descriptive strings adds zero
-# value to the reader and makes diffs noisier.
+# value to the reader and makes diffs noisier. challenge_generator.py
+# contains a Haiku system prompt where line shape is meaningful (the model
+# sees it verbatim).
 "services/engine_core/challenge_bank.py" = ["E501"]
+"services/engine_core/challenge_generator.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.13"
