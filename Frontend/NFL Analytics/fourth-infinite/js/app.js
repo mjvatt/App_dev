@@ -33,6 +33,7 @@
     class2027:  ['2027 Draft Class', 'NFL Draft · April – May 2027'],
     positions:  ['Position Trends',  'How position drafting has evolved over 32 years'],
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
+    'picks-calc': ['Pick Value Calc', 'Historical expected career AV by pick slot and position'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -57,6 +58,7 @@
     if (id === 'teams')      initTeamHub();
     if (id === 'class2026')  initClass2026();
     if (id === 'class2027')  initClass2027();
+    if (id === 'picks-calc') initPicksCalc();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -549,6 +551,128 @@
     }
 
     renderBoard27();
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PICK VALUE CALCULATOR
+  ═══════════════════════════════════════════════════════════════════ */
+  let _picksCalcWired = false;
+  function initPicksCalc() {
+    const pickInput = document.getElementById('pc-pick');
+    const prevBtn   = document.getElementById('pc-prev');
+    const nextBtn   = document.getElementById('pc-next');
+    if (!pickInput) return;
+
+    if (!_picksCalcWired) {
+      _picksCalcWired = true;
+      pickInput.addEventListener('input',  renderPicksCalc);
+      pickInput.addEventListener('change', renderPicksCalc);
+      prevBtn.addEventListener('click', () => {
+        const v = Math.max(1, (+pickInput.value || 1) - 1);
+        pickInput.value = String(v);
+        renderPicksCalc();
+      });
+      nextBtn.addEventListener('click', () => {
+        const v = Math.min(256, (+pickInput.value || 1) + 1);
+        pickInput.value = String(v);
+        renderPicksCalc();
+      });
+    }
+    renderPicksCalc();
+  }
+
+  function renderPicksCalc() {
+    const pickInput = document.getElementById('pc-pick');
+    let pickNum = Math.max(1, Math.min(256, +pickInput.value || 1));
+    pickInput.value = String(pickNum);
+
+    const POS = ['QB','RB','WR','TE','OL','DL','LB','DB','ST'];
+
+    const pooledExp = DraftData.expectedAvForPick(pickNum);
+    const pickValue = +(100 * Math.pow(pickNum, -0.66)).toFixed(1);
+
+    // Approximate round (32 picks per round, post-1994 — close enough; some
+    // years had compensatory variation but this is the conventional split).
+    const round = Math.min(7, Math.ceil(pickNum / 32));
+
+    // KPI strip — single source of truth
+    const kpis = [
+      { label: 'Pick #',                 val: pickNum,           accent: 'var(--text)' },
+      { label: 'Round',                  val: round,             accent: 'var(--text-muted)' },
+      { label: 'Power-law value',        val: pickValue,         accent: 'var(--accent)' },
+      { label: 'Expected career AV',     val: pooledExp.toFixed(1), accent: 'var(--sage)' },
+    ];
+    document.getElementById('pc-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <span class="kpi-value" style="color:${k.accent}">${k.val}</span>
+          <span class="kpi-label">${k.label}</span>
+        </div>
+      </div>`).join('');
+
+    // Plain summary text — context for the slot
+    document.getElementById('pc-summary').innerHTML = `
+      <div style="font-size:13px;color:var(--text-sub);max-width:680px;line-height:1.6">
+        <strong style="color:var(--text)">Pick #${pickNum}</strong> sits in
+        <strong style="color:var(--text)">round ${round}</strong>. The power-law value
+        is <strong style="color:var(--accent)">${pickValue}</strong> (relative to pick #1 = 100).
+        Historical drafts (1994–2021) returned an average career AV of
+        <strong style="color:var(--sage)">${pooledExp.toFixed(1)}</strong> at this slot pooled across positions.
+        See the per-position breakdown below for how the expectation shifts by role.
+      </div>`;
+
+    // Per-position expected AV table
+    const rows = POS.map(g => {
+      const exp = DraftData.expectedAvForPick(pickNum, g);
+      const delta = +(exp - pooledExp).toFixed(1);
+      return { g, exp, delta };
+    }).sort((a, b) => b.exp - a.exp);
+
+    document.getElementById('pc-pos-table').innerHTML = `
+      <div class="profile-av-bars">
+        ${rows.map(r => {
+          const max = Math.max(...rows.map(x => x.exp), 1);
+          const pct = Math.round((r.exp / max) * 100);
+          const sign = r.delta >= 0 ? '+' : '';
+          const deltaColor = r.delta >= 0 ? 'var(--sage)' : '#ef4444';
+          return `
+            <div class="profile-av-bar-row">
+              <span class="profile-av-bar-label" style="color:${DraftData.posColor(r.g)};font-weight:700">${r.g}</span>
+              <div class="profile-av-bar-track">
+                <div class="profile-av-bar-fill" style="width:${pct}%;background:${DraftData.posColor(r.g)}"></div>
+              </div>
+              <span class="profile-av-bar-val" style="min-width:80px">${r.exp.toFixed(1)} <span style="color:${deltaColor};font-weight:500;font-size:11px">${sign}${r.delta}</span></span>
+            </div>`;
+        }).join('')}
+      </div>`;
+
+    // Historical picks made at this exact slot
+    document.getElementById('pc-picknum-label').textContent = String(pickNum);
+    const history = DraftData.picks({})
+      .filter(p => p.pick === pickNum && p.year >= 1994)
+      .sort((a, b) => b.year - a.year);
+    if (!history.length) {
+      document.getElementById('pc-history-body').innerHTML =
+        `<tr><td colspan="7" class="empty-state">No historical picks at this slot.</td></tr>`;
+      return;
+    }
+    document.getElementById('pc-history-body').innerHTML = history.map(p => {
+      const exp = DraftData.expectedAvForPick(p.pick, p.pos_group);
+      const surplus = p.year <= 2021 ? +(p.career_av - exp).toFixed(1) : null;
+      const surplusCell = surplus === null
+        ? `<td style="text-align:right;color:var(--text-muted);font-size:11px">—</td>`
+        : `<td style="text-align:right;color:${surplus >= 0 ? 'var(--sage)' : '#ef4444'}">${surplus >= 0 ? '+' : ''}${surplus}</td>`;
+      return `
+        <tr data-year="${p.year}" data-pick="${p.pick}">
+          <td>${p.year}</td>
+          <td>${p.team}</td>
+          <td><strong>${p.player || '—'}</strong></td>
+          <td><span class="pos-pill" style="background:${DraftData.posColor(p.pos_group)}22;color:${DraftData.posColor(p.pos_group)}">${p.pos || '—'}</span></td>
+          <td>${p.college || '—'}</td>
+          <td style="text-align:right">${p.career_av || '—'}</td>
+          ${surplusCell}
+        </tr>`;
+    }).join('');
   }
 
   /* ═══════════════════════════════════════════════════════════════════

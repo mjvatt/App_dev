@@ -71,6 +71,9 @@
         <a href="#" class="nav-item" data-view="colleges">
           <i class="fas fa-graduation-cap"></i><span>College Pipeline</span>
         </a>
+        <a href="#" class="nav-item" data-view="picks-calc">
+          <i class="fas fa-calculator"></i><span>Pick Value Calc</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -567,6 +570,46 @@
         <div class="chart-card wide">
           <div class="chart-card-header"><div><h3>College Efficiency — Avg Career AV per Pick</h3><p>Top 25 colleges ranked by average career AV produced per draft selection · subject to min picks filter</p></div></div>
           <div class="chart-wrap chart-wrap--hbar-lg"><canvas id="chart-collegeEfficiency"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PICK VALUE CALCULATOR ─── -->
+    <section class="view" id="view-picks-calc">
+      <div class="kpi-row" id="pc-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Pick Value Calculator</h3>
+              <p>Enter any pick from 1 to 256. See its historical expected career AV by position, power-law value score, and the picks that have actually landed at that slot.</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <label class="filter-label">Pick #</label>
+              <input id="pc-pick" type="number" min="1" max="256" value="1" class="filter-select" style="width:90px;text-align:center" />
+              <button id="pc-prev" class="filter-select" type="button" style="cursor:pointer">◀</button>
+              <button id="pc-next" class="filter-select" type="button" style="cursor:pointer">▶</button>
+            </div>
+          </div>
+          <div style="padding:8px 16px 18px">
+            <div id="pc-summary" style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:18px"></div>
+            <h4 style="font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);margin:14px 0 8px">Expected Career AV by Position Group</h4>
+            <div id="pc-pos-table"></div>
+            <h4 style="font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);margin:24px 0 8px">Picks Made at #<span id="pc-picknum-label">—</span> (1994–2025)</h4>
+            <div class="table-wrap" style="max-height:400px;overflow:auto">
+              <table class="draft-table">
+                <thead>
+                  <tr>
+                    <th>Year</th><th>Team</th><th>Player</th><th>Pos</th><th>College</th>
+                    <th style="text-align:right">Career AV</th>
+                    <th style="text-align:right">Surplus vs Slot</th>
+                  </tr>
+                </thead>
+                <tbody id="pc-history-body"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </section>
