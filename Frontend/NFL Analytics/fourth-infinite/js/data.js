@@ -988,9 +988,11 @@ const DraftData = (() => {
   }
 
   /* GHOST classifier rankings.
-     mode = 'predicted' → ranked by model-predicted hit probability
-     mode = 'surprise'  → ranked by (actual_hit - predicted_prob), showing
-                          completed picks the model badly under-rated */
+     mode = 'predicted' → top picks by model-predicted hit probability
+     mode = 'surprise'  → biggest UNDER-predictions (low predicted prob,
+                          actually a hit). Completed careers only.
+     mode = 'busts'     → biggest OVER-predictions (high predicted prob,
+                          actually a miss). Completed careers only. */
   function getSleeperPredictions() {
     return _sleeperPreds ? _sleeperPreds.predictions : [];
   }
@@ -1006,21 +1008,26 @@ const DraftData = (() => {
 
     const scored = preds.map(p => {
       let displayScore;
-      if (mode === 'surprise') {
-        // Skip incomplete careers — actual_hit is null until INCOMPLETE_YEAR.
+      let skip = false;
+      if (mode === 'surprise' || mode === 'busts') {
         if (p.incomplete || p.actual_hit === null || p.actual_hit === undefined) {
-          displayScore = -1;  // sorts to bottom
+          skip = true;
+          displayScore = 0;
         } else {
-          displayScore = +(((p.actual_hit ? 1 : 0) - p.predicted_prob)).toFixed(3);
+          const diff = (p.actual_hit ? 1 : 0) - p.predicted_prob;
+          displayScore = mode === 'busts' ? +(-diff).toFixed(3) : +diff.toFixed(3);
         }
       } else {
         displayScore = p.predicted_prob;
       }
-      return { ...p, displayScore };
+      return { ...p, displayScore, _skip: skip };
     });
 
     return {
-      picks:       scored.sort((a, b) => b.displayScore - a.displayScore).slice(0, topN),
+      picks:       scored
+                     .filter(p => !p._skip)
+                     .sort((a, b) => b.displayScore - a.displayScore)
+                     .slice(0, topN),
       importances: _sleeperPreds.importances,
       modelMeta:   _sleeperPreds.meta,
     };

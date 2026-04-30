@@ -1310,12 +1310,12 @@
         }
       }
 
-      const rankLabel = mode === 'surprise'
-        ? 'Hit Surprise (actual − predicted)'
-        : 'Predicted Hit Probability';
-      const xLabel    = mode === 'surprise'
-        ? 'Completed picks: actual hit (1/0) minus predicted probability'
-        : 'Probability of exceeding slot expectation by the hit threshold';
+      const rankLabel = mode === 'surprise' ? 'Hit Surprise (actual − predicted)'
+                      : mode === 'busts'    ? 'Bust Margin (predicted − actual)'
+                      : 'Predicted Hit Probability';
+      const xLabel    = mode === 'surprise' ? 'Completed picks: actual hit (1/0) minus predicted probability — high = model under-rated this hit'
+                      : mode === 'busts'    ? 'Completed picks: predicted probability minus actual hit (1/0) — high = model over-rated this miss'
+                      : 'Probability of exceeding slot expectation by the hit threshold';
 
       DraftCharts.ghostLeaderboard('chart-mlRankings', {
         labels:      result.picks.map(p => `${p.player} (${p.year})`),
