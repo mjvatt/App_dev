@@ -11,7 +11,15 @@ from starlette.responses import Response
 
 from api.config import settings
 from api.rate_limit import limiter
-from api.routers import auth, billing, challenges, curriculum, leaderboard, progress
+from api.routers import (
+    auth,
+    billing,
+    challenges,
+    curriculum,
+    friends,
+    leaderboard,
+    progress,
+)
 
 if settings.sentry_dsn:
     sentry_sdk.init(
@@ -60,6 +68,7 @@ app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 app.include_router(billing.router, prefix="/api/billing", tags=["billing"])
 app.include_router(leaderboard.router, prefix="/api/leaderboard", tags=["leaderboard"])
 app.include_router(curriculum.router, prefix="/api/curriculum", tags=["curriculum"])
+app.include_router(friends.router, prefix="/api/friends", tags=["friends"])
 
 
 @app.get("/health", tags=["meta"])

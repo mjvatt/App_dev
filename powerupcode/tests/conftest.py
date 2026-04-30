@@ -83,7 +83,7 @@ async def db_engine(pg_url: str) -> AsyncGenerator[AsyncEngine]:
                 text(
                     "TRUNCATE TABLE attempts, user_progress, email_tokens, "
                     "subscriptions, processed_stripe_events, sessions, "
-                    "review_schedule, daily_challenges, users "
+                    "review_schedule, daily_challenges, friendships, users "
                     "RESTART IDENTITY CASCADE"
                 )
             )

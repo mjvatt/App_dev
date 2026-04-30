@@ -106,3 +106,50 @@ export interface CurriculumResponse {
   pass_count: number;
   total_attempts: number;
 }
+
+export interface FriendUserSummary {
+  user_id: string;
+  username: string;
+  level: number;
+  total_xp: number;
+  streak_days: number;
+}
+
+export interface FriendshipEntry {
+  friendship_id: string;
+  status: "pending" | "accepted";
+  direction: "incoming" | "outgoing" | "mutual";
+  other: FriendUserSummary;
+  created_at: string;
+}
+
+export interface FriendsListResponse {
+  friends: FriendshipEntry[];
+}
+
+export interface FriendRequestsResponse {
+  incoming: FriendshipEntry[];
+  outgoing: FriendshipEntry[];
+}
+
+export interface UserSearchEntry {
+  user_id: string;
+  username: string;
+}
+
+export interface UserSearchResponse {
+  results: UserSearchEntry[];
+}
+
+export interface FriendLeaderboardEntry {
+  rank: number;
+  username: string;
+  level: number;
+  total_xp: number;
+  streak_days: number;
+  is_current_user: boolean;
+}
+
+export interface FriendLeaderboardResponse {
+  entries: FriendLeaderboardEntry[];
+}
