@@ -38,3 +38,27 @@ class HintRequest(BaseModel):
 class HintResponse(BaseModel):
     hint: str
     hints_remaining: int
+
+
+class DailyStatusResponse(BaseModel):
+    """Per-user state for today's daily, returned alongside the challenge."""
+    solved: bool
+    time_ms: int | None
+    rank: int | None  # 1-based among today's solvers; None if not solved
+
+
+class DailyChallengeResponse(BaseModel):
+    challenge: ChallengeResponse
+    status: DailyStatusResponse
+
+
+class DailyLeaderboardEntry(BaseModel):
+    rank: int
+    username: str
+    time_ms: int
+    is_current_user: bool
+
+
+class DailyLeaderboardResponse(BaseModel):
+    entries: list[DailyLeaderboardEntry]
+    total_solvers: int

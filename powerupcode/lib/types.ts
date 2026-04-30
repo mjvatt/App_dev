@@ -75,3 +75,26 @@ export interface LeaderboardEntry {
 export interface LeaderboardResponse {
   entries: LeaderboardEntry[];
 }
+
+export interface DailyChallengeStatus {
+  solved: boolean;
+  time_ms: number | null;
+  rank: number | null;
+}
+
+export interface DailyChallengeResponse {
+  challenge: Challenge;
+  status: DailyChallengeStatus;
+}
+
+export interface DailyLeaderboardEntry {
+  rank: number;
+  username: string;
+  time_ms: number;
+  is_current_user: boolean;
+}
+
+export interface DailyLeaderboardResponse {
+  entries: DailyLeaderboardEntry[];
+  total_solvers: number;
+}

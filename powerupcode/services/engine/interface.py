@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -88,6 +89,14 @@ class GameEngine(ABC):
 
     @abstractmethod
     async def get_challenge(self, challenge_id: str) -> ChallengeData | None: ...
+
+    @abstractmethod
+    async def get_daily_challenge(self, on_date: datetime.date) -> ChallengeData:
+        """Deterministic daily-challenge selection. Must return the same
+        ChallengeData for every caller on a given date so all users solve
+        the same problem. Real engines hash the date against their full
+        challenge bank; the stub returns its single challenge."""
+        ...
 
     async def get_challenges(
         self, challenge_ids: list[str]

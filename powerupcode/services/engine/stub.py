@@ -1,5 +1,6 @@
 """
 Stub engine for local development and CI.
+Daily challenge: returns the single stub problem regardless of date.
 All evaluation and hint logic returns placeholder responses.
 Replace at runtime by setting ENGINE_MODULE in the environment.
 
@@ -10,6 +11,7 @@ on worker B will fall back to the challenge's default difficulty. The
 production engine_core is responsible for persisting any state that needs
 to survive across requests or workers.
 """
+import datetime
 import uuid
 
 from services.engine.interface import (
@@ -101,6 +103,9 @@ class StubEngine(GameEngine):
         if challenge_id == _STUB_CHALLENGE.id:
             return _STUB_CHALLENGE
         return None
+
+    async def get_daily_challenge(self, on_date: datetime.date) -> ChallengeData:
+        return _STUB_CHALLENGE
 
     async def get_user_level(self, user_id: str) -> UserLevel:
         return UserLevel(

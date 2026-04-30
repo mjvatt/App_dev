@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
-import type { UserMe, UserProgress, Topic, Difficulty } from "@/lib/types";
+import type {
+  DailyChallengeResponse,
+  Difficulty,
+  Topic,
+  UserMe,
+  UserProgress,
+} from "@/lib/types";
 import XPBar from "@/components/game/XPBar";
 
 const TOPIC_LABELS: Record<Topic, string> = {
@@ -25,9 +31,26 @@ const DIFFICULTIES: { key: Difficulty; label: string; color: string }[] = [
   { key: "boss", label: "Boss", color: "text-red-400" },
 ];
 
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
+}
+
+const DIFFICULTY_COLOR: Record<string, string> = {
+  easy: "text-green-400",
+  medium: "text-yellow-400",
+  hard: "text-orange-400",
+  boss: "text-red-400",
+};
+
 export default function DashboardPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [me, setMe] = useState<UserMe | null>(null);
+  const [daily, setDaily] = useState<DailyChallengeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -42,6 +65,9 @@ export default function DashboardPage() {
         setError(err instanceof Error ? err.message : "Failed to load progress")
       );
     authedRequest<UserMe>("/api/auth/me").then(setMe).catch(() => null);
+    authedRequest<DailyChallengeResponse>("/api/challenges/daily")
+      .then(setDaily)
+      .catch(() => null);
   }, [retryCount]);
 
   async function handleResend() {
@@ -111,6 +137,52 @@ export default function DashboardPage() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+
+      {daily && (
+        <div className="bg-gradient-to-br from-purple-950/40 to-zinc-950 border border-purple-900 rounded-xl p-6 mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-400">
+                Today&apos;s Daily
+              </span>
+              <span
+                className={`text-xs font-medium ${
+                  DIFFICULTY_COLOR[daily.challenge.difficulty] ?? "text-zinc-400"
+                }`}
+              >
+                {daily.challenge.difficulty}
+              </span>
+            </div>
+            <p className="text-base font-semibold text-white truncate">
+              {daily.challenge.title}
+            </p>
+            {daily.status.solved && daily.status.time_ms !== null ? (
+              <p className="text-sm text-zinc-400">
+                Solved in{" "}
+                <span className="text-white font-semibold">
+                  {formatDuration(daily.status.time_ms)}
+                </span>
+                {daily.status.rank !== null && (
+                  <>
+                    {" "}· rank{" "}
+                    <span className="text-white font-semibold">#{daily.status.rank}</span>
+                  </>
+                )}
+              </p>
+            ) : (
+              <p className="text-sm text-zinc-400">
+                Same problem for every user. Ranked by completion time.
+              </p>
+            )}
+          </div>
+          <Link
+            href="/arcade?daily=1"
+            className="self-start md:self-auto shrink-0 px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+          >
+            {daily.status.solved ? "Try again" : "Solve daily →"}
+          </Link>
+        </div>
+      )}
 
       {isBrandNew && (
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl px-6 py-6 mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

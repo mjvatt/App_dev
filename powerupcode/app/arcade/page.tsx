@@ -10,7 +10,12 @@ import LevelUpOverlay from "@/components/game/LevelUpOverlay";
 import StreakMilestoneOverlay from "@/components/game/StreakMilestoneOverlay";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
-import type { AttemptResult, Challenge, Difficulty } from "@/lib/types";
+import type {
+  AttemptResult,
+  Challenge,
+  DailyChallengeResponse,
+  Difficulty,
+} from "@/lib/types";
 
 const LANGUAGES = ["python", "javascript", "typescript", "java"] as const;
 type Language = (typeof LANGUAGES)[number];
@@ -98,6 +103,7 @@ export default function ArcadePage() {
   }>({ open: false, title: "", xp: 0 });
   const [reviewMode, setReviewMode] = useState(false);
   const [noReviewsMessage, setNoReviewsMessage] = useState<string | null>(null);
+  const [dailyMode, setDailyMode] = useState(false);
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
 
@@ -145,15 +151,51 @@ export default function ArcadePage() {
   }, [challenge, language, code]);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("daily") === "1") {
+        void loadDaily();
+        return;
+      }
+    }
     loadChallenge();
-  }, [loadChallenge]);
+    // loadDaily / loadChallenge are stable per their own deps; rebinding is cheap.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleDifficultyChange(diff: Difficulty | "") {
     selectedDifficultyRef.current = diff;
     setSelectedDifficulty(diff);
     setReviewMode(false);
+    setDailyMode(false);
     setNoReviewsMessage(null);
     loadChallenge(diff);
+  }
+
+  const loadDaily = useCallback(async () => {
+    setFetching(true);
+    setResult(null);
+    setError(null);
+    setHint(null);
+    setHintsRemaining(3);
+    setUpgradeRequired(false);
+    setNoReviewsMessage(null);
+    try {
+      const data = await authedRequest<DailyChallengeResponse>("/api/challenges/daily");
+      setChallenge(data.challenge);
+      setCode(loadDraft(data.challenge.id, language));
+      startTime.current = Date.now();
+      setDailyMode(true);
+      setReviewMode(false);
+    } catch {
+      setError("Failed to load today's challenge. Try again.");
+    } finally {
+      setFetching(false);
+    }
+  }, [language]);
+
+  function handleDailyClick() {
+    void loadDaily();
   }
 
   async function handleReviewClick() {
@@ -347,6 +389,17 @@ export default function ArcadePage() {
                   </button>
                 ))}
                 <span className="text-zinc-800 mx-1">|</span>
+                <button
+                  onClick={handleDailyClick}
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                    dailyMode
+                      ? "text-purple-400 bg-zinc-800"
+                      : "text-zinc-600 hover:text-zinc-400"
+                  }`}
+                  title="Today's challenge — same problem for every user"
+                >
+                  Daily
+                </button>
                 <button
                   onClick={handleReviewClick}
                   className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${

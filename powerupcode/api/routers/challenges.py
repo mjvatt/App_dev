@@ -2,16 +2,20 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_current_user, get_db, require_verified_user
-from api.models.challenge import Attempt, ReviewSchedule, UserProgress
-from api.models.user import Subscription
+from api.models.challenge import Attempt, DailyChallenge, ReviewSchedule, UserProgress
+from api.models.user import Subscription, User
 from api.schemas.challenge import (
     AttemptRequest,
     AttemptResponse,
     ChallengeResponse,
+    DailyChallengeResponse,
+    DailyLeaderboardEntry,
+    DailyLeaderboardResponse,
+    DailyStatusResponse,
     HintRequest,
     HintResponse,
 )
@@ -280,6 +284,133 @@ async def submit_attempt(
         streak_days=progress.streak_days,
         streak_milestone=_milestone_just_hit(prior_streak, progress.streak_days),
     )
+
+
+async def _resolve_daily_challenge_id(db: AsyncSession) -> str:
+    """Look up today's daily assignment, creating it on first call of the day.
+    Persisting the assignment means historical leaderboards stay stable even
+    if the underlying challenge bank is reseeded later."""
+    today = datetime.now(UTC).date()
+    row = await db.scalar(select(DailyChallenge).where(DailyChallenge.date == today))
+    if row is not None:
+        return row.challenge_id
+    challenge = await get_engine().get_daily_challenge(today)
+    db.add(DailyChallenge(date=today, challenge_id=challenge.id))
+    await db.commit()
+    return challenge.id
+
+
+async def _daily_status(
+    db: AsyncSession, user_id: str, daily_challenge_id: str
+) -> DailyStatusResponse:
+    today = datetime.now(UTC).date()
+    today_start = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
+    today_end = today_start + timedelta(days=1)
+
+    user_attempt = await db.scalar(
+        select(Attempt)
+        .where(
+            Attempt.user_id == user_id,
+            Attempt.challenge_id == daily_challenge_id,
+            Attempt.passed.is_(True),
+            Attempt.submitted_at >= today_start,
+            Attempt.submitted_at < today_end,
+        )
+        .order_by(Attempt.time_ms.asc())
+        .limit(1)
+    )
+    if user_attempt is None:
+        return DailyStatusResponse(solved=False, time_ms=None, rank=None)
+
+    faster_count = await db.scalar(
+        select(func.count(func.distinct(Attempt.user_id)))
+        .where(
+            Attempt.challenge_id == daily_challenge_id,
+            Attempt.passed.is_(True),
+            Attempt.submitted_at >= today_start,
+            Attempt.submitted_at < today_end,
+            Attempt.time_ms < user_attempt.time_ms,
+        )
+    )
+    rank = (faster_count or 0) + 1
+    return DailyStatusResponse(solved=True, time_ms=user_attempt.time_ms, rank=rank)
+
+
+@router.get("/daily", response_model=DailyChallengeResponse)
+async def get_daily_challenge_route(
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> DailyChallengeResponse:
+    """Today's challenge — same problem for every user, ranked by completion time."""
+    daily_id = await _resolve_daily_challenge_id(db)
+    challenge = await get_engine().get_challenge(daily_id)
+    if challenge is None:
+        raise HTTPException(status_code=500, detail="Daily challenge unavailable")
+    status = await _daily_status(db, user_id, daily_id)
+    return DailyChallengeResponse(
+        challenge=ChallengeResponse(
+            id=challenge.id,
+            topic=challenge.topic,
+            difficulty=challenge.difficulty,
+            title=challenge.title,
+            prompt=challenge.prompt,
+            constraints=challenge.constraints,
+            examples=challenge.examples,
+        ),
+        status=status,
+    )
+
+
+@router.get("/daily/leaderboard", response_model=DailyLeaderboardResponse)
+async def get_daily_leaderboard(
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> DailyLeaderboardResponse:
+    """Top 10 fastest solvers of today's daily challenge."""
+    daily_id = await _resolve_daily_challenge_id(db)
+    today = datetime.now(UTC).date()
+    today_start = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
+    today_end = today_start + timedelta(days=1)
+
+    # First passing attempt per user, ordered by time_ms.
+    fastest_per_user = (
+        select(
+            Attempt.user_id.label("user_id"),
+            func.min(Attempt.time_ms).label("time_ms"),
+        )
+        .where(
+            Attempt.challenge_id == daily_id,
+            Attempt.passed.is_(True),
+            Attempt.submitted_at >= today_start,
+            Attempt.submitted_at < today_end,
+        )
+        .group_by(Attempt.user_id)
+        .subquery()
+    )
+
+    rows = (
+        await db.execute(
+            select(User.username, fastest_per_user.c.user_id, fastest_per_user.c.time_ms)
+            .join(User, User.id == fastest_per_user.c.user_id)
+            .order_by(fastest_per_user.c.time_ms.asc())
+            .limit(10)
+        )
+    ).all()
+
+    total = await db.scalar(
+        select(func.count()).select_from(fastest_per_user)
+    ) or 0
+
+    entries = [
+        DailyLeaderboardEntry(
+            rank=i + 1,
+            username=row.username,
+            time_ms=row.time_ms,
+            is_current_user=row.user_id == user_id,
+        )
+        for i, row in enumerate(rows)
+    ]
+    return DailyLeaderboardResponse(entries=entries, total_solvers=int(total))
 
 
 @router.get("/review", response_model=ChallengeResponse)
