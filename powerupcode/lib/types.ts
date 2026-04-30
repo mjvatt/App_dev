@@ -98,3 +98,11 @@ export interface DailyLeaderboardResponse {
   entries: DailyLeaderboardEntry[];
   total_solvers: number;
 }
+
+export interface CurriculumResponse {
+  weak_topic: Topic;
+  suggested_difficulty: Difficulty;
+  rationale: string;
+  pass_count: number;
+  total_attempts: number;
+}

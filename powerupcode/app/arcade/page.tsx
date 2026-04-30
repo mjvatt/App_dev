@@ -108,7 +108,7 @@ export default function ArcadePage() {
   const startTime = useRef<number>(Date.now());
 
   const loadChallenge = useCallback(
-    async (difficulty?: Difficulty | "") => {
+    async (difficulty?: Difficulty | "", topic?: string) => {
       setFetching(true);
       setResult(null);
       setError(null);
@@ -116,7 +116,10 @@ export default function ArcadePage() {
       setHintsRemaining(3);
       setUpgradeRequired(false);
       const diff = difficulty !== undefined ? difficulty : selectedDifficultyRef.current;
-      const qs = diff ? `?difficulty=${diff}` : "";
+      const params = new URLSearchParams();
+      if (diff) params.set("difficulty", diff);
+      if (topic) params.set("topic", topic);
+      const qs = params.toString() ? `?${params.toString()}` : "";
       try {
         const data = await authedRequest<Challenge>(`/api/challenges/next${qs}`);
         setChallenge(data);
@@ -157,9 +160,23 @@ export default function ArcadePage() {
         void loadDaily();
         return;
       }
+      // ?topic= and ?difficulty= come from the dashboard curriculum card.
+      const diffParam = params.get("difficulty");
+      const topicParam = params.get("topic");
+      if (diffParam || topicParam) {
+        const validDiffs: (Difficulty | "")[] = ["", "easy", "medium", "hard", "boss"];
+        const diff = validDiffs.includes(diffParam as Difficulty | "")
+          ? (diffParam as Difficulty | "")
+          : "";
+        if (diff) {
+          selectedDifficultyRef.current = diff;
+          setSelectedDifficulty(diff);
+        }
+        void loadChallenge(diff, topicParam ?? undefined);
+        return;
+      }
     }
     loadChallenge();
-    // loadDaily / loadChallenge are stable per their own deps; rebinding is cheap.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

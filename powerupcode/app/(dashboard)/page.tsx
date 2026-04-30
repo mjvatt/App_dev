@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
 import type {
+  CurriculumResponse,
   DailyChallengeResponse,
   Difficulty,
   Topic,
@@ -51,6 +52,7 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [me, setMe] = useState<UserMe | null>(null);
   const [daily, setDaily] = useState<DailyChallengeResponse | null>(null);
+  const [curriculum, setCurriculum] = useState<CurriculumResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -67,6 +69,9 @@ export default function DashboardPage() {
     authedRequest<UserMe>("/api/auth/me").then(setMe).catch(() => null);
     authedRequest<DailyChallengeResponse>("/api/challenges/daily")
       .then(setDaily)
+      .catch(() => null);
+    authedRequest<CurriculumResponse>("/api/curriculum/me")
+      .then(setCurriculum)
       .catch(() => null);
   }, [retryCount]);
 
@@ -180,6 +185,25 @@ export default function DashboardPage() {
             className="self-start md:self-auto shrink-0 px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
           >
             {daily.status.solved ? "Try again" : "Solve daily →"}
+          </Link>
+        </div>
+      )}
+
+      {curriculum && !isBrandNew && (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              Recommended for you
+            </p>
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              {curriculum.rationale}
+            </p>
+          </div>
+          <Link
+            href={`/arcade?topic=${curriculum.weak_topic}&difficulty=${curriculum.suggested_difficulty}`}
+            className="self-start md:self-auto shrink-0 px-4 py-2 border border-zinc-700 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
+          >
+            Open in arcade →
           </Link>
         </div>
       )}
