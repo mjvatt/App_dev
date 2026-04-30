@@ -12,6 +12,14 @@
 </head>
 <body>
 
+  <!-- Loading overlay (visible until DraftData.load() resolves) -->
+  <div class="app-loading" id="appLoading">
+    <div class="app-loading-inner">
+      <div class="app-loading-spinner" aria-hidden="true"></div>
+      <div class="app-loading-text">Loading draft data…</div>
+    </div>
+  </div>
+
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">

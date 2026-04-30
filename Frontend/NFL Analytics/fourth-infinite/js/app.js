@@ -2,8 +2,27 @@
 
 (async () => {
   /* ── Load data ────────────────────────────────────────────────────── */
-  const { meta } = await DraftData.load();
+  let _meta;
+  try {
+    ({ meta: _meta } = await DraftData.load());
+  } catch (err) {
+    const overlay = document.getElementById('appLoading');
+    if (overlay) {
+      overlay.innerHTML = `<div class="app-loading-inner">
+        <div class="app-loading-text" style="color:#ef4444">Failed to load draft data.</div>
+        <div class="app-loading-text" style="font-size:12px">${(err && err.message) || err}</div>
+      </div>`;
+    }
+    throw err;
+  }
+  const meta = _meta;
   document.getElementById('pickCount').textContent = `${meta.total_picks.toLocaleString()} picks`;
+  // Fade out the loading overlay; CSS handles the transition.
+  const _appLoading = document.getElementById('appLoading');
+  if (_appLoading) {
+    _appLoading.classList.add('hide');
+    setTimeout(() => _appLoading.remove(), 400);
+  }
 
   /* ── Navigation ───────────────────────────────────────────────────── */
   const VIEW_TITLES = {
