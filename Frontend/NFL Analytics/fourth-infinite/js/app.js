@@ -1142,6 +1142,91 @@
         return `<span class="trade-asset player">${asset.player}</span>`;
       }
 
+      /* Resolve an asset to {label, careerAV} given the year+pick the asset
+         identifies. Returns null when the pick can't be resolved (future
+         draft, missing year, etc.). */
+      function _resolveAsset(asset) {
+        if (asset.type === 'player') return { label: asset.player, careerAV: null };
+        if (!asset.pick || !asset.pick_season) return null;
+        const p = DraftData.picks({})
+          .find(pk => pk.year === +asset.pick_season && pk.pick === +asset.pick);
+        if (!p) return null;
+        return {
+          label: p.player,
+          year: p.year,
+          pick: p.pick,
+          pos: p.pos,
+          posGroup: p.pos_group,
+          college: p.college,
+          careerAV: p.career_av || 0,
+          incomplete: p.year >= 2022,
+        };
+      }
+
+      function _tradeDetailHtml(trade, tA, tB, aAssets, bAssets) {
+        const renderSide = (team, assets) => {
+          let avTotal = 0, anyIncomplete = false, anyUnresolved = false;
+          const rows = assets.map(a => {
+            const r = _resolveAsset(a);
+            if (!r) { anyUnresolved = true;
+              const lbl = a.type === 'player'
+                ? a.player
+                : `${a.pick_season || trade.season} R${a.round}${a.pick ? ' #'+a.pick : ''}${a.cond ? '?' : ''}`;
+              return `<div class="trade-detail-row">
+                <span class="trade-detail-pick">${lbl}</span>
+                <span class="trade-detail-meta" style="color:var(--text-muted)">unresolved</span>
+              </div>`;
+            }
+            if (r.careerAV !== null) avTotal += r.careerAV;
+            if (r.incomplete) anyIncomplete = true;
+            if (a.type === 'player') {
+              return `<div class="trade-detail-row">
+                <span class="trade-detail-pick">Player</span>
+                <strong>${r.label}</strong>
+              </div>`;
+            }
+            return `<div class="trade-detail-row" data-year="${r.year}" data-pick="${r.pick}">
+              <span class="trade-detail-pick">${r.year} #${r.pick}</span>
+              <strong>${r.label || '—'}</strong>
+              <span class="trade-detail-meta">${r.pos || '—'} · ${r.college || ''}</span>
+              <span class="trade-detail-av">${r.careerAV} AV${r.incomplete ? '*' : ''}</span>
+            </div>`;
+          }).join('');
+          return { html: `
+            <div class="trade-detail-side">
+              <div class="trade-detail-team">${team} got</div>
+              ${rows}
+              <div class="trade-detail-total">Total career AV: <strong>${avTotal}${anyIncomplete ? '*' : ''}</strong></div>
+            </div>`, avTotal, anyIncomplete, anyUnresolved };
+        };
+        // Side A "got" the assets they received (i.e., assets where to=A)
+        const aGot = trade.assets.filter(x => x.to === tA);
+        const bGot = trade.assets.filter(x => x.to === tB);
+        const aSide = renderSide(tA, aGot);
+        const bSide = renderSide(tB, bGot);
+
+        const avDiff = +(aSide.avTotal - bSide.avTotal).toFixed(0);
+        const anyIncomplete = aSide.anyIncomplete || bSide.anyIncomplete;
+        const anyUnresolved = aSide.anyUnresolved || bSide.anyUnresolved;
+        let winnerLabel;
+        if (anyUnresolved) {
+          winnerLabel = '<span class="trade-detail-winner-tag none">Career AV: incomplete</span>';
+        } else if (Math.abs(avDiff) <= 5) {
+          winnerLabel = `<span class="trade-detail-winner-tag even">Career AV: roughly even (Δ ${Math.abs(avDiff)})</span>`;
+        } else {
+          const winner = avDiff > 0 ? tA : tB;
+          winnerLabel = `<span class="trade-detail-winner-tag">Career AV winner: <strong>${winner}</strong> (+${Math.abs(avDiff)})</span>`;
+        }
+
+        return `<div class="trade-detail">
+          <div class="trade-detail-grid">${aSide.html}${bSide.html}</div>
+          <div class="trade-detail-footer">
+            ${winnerLabel}
+            ${anyIncomplete ? '<span class="trade-detail-meta">* career still in progress (drafted 2022+)</span>' : ''}
+          </div>
+        </div>`;
+      }
+
       function renderTradeCards(trades) {
         const list = document.getElementById('trade-list');
         if (!trades.length) {
@@ -1149,7 +1234,10 @@
           return;
         }
 
-        const html = trades.map(trade => {
+        // Cache trades on the list element so the click handler can look them up.
+        list._trades = trades;
+
+        const html = trades.map((trade, idx) => {
           const teams = [...new Set(trade.assets.flatMap(a => [a.frm, a.to]))];
           if (teams.length !== 2) return '';
           const [tA, tB] = teams;
@@ -1169,7 +1257,7 @@
           const badge  = winner ? `${winner} +${absS}` : 'EVEN';
           const mm     = trade.date ? trade.date.slice(5, 10).replace('-', '/') : '';
 
-          return `<div class="trade-card">
+          return `<div class="trade-card" data-trade-idx="${idx}">
             <span class="trade-date">${mm}</span>
             <div class="trade-body">
               <div class="trade-side">
@@ -1189,6 +1277,45 @@
         }).join('');
 
         list.innerHTML = html || '<div class="trade-empty">No 2-team pick trades found.</div>';
+
+        // Wire click handlers once via delegation.
+        if (!list._wired) {
+          list._wired = true;
+          list.addEventListener('click', e => {
+            // Resolved-pick row: open player modal.
+            const detailRow = e.target.closest('.trade-detail-row[data-year]');
+            if (detailRow) {
+              const y = +detailRow.dataset.year;
+              const pk = +detailRow.dataset.pick;
+              if (y && pk) openPlayerModal(y, pk);
+              return;
+            }
+            const card = e.target.closest('.trade-card');
+            if (!card) return;
+            const idx = +card.dataset.tradeIdx;
+            const trade = list._trades[idx];
+            if (!trade) return;
+
+            // Toggle: if this card is already expanded, collapse it.
+            const existing = card.nextElementSibling;
+            if (existing && existing.classList && existing.classList.contains('trade-detail')) {
+              existing.remove();
+              card.classList.remove('expanded');
+              return;
+            }
+            // Collapse any other expanded detail first.
+            list.querySelectorAll('.trade-detail').forEach(d => d.remove());
+            list.querySelectorAll('.trade-card.expanded').forEach(c => c.classList.remove('expanded'));
+
+            const teams = [...new Set(trade.assets.flatMap(a => [a.frm, a.to]))];
+            if (teams.length !== 2) return;
+            const [tA, tB] = teams;
+            const aAssets = trade.assets.filter(a => a.frm === tA);
+            const bAssets = trade.assets.filter(a => a.frm === tB);
+            card.insertAdjacentHTML('afterend', _tradeDetailHtml(trade, tA, tB, aAssets, bAssets));
+            card.classList.add('expanded');
+          });
+        }
       }
 
       async function renderTrades(year) {

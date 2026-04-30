@@ -920,6 +920,92 @@ td.empty-state {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.trade-card:hover { border-color: var(--border-light); background: var(--card-hover); }
+.trade-card.expanded { border-color: var(--accent); background: var(--accent-dim); }
+
+.trade-detail {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 14px 16px 16px;
+  margin-top: -6px;
+  font-size: 12px;
+}
+.trade-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.trade-detail-side { min-width: 0; }
+.trade-detail-team {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.trade-detail-row {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--border);
+  cursor: default;
+}
+.trade-detail-row[data-year] { cursor: pointer; }
+.trade-detail-row[data-year]:hover { background: var(--accent-dim); }
+.trade-detail-row:last-of-type { border-bottom: none; }
+.trade-detail-pick {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.trade-detail-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  grid-column: 2 / -1;
+}
+.trade-detail-av {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sage);
+  white-space: nowrap;
+}
+.trade-detail-total {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-sub);
+  font-size: 11px;
+}
+.trade-detail-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.trade-detail-winner-tag {
+  font-size: 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+.trade-detail-winner-tag.even { color: var(--text-muted); }
+.trade-detail-winner-tag.none { color: var(--text-muted); font-style: italic; }
+@media (max-width: 600px) {
+  .trade-detail-grid { grid-template-columns: 1fr; }
+  .trade-detail-row { grid-template-columns: 60px 1fr auto; }
 }
 
 .trade-date { color: var(--text-muted); min-width: 44px; flex-shrink: 0; font-size: 11px; }
