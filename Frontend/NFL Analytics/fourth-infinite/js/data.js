@@ -291,8 +291,11 @@ const DraftData = (() => {
     return { rows, eras: eraLabels };
   }
 
-  /* ATLAS — league-wide draft capital (year Y) vs avg wins in Y+lagFrom through Y+lagTo */
-  function leagueDraftToWins(yearFrom = 1994, yearTo = 2020, lagFrom = 3, lagTo = 5) {
+  /* ATLAS — league-wide draft capital (year Y) vs avg wins in Y+lagFrom through Y+lagTo
+     posGroup optional: when set, only that position group's draft capital
+     contributes. Lets the user see, e.g., that QB capital correlates with
+     wins on a different lag than OL capital. */
+  function leagueDraftToWins(yearFrom = 1994, yearTo = 2020, lagFrom = 3, lagTo = 5, posGroup = null) {
     lagFrom = +lagFrom; lagTo = +lagTo;
 
     const standingsMap = {};
@@ -302,10 +305,13 @@ const DraftData = (() => {
     });
 
     const capByKey = {};
-    _picks.filter(p => p.pick > 0 && p.year >= +yearFrom && p.year <= +yearTo).forEach(p => {
-      const key = `${p.franchise}|${p.year}`;
-      capByKey[key] = (capByKey[key] || 0) + 100 * Math.pow(p.pick, -0.66);
-    });
+    _picks
+      .filter(p => p.pick > 0 && p.year >= +yearFrom && p.year <= +yearTo
+        && (!posGroup || p.pos_group === posGroup))
+      .forEach(p => {
+        const key = `${p.franchise}|${p.year}`;
+        capByKey[key] = (capByKey[key] || 0) + 100 * Math.pow(p.pick, -0.66);
+      });
 
     const points = [];
     Object.entries(capByKey).forEach(([key, capital]) => {

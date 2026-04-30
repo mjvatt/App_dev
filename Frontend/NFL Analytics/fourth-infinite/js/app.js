@@ -716,6 +716,7 @@
     const dwLag   = document.getElementById('atlas-dw-lag');
     const dwYfrom = document.getElementById('atlas-dw-yfrom');
     const dwYto   = document.getElementById('atlas-dw-yto');
+    const dwPos   = document.getElementById('atlas-dw-pos');
 
     /* default yearTo per lag window: need standings through yearTo+lagTo */
     const LAG_DEFAULTS = { '1|1': { yearTo: 2024 }, '3|5': { yearTo: 2020 } };
@@ -735,7 +736,7 @@
         renderDraftWins();
         _atlasTabInited['draft-wins'] = true;
       });
-      [dwYfrom, dwYto].forEach(el => el.addEventListener('change', () => {
+      [dwYfrom, dwYto, dwPos].forEach(el => el.addEventListener('change', () => {
         _atlasTabInited['draft-wins'] = false;
         renderDraftWins();
         _atlasTabInited['draft-wins'] = true;
@@ -744,9 +745,12 @@
 
     function renderDraftWins() {
       const [lagFrom, lagTo] = (dwLag.value || '3|5').split('|').map(Number);
-      const data = DraftData.leagueDraftToWins(+dwYfrom.value, +dwYto.value, lagFrom, lagTo);
+      const pos = dwPos && dwPos.value ? dwPos.value : null;
+      const data = DraftData.leagueDraftToWins(+dwYfrom.value, +dwYto.value, lagFrom, lagTo, pos);
       const lagLabel = lagFrom === lagTo ? `Y+${lagFrom}` : `Y+${lagFrom}–Y+${lagTo}`;
-      document.getElementById('atlas-dw-r2').textContent = `R² = ${data.r2}  ·  lag ${lagLabel}`;
+      const posLabel = pos ? `${pos} only` : 'all positions';
+      document.getElementById('atlas-dw-r2').textContent =
+        `R² = ${data.r2}  ·  lag ${lagLabel}  ·  ${posLabel}  ·  n=${data.points.length}`;
       DraftCharts.leagueDraftWinsChart('chart-atlas-draft-wins', data);
     }
 
