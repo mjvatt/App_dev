@@ -1674,9 +1674,16 @@
     }
   });
 
+  /* Convert a height-in-inches number to a "ft'in"" display string. */
+  function _ftIn(totalIn) {
+    if (totalIn == null) return null;
+    const n = Math.round(totalIn);
+    return `${Math.floor(n / 12)}'${n % 12}"`;
+  }
+
   /* Build the inner HTML for a single player profile card. compareMode=true
-     drops the Historical Comps section to keep two side-by-side cards
-     comparable in length and avoid horizontal scroll. */
+     drops the Historical Comps and Combine & Bio sections to keep two
+     side-by-side cards comparable in length. */
   function _buildProfileCardHtml(year, pick, mlResult, compareMode = false) {
     const profile = DraftData.playerProfile(year, pick);
     if (!profile) return null;
@@ -1757,13 +1764,10 @@
       </div>` : '';
 
     /* Combine & Bio section — surfaces age + measurables that GHOST uses
-       as features. Only rows with data render; section hides if all blank. */
-    const _ftIn = totalIn => {
-      if (totalIn == null) return null;
-      const n = Math.round(totalIn);
-      return `${Math.floor(n / 12)}'${n % 12}"`;
-    };
-    const _bioRows = [
+       as features. Only rows with data render; section hides if all blank.
+       In compare mode the section is suppressed; the comparison bars
+       panel above the cards covers it. */
+    const _bioRows = compareMode ? [] : [
       ['Age at draft',  p.age != null ? p.age : null],
       ['Height',        _ftIn(p.ht_in)],
       ['Weight',        p.wt != null ? `${Math.round(p.wt)} lb` : null],
@@ -1920,6 +1924,90 @@
     `;
   }
 
+  /* Build the visual measurable-comparison panel shown above the two cards
+     in compare mode. Bars are oriented so longer = better (lower-is-better
+     measurables get inverted). Skips rows where neither player has data. */
+  function _buildCompareBarsHtml(year1, pick1, year2, pick2) {
+    const profile1 = DraftData.playerProfile(year1, pick1);
+    const profile2 = DraftData.playerProfile(year2, pick2);
+    if (!profile1 || !profile2) return '';
+    const p1 = profile1.pick;
+    const p2 = profile2.pick;
+
+    // [absMin, absMax] are scale endpoints across all combine-tested NFL
+    // draftees. lower=true means smaller values are better and the bar
+    // gets inverted so longer bar = better mark.
+    const BARS = [
+      { key: 'age',        label: 'Age at draft', min: 20,  max: 27,  lower: true,  fmt: v => `${v}` },
+      { key: 'forty',      label: '40-yard',      min: 4.2, max: 5.8, lower: true,  fmt: v => `${(+v).toFixed(2)}s` },
+      { key: 'vertical',   label: 'Vertical',     min: 20,  max: 45,  lower: false, fmt: v => `${(+v).toFixed(1)}"` },
+      { key: 'broad_jump', label: 'Broad jump',   min: 100, max: 140, lower: false, fmt: v => _ftIn(v) },
+      { key: 'bench',      label: 'Bench',        min: 5,   max: 40,  lower: false, fmt: v => `${Math.round(v)} reps` },
+      { key: 'cone',       label: '3-cone',       min: 6.6, max: 8.0, lower: true,  fmt: v => `${(+v).toFixed(2)}s` },
+      { key: 'shuttle',    label: '20-yd shuttle', min: 3.8, max: 4.8, lower: true,  fmt: v => `${(+v).toFixed(2)}s` },
+    ];
+
+    const c1 = DraftData.posColor(p1.pos_group);
+    // Disambiguate when both players are the same position.
+    const c2 = p1.pos_group === p2.pos_group ? '#f59e0b' : DraftData.posColor(p2.pos_group);
+
+    const pct = (v, b) => {
+      if (v == null) return null;
+      const cl = Math.max(0, Math.min(1, (v - b.min) / (b.max - b.min)));
+      return Math.round((b.lower ? 1 - cl : cl) * 100);
+    };
+
+    const barRow = (b) => {
+      const v1 = p1[b.key], v2 = p2[b.key];
+      if (v1 == null && v2 == null) return '';
+      const p1pct = pct(v1, b);
+      const p2pct = pct(v2, b);
+      const fill = (val, pctVal, color) => val == null
+        ? '<div class="cmp-fill" style="width:0;background:transparent"></div>'
+        : `<div class="cmp-fill" style="width:${pctVal}%;background:${color}"></div>`;
+      return `
+        <div class="cmp-row">
+          <div class="cmp-label">${b.label}</div>
+          <div class="cmp-twin">
+            <div class="cmp-track">${fill(v1, p1pct, c1)}</div>
+            <span class="cmp-val">${v1 != null ? b.fmt(v1) : '—'}</span>
+          </div>
+          <div class="cmp-twin">
+            <div class="cmp-track">${fill(v2, p2pct, c2)}</div>
+            <span class="cmp-val">${v2 != null ? b.fmt(v2) : '—'}</span>
+          </div>
+        </div>`;
+    };
+
+    const bioRow = (label, getVal, fmt) => {
+      const v1 = getVal(p1), v2 = getVal(p2);
+      if (v1 == null && v2 == null) return '';
+      return `
+        <div class="cmp-row cmp-bio">
+          <div class="cmp-label">${label}</div>
+          <div class="cmp-twin"><span class="cmp-val">${v1 != null ? fmt(v1) : '—'}</span></div>
+          <div class="cmp-twin"><span class="cmp-val">${v2 != null ? fmt(v2) : '—'}</span></div>
+        </div>`;
+    };
+
+    const bioHtml = bioRow('Height', p => p.ht_in, _ftIn)
+                  + bioRow('Weight', p => p.wt, v => `${Math.round(v)} lb`);
+    const barRows = BARS.map(barRow).join('');
+    if (!bioHtml && !barRows) return '';
+
+    return `
+      <div class="profile-section profile-compare-bars">
+        <h4>Combine & Bio Comparison</h4>
+        <div class="cmp-headers">
+          <div class="cmp-label"></div>
+          <div class="cmp-twin"><span style="color:${c1};font-weight:700;font-size:12px">${p1.player}</span></div>
+          <div class="cmp-twin"><span style="color:${c2};font-weight:700;font-size:12px">${p2.player}</span></div>
+        </div>
+        ${bioHtml}
+        ${barRows}
+      </div>`;
+  }
+
   /* Open the player profile modal. comparePick is optional — when set, the
      modal renders two cards side-by-side. */
   async function openPlayerModal(year, pick, compareYear = null, comparePick = null) {
@@ -1942,8 +2030,13 @@
            <div id="profileCompareResults" class="profile-compare-results"></div>
          </div>`;
 
+    const compareBars = secondary
+      ? _buildCompareBarsHtml(year, pick, compareYear, comparePick)
+      : '';
+
     const body = secondary
-      ? `<div class="profile-compare-grid">
+      ? `${compareBars}
+         <div class="profile-compare-grid">
            <div class="profile-compare-card">${primary}</div>
            <div class="profile-compare-card">${secondary}</div>
          </div>`
