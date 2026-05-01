@@ -1,17 +1,16 @@
-"""
-Walk the proposed_challenges queue, approve or reject each, and emit
-Python snippets for the engine_core challenge bank.
+"""Walk the proposed_challenges queue, approve or reject each.
 
-Approving a candidate sets status='approved', stamps reviewed_at, and
-prints a ready-to-paste ChallengeData(...) snippet using a slug-based
-challenge id derived from the title (with a -2 / -3 suffix on
-collisions). Rejecting just sets status='rejected' so the row is kept
-for audit but no longer surfaces.
+Approving a candidate sets status='approved', stamps reviewed_at and
+approved_challenge_id, and inserts the new row directly into the
+canonical challenges table. The candidate is live as soon as the
+script commits — no deploy or paste required.
+
+Rejecting just sets status='rejected' so the row is kept for audit
+but no longer surfaces.
 
 Usage (from powerupcode/):
     python scripts/review_proposed_challenges.py
     python scripts/review_proposed_challenges.py --topic graphs
-    python scripts/review_proposed_challenges.py --export-only  # just emit snippets for already-approved
 """
 import argparse
 import asyncio
@@ -22,36 +21,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sqlalchemy import select  # noqa: E402
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from api.config import settings  # noqa: E402
-from api.models.challenge import ProposedChallenge  # noqa: E402
+from api.models.challenge import Challenge, ProposedChallenge  # noqa: E402
 from services.content.schemas import slugify  # noqa: E402
-
-
-def _format_python_snippet(candidate: ProposedChallenge, challenge_id: str) -> str:
-    """Emit a ChallengeData(...) literal ready to paste into
-    services/engine_core/challenge_bank.py. Quotes are doubled to dodge
-    string escaping headaches with the user-supplied prompt text."""
-    indent = "        "
-    constraints_lines = ",\n".join(
-        f"{indent}    {repr(c)}" for c in candidate.constraints
-    )
-    examples_lines = ",\n".join(
-        f"{indent}    {repr(ex)}" for ex in candidate.examples
-    )
-
-    return (
-        f'    "{challenge_id}": ChallengeData(\n'
-        f'        id="{challenge_id}",\n'
-        f"        topic=Topic.{candidate.topic.upper()},\n"
-        f"        difficulty=Difficulty.{candidate.difficulty.upper()},\n"
-        f"        title={candidate.title!r},\n"
-        f"        prompt={candidate.prompt!r},\n"
-        f"        constraints=[\n{constraints_lines},\n        ],\n"
-        f"        examples=[\n{examples_lines},\n        ],\n"
-        f"    ),"
-    )
+from services.engine.interface import ChallengeData, Difficulty, Topic  # noqa: E402
+from services.engine.repository import ChallengeRepository  # noqa: E402
 
 
 def _print_candidate(candidate: ProposedChallenge) -> None:
@@ -78,17 +58,17 @@ def _print_candidate(candidate: ProposedChallenge) -> None:
 
 
 async def _next_unique_id(
-    db, base_slug: str, used_in_session: set[str]  # type: ignore[no-untyped-def]
+    db: AsyncSession, base_slug: str, used_in_session: set[str]
 ) -> str:
-    """Return base_slug, or base_slug-2 / -3 / ... if collision exists."""
+    """Return base_slug, or base_slug-2 / -3 / ... if a row with that id
+    already exists in the challenges table or was minted earlier in this
+    same review session."""
     candidate = base_slug
     suffix = 2
     while True:
         clash_session = candidate in used_in_session
         clash_db = await db.scalar(
-            select(ProposedChallenge.id).where(
-                ProposedChallenge.approved_challenge_id == candidate
-            )
+            select(Challenge.id).where(Challenge.id == candidate)
         )
         if not clash_session and clash_db is None:
             return candidate
@@ -96,25 +76,43 @@ async def _next_unique_id(
         suffix += 1
 
 
-async def _run(topic: str | None, export_only: bool) -> None:
+async def _approve(
+    db: AsyncSession,
+    repo: ChallengeRepository,
+    candidate: ProposedChallenge,
+    used_in_session: set[str],
+) -> str:
+    """Mint a unique challenge id, mark the proposal approved, and insert
+    the live row into the challenges table. Returns the minted id."""
+    base = slugify(candidate.title)
+    challenge_id = await _next_unique_id(db, base, used_in_session)
+    used_in_session.add(challenge_id)
+
+    candidate.status = "approved"
+    candidate.reviewed_at = datetime.now(UTC)
+    candidate.approved_challenge_id = challenge_id
+
+    data = ChallengeData(
+        id=challenge_id,
+        topic=Topic(candidate.topic),
+        difficulty=Difficulty(candidate.difficulty),
+        title=candidate.title,
+        prompt=candidate.prompt,
+        constraints=list(candidate.constraints),
+        examples=list(candidate.examples),
+    )
+    await repo.upsert(
+        db, data, source="ai", proposed_challenge_id=candidate.id
+    )
+    return challenge_id
+
+
+async def _run(topic: str | None) -> None:
     engine = create_async_engine(settings.database_url, echo=False)
     Session = async_sessionmaker(engine, expire_on_commit=False)
+    repo = ChallengeRepository()
 
     async with Session() as db:
-        if export_only:
-            # Re-emit snippets for already-approved candidates.
-            stmt = select(ProposedChallenge).where(
-                ProposedChallenge.status == "approved"
-            )
-            if topic:
-                stmt = stmt.where(ProposedChallenge.topic == topic)
-            rows = (await db.execute(stmt)).scalars().all()
-            print(f"\n# {len(rows)} approved candidate(s):\n")
-            for row in rows:
-                print(_format_python_snippet(row, row.approved_challenge_id or row.id))
-                print()
-            return
-
         stmt = select(ProposedChallenge).where(
             ProposedChallenge.status == "pending"
         )
@@ -150,19 +148,9 @@ async def _run(topic: str | None, export_only: bool) -> None:
                 rejected_count += 1
                 continue
             if choice == "a":
-                base = slugify(row.title)
-                challenge_id = await _next_unique_id(db, base, approved_in_session)
-                approved_in_session.add(challenge_id)
-                row.status = "approved"
-                row.reviewed_at = datetime.now(UTC)
-                row.approved_challenge_id = challenge_id
+                challenge_id = await _approve(db, repo, row, approved_in_session)
                 print()
-                print(
-                    f"  Approved as id={challenge_id}. Snippet to paste into "
-                    "services/engine_core/challenge_bank.py CHALLENGES dict:"
-                )
-                print()
-                print(_format_python_snippet(row, challenge_id))
+                print(f"  Approved as id={challenge_id}. Live in challenges table.")
                 approved_count += 1
                 continue
             print("  unknown choice; treating as skip")
@@ -186,13 +174,8 @@ def main() -> None:
         default=None,
         help="Only review candidates with this topic.",
     )
-    parser.add_argument(
-        "--export-only",
-        action="store_true",
-        help="Skip review prompt; re-emit Python snippets for already-approved rows.",
-    )
     args = parser.parse_args()
-    asyncio.run(_run(args.topic, args.export_only))
+    asyncio.run(_run(args.topic))
 
 
 if __name__ == "__main__":
