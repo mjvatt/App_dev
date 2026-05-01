@@ -102,6 +102,30 @@ export interface DailyLeaderboardResponse {
   total_solvers: number;
 }
 
+export interface BossRushSession {
+  id: string;
+  status: "in_progress" | "completed" | "wiped";
+  current_index: number;
+  lives_remaining: number;
+  attempts_total: number;
+  xp_awarded: number | null;
+  current_challenge: Challenge | null;
+  challenge_ids: string[];
+  started_at: string;
+  ended_at: string | null;
+}
+
+export interface BossRushAttemptResponse {
+  passed: boolean;
+  feedback: string;
+  status: "in_progress" | "completed" | "wiped";
+  current_index: number;
+  lives_remaining: number;
+  attempts_total: number;
+  xp_awarded: number | null;
+  next_challenge: Challenge | null;
+}
+
 export interface ExplanationGrade {
   correctness: number;
   clarity: number;

@@ -14,6 +14,7 @@ from api.rate_limit import limiter
 from api.routers import (
     auth,
     billing,
+    boss_rush,
     challenges,
     curriculum,
     friends,
@@ -71,6 +72,7 @@ app.include_router(leaderboard.router, prefix="/api/leaderboard", tags=["leaderb
 app.include_router(curriculum.router, prefix="/api/curriculum", tags=["curriculum"])
 app.include_router(friends.router, prefix="/api/friends", tags=["friends"])
 app.include_router(interview.router, prefix="/api/interviews", tags=["interviews"])
+app.include_router(boss_rush.router, prefix="/api/boss-rush", tags=["boss-rush"])
 
 
 @app.get("/health", tags=["meta"])

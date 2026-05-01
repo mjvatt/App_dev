@@ -37,11 +37,11 @@ const MODES: Mode[] = [
     accent: "from-amber-500/60 to-amber-700/30",
   },
   {
-    href: null,
+    href: "/arcade/boss-rush",
     title: "Boss Rush",
     blurb: "Three boss-tier problems back to back. Pass all three or wipe.",
-    rule: "Three lives. Combo multiplier on consecutive passes.",
-    badge: "Soon",
+    rule: "Three lives total. 90 / 140 / 190 XP based on outcome.",
+    badge: "Live",
     accent: "from-red-500/60 to-red-800/30",
   },
   {

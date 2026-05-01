@@ -143,6 +143,42 @@ class DailyChallenge(Base):
     )
 
 
+class BossRushRun(Base):
+    """One Boss Rush attempt: 3 boss-tier challenges, 3 lives, all-or-
+    nothing ending. status transitions in_progress -> completed (all 3
+    passed) or wiped (lives hit 0)."""
+
+    __tablename__ = "boss_rush_runs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String, nullable=False, default="in_progress", server_default=text("'in_progress'")
+    )
+    # Three challenge ids picked at start. Frozen for the run's life so a
+    # mid-run bank change can't shift the gauntlet under the player.
+    challenge_ids: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    # Equals the number of problems already passed (0..3). Doubles as the
+    # "which problem are we on" pointer until current_index == 3.
+    current_index: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    lives_remaining: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=3, server_default=text("3")
+    )
+    attempts_total: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    # Awarded once on terminal status — null while in_progress.
+    xp_awarded: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
 class InterviewSession(Base):
     """One mock-interview run. Created when the user clicks Start, completed
     when they click End and the post-mortem is synthesized. Single-problem
