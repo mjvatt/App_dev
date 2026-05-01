@@ -34,6 +34,8 @@ Thumbs.db
 
 # Local artifacts
 logs/
+loadtest/users.csv
+reports/
 
 # IDE
 .vscode/

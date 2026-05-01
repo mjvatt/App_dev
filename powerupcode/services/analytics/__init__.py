@@ -43,7 +43,7 @@ def _ensure_initialized() -> None:
     if not settings.posthog_key:
         logger.info("PostHog disabled: POSTHOG_KEY not set")
         return
-    _client = Posthog(
+    _client = Posthog(  # type: ignore[no-untyped-call]
         project_api_key=settings.posthog_key,
         host=settings.posthog_host or "https://us.posthog.com",
     )
@@ -60,7 +60,7 @@ def capture(
     if _client is None:
         return
     try:
-        _client.capture(
+        _client.capture(  # type: ignore[no-untyped-call]
             distinct_id=distinct_id,
             event=event,
             properties=properties or {},
@@ -75,7 +75,7 @@ def shutdown() -> None:
     if _client is None:
         return
     try:
-        _client.shutdown()
+        _client.shutdown()  # type: ignore[no-untyped-call]
     except Exception:
         logger.exception("PostHog shutdown failed")
 
