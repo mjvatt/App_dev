@@ -81,3 +81,29 @@ class Recommendation(BaseModel):
 class RecommendResponse(BaseModel):
     recommendations: list[Recommendation]
     notes: str | None = None
+
+
+class RewriteContext(BaseModel):
+    branch: Branch | None = None
+    occupation_code: str | None = None
+    pay_grade: str | None = None
+    target_role: str | None = Field(
+        default=None,
+        description="Target civilian role for tuning translation, e.g., 'Training Specialist'.",
+    )
+
+
+class RewriteRequest(BaseModel):
+    bullets: list[str] = Field(..., min_length=1, max_length=20)
+    context: RewriteContext | None = None
+
+
+class RewriteItem(BaseModel):
+    original: str
+    rewritten: str
+    notes: str | None = None
+
+
+class RewriteResponse(BaseModel):
+    rewrites: list[RewriteItem]
+    notes: str | None = None
