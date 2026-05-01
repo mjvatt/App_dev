@@ -181,7 +181,7 @@ export default function DashboardPage() {
             )}
           </div>
           <Link
-            href="/arcade?daily=1"
+            href="/arcade/play?daily=1"
             className="self-start md:self-auto shrink-0 px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
           >
             {daily.status.solved ? "Try again" : "Solve daily →"}
@@ -200,7 +200,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <Link
-            href={`/arcade?topic=${curriculum.weak_topic}&difficulty=${curriculum.suggested_difficulty}`}
+            href={`/arcade/play?topic=${curriculum.weak_topic}&difficulty=${curriculum.suggested_difficulty}`}
             className="self-start md:self-auto shrink-0 px-4 py-2 border border-zinc-700 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
           >
             Open in arcade →
