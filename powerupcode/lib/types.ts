@@ -26,6 +26,8 @@ export interface AttemptResult {
   new_level: number;
   streak_days: number;
   streak_milestone: number | null;
+  daily_streak_days: number;
+  daily_streak_milestone: number | null;
 }
 
 export interface DifficultyStats {
@@ -40,6 +42,7 @@ export interface UserProgress {
   level: number;
   xp_to_next: number;
   streak_days: number;
+  daily_streak_days: number;
   topics: Record<Topic, number>;
   difficulty_stats: Partial<Record<Difficulty, DifficultyStats>>;
 }

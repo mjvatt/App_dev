@@ -108,8 +108,8 @@ export default function DashboardPage() {
     return (
       <div className="p-8">
         <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 animate-pulse">
               <div className="h-3 w-24 bg-zinc-800 rounded mb-3" />
               <div className="h-8 w-16 bg-zinc-800 rounded" />
@@ -248,12 +248,16 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard label="Level" value={String(progress.level)} />
         <StatCard label="Total XP" value={progress.total_xp.toLocaleString()} />
         <StatCard
           label="Current Streak"
           value={`${progress.streak_days} day${progress.streak_days !== 1 ? "s" : ""}`}
+        />
+        <StatCard
+          label="Daily Streak"
+          value={`${progress.daily_streak_days} day${progress.daily_streak_days !== 1 ? "s" : ""}`}
         />
       </div>
 

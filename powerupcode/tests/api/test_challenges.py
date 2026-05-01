@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 
 from httpx import AsyncClient
 
@@ -6,7 +6,9 @@ from api.models.challenge import UserProgress
 from api.routers.challenges import (
     _REVIEW_XP_CAP,
     _award_xp,
+    _daily_milestone_just_hit,
     _milestone_just_hit,
+    _update_daily_streak,
     _update_streak,
 )
 
@@ -91,6 +93,63 @@ def test_milestone_handles_streak_jumps_taking_first_only() -> None:
 
 def test_milestone_returns_none_on_streak_reset() -> None:
     assert _milestone_just_hit(prior=10, current=1) is None
+
+
+def test_daily_streak_starts_at_one_for_new_user() -> None:
+    progress = UserProgress(user_id="u1", total_xp=0, daily_streak_days=0)
+    _update_daily_streak(progress, today_utc=date(2026, 5, 1))
+    assert progress.daily_streak_days == 1
+    assert progress.last_daily_solved_date == date(2026, 5, 1)
+
+
+def test_daily_streak_increments_on_consecutive_days() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=4,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 2))
+    assert progress.daily_streak_days == 5
+    assert progress.last_daily_solved_date == date(2026, 5, 2)
+
+
+def test_daily_streak_resets_after_a_gap() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=12,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 4))
+    assert progress.daily_streak_days == 1
+
+
+def test_daily_streak_idempotent_within_same_day() -> None:
+    """A second daily-pass on the same UTC date must not double-count.
+    The submit handler can call _update_daily_streak twice in flight if
+    the user pounds the button on a 're-solve today' button later."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=7,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 1))
+    assert progress.daily_streak_days == 7
+
+
+def test_daily_milestone_first_threshold_is_three() -> None:
+    assert _daily_milestone_just_hit(prior=2, current=3) == 3
+
+
+def test_daily_milestone_returns_none_when_not_crossed() -> None:
+    assert _daily_milestone_just_hit(prior=4, current=5) is None
+    assert _daily_milestone_just_hit(prior=14, current=15) is None
+
+
+def test_daily_milestone_returns_none_on_reset() -> None:
+    assert _daily_milestone_just_hit(prior=30, current=1) is None
 
 
 def test_award_xp_failed_attempt_returns_raw_xp() -> None:

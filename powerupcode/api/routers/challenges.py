@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -36,11 +36,19 @@ _MEDIUM_PASS_THRESHOLD = 3  # out of _ADAPTIVE_WINDOW
 _MIN_ATTEMPTS_FOR_ADAPT = 3
 _REVIEW_XP_CAP = 5  # XP for repeat passes of an already-solved challenge
 _STREAK_MILESTONES = (3, 7, 14, 30, 60, 100, 365)
+_DAILY_STREAK_MILESTONES = (3, 7, 14, 30, 100, 365)
 
 
 def _milestone_just_hit(prior: int, current: int) -> int | None:
     """Return the streak milestone the user just crossed, or None."""
     for m in _STREAK_MILESTONES:
+        if prior < m <= current:
+            return m
+    return None
+
+
+def _daily_milestone_just_hit(prior: int, current: int) -> int | None:
+    for m in _DAILY_STREAK_MILESTONES:
         if prior < m <= current:
             return m
     return None
@@ -176,6 +184,37 @@ def _compute_level(total_xp: int) -> int:
     return total_xp // 100 + 1
 
 
+def _update_daily_streak(progress: UserProgress, today_utc: date) -> None:
+    """Tick the user's daily-challenge streak when they pass the daily for
+    a UTC calendar day they haven't already solved. Same calendar-math
+    shape as _update_streak but driven off `last_daily_solved_date` so the
+    activity streak and the daily streak don't interfere."""
+    last = progress.last_daily_solved_date
+    if last is None:
+        progress.daily_streak_days = 1
+    else:
+        delta = (today_utc - last).days
+        if delta == 0:
+            return  # already solved today's daily; idempotent
+        if delta == 1:
+            progress.daily_streak_days += 1
+        else:
+            progress.daily_streak_days = 1
+    progress.last_daily_solved_date = today_utc
+
+
+async def _get_today_daily_id(db: AsyncSession) -> str | None:
+    """Read-only lookup for today's daily challenge id. Unlike
+    _resolve_daily_challenge_id, this does NOT create a daily_challenges row
+    if missing — the calling path is submit_attempt, which mustn't have
+    side effects on a non-daily submission."""
+    today = datetime.now(UTC).date()
+    row = await db.scalar(
+        select(DailyChallenge.challenge_id).where(DailyChallenge.date == today)
+    )
+    return row if isinstance(row, str) else None
+
+
 def _update_streak(progress: UserProgress, now: datetime | None = None) -> None:
     """Streak is measured in UTC days. A user keeps their streak by submitting
     at least one attempt within consecutive UTC calendar days. Server local time
@@ -257,11 +296,13 @@ async def submit_attempt(
     if progress is None:
         prior_level = 1
         prior_streak = 0
+        prior_daily_streak = 0
         progress = UserProgress(user_id=user_id, total_xp=awarded_xp)
         db.add(progress)
     else:
         prior_level = progress.level
         prior_streak = progress.streak_days
+        prior_daily_streak = progress.daily_streak_days
         progress.total_xp += awarded_xp
 
     progress.level = _compute_level(progress.total_xp)
@@ -272,6 +313,16 @@ async def submit_attempt(
         key = result.topic.value
         topics[key] = topics.get(key, 0) + 1
         progress.topics = topics
+
+    daily_milestone: int | None = None
+    if result.passed:
+        today_daily_id = await _get_today_daily_id(db)
+        if today_daily_id == challenge_id:
+            today_utc = datetime.now(UTC).date()
+            _update_daily_streak(progress, today_utc)
+            daily_milestone = _daily_milestone_just_hit(
+                prior_daily_streak, progress.daily_streak_days
+            )
 
     await _update_review_schedule(
         db, user_id, challenge_id, passed=result.passed, hints_used=result.hints_used
@@ -303,6 +354,8 @@ async def submit_attempt(
         new_level=progress.level,
         streak_days=progress.streak_days,
         streak_milestone=_milestone_just_hit(prior_streak, progress.streak_days),
+        daily_streak_days=progress.daily_streak_days,
+        daily_streak_milestone=daily_milestone,
     )
 
 
