@@ -27,7 +27,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine  # no
 
 from api.config import settings  # noqa: E402
 from api.models.challenge import ProposedChallenge  # noqa: E402
-from services.engine.interface import Difficulty, Topic  # noqa: E402
+from services.calibrator import HeuristicPredictor  # noqa: E402
+from services.engine.interface import ChallengeData, Difficulty, Topic  # noqa: E402
 
 # engine_core is gitignored — import here defers the failure to runtime
 # with a clear message instead of an unfindable ImportError at startup.
@@ -46,6 +47,9 @@ except ImportError as exc:  # pragma: no cover
     raise SystemExit(1) from exc
 
 
+_PREDICTOR = HeuristicPredictor()
+
+
 async def _generate_one(
     topic: Topic, difficulty: Difficulty, guidance: str | None
 ) -> ProposedChallenge | None:
@@ -57,15 +61,30 @@ async def _generate_one(
         print(f"  generation failed: {exc}", file=sys.stderr)
         return None
 
+    examples = [ex.model_dump() for ex in candidate.examples]
+    prediction = _PREDICTOR.predict(
+        ChallengeData(
+            id="pending",
+            topic=candidate.topic,
+            difficulty=candidate.difficulty,
+            title=candidate.title,
+            prompt=candidate.prompt,
+            constraints=list(candidate.constraints),
+            examples=examples,
+        )
+    )
     return ProposedChallenge(
         topic=candidate.topic.value,
         difficulty=candidate.difficulty.value,
         title=candidate.title,
         prompt=candidate.prompt,
         constraints=candidate.constraints,
-        examples=[ex.model_dump() for ex in candidate.examples],
+        examples=examples,
         sample_solution=candidate.sample_solution,
         generation_model="claude-haiku-4-5-20251001",
+        predicted_solve_rate=prediction.solve_rate,
+        predicted_time_ms=prediction.time_ms,
+        prediction_model=prediction.model_version,
     )
 
 

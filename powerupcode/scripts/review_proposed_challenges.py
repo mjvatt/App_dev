@@ -29,6 +29,10 @@ from sqlalchemy.ext.asyncio import (  # noqa: E402
 
 from api.config import settings  # noqa: E402
 from api.models.challenge import Challenge, ProposedChallenge  # noqa: E402
+from services.calibrator import (  # noqa: E402
+    declared_vs_predicted_tier_gap,
+    solve_rate_to_tier,
+)
 from services.content.schemas import slugify  # noqa: E402
 from services.engine.interface import ChallengeData, Difficulty, Topic  # noqa: E402
 from services.engine.repository import ChallengeRepository  # noqa: E402
@@ -40,6 +44,7 @@ def _print_candidate(candidate: ProposedChallenge) -> None:
     print(f"  {candidate.title}")
     print(f"  topic: {candidate.topic}    difficulty: {candidate.difficulty}")
     print(f"  candidate id: {candidate.id}")
+    _print_calibration(candidate)
     print("-" * 78)
     print(candidate.prompt)
     print()
@@ -55,6 +60,36 @@ def _print_candidate(candidate: ProposedChallenge) -> None:
     print("Sample solution:")
     print(candidate.sample_solution)
     print("=" * 78)
+
+
+def _print_calibration(candidate: ProposedChallenge) -> None:
+    """Surface the calibrator's prediction and warn loudly when the
+    declared difficulty disagrees with the bucketed prediction by 2+
+    tiers. The reviewer still has the final call — we don't auto-block."""
+    if candidate.predicted_solve_rate is None:
+        return
+    declared = Difficulty(candidate.difficulty)
+    predicted_tier = solve_rate_to_tier(candidate.predicted_solve_rate)
+    gap = declared_vs_predicted_tier_gap(declared, predicted_tier)
+    seconds = (
+        candidate.predicted_time_ms // 1000
+        if candidate.predicted_time_ms is not None
+        else None
+    )
+    label = "agrees" if gap == 0 else f"looks more like {predicted_tier.value}"
+    line = (
+        f"  calibrator: {candidate.predicted_solve_rate:.0%} solve rate, "
+        f"~{seconds}s median  ({label})"
+        if seconds is not None
+        else (
+            f"  calibrator: {candidate.predicted_solve_rate:.0%} solve rate  "
+            f"({label})"
+        )
+    )
+    print(line)
+    if gap >= 2:
+        print(f"  WARNING: declared='{declared.value}' but prediction "
+              f"buckets to '{predicted_tier.value}' — investigate before approving.")
 
 
 async def _next_unique_id(
@@ -102,7 +137,13 @@ async def _approve(
         examples=list(candidate.examples),
     )
     await repo.upsert(
-        db, data, source="ai", proposed_challenge_id=candidate.id
+        db,
+        data,
+        source="ai",
+        proposed_challenge_id=candidate.id,
+        predicted_solve_rate=candidate.predicted_solve_rate,
+        predicted_time_ms=candidate.predicted_time_ms,
+        prediction_model=candidate.prediction_model,
     )
     return challenge_id
 

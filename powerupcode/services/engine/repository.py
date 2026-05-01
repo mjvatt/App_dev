@@ -81,6 +81,9 @@ class ChallengeRepository:
         *,
         source: str = "seed",
         proposed_challenge_id: str | None = None,
+        predicted_solve_rate: float | None = None,
+        predicted_time_ms: int | None = None,
+        prediction_model: str | None = None,
     ) -> None:
         """Insert a new challenge row, or update the matching one in place.
         Postgres ON CONFLICT keeps the upsert atomic; the stub-only test path
@@ -96,6 +99,9 @@ class ChallengeRepository:
             "examples": list(data.examples),
             "source": source,
             "proposed_challenge_id": proposed_challenge_id,
+            "predicted_solve_rate": predicted_solve_rate,
+            "predicted_time_ms": predicted_time_ms,
+            "prediction_model": prediction_model,
         }
         stmt = pg_insert(Challenge).values(**values)
         stmt = stmt.on_conflict_do_update(
@@ -109,6 +115,9 @@ class ChallengeRepository:
                 "examples": stmt.excluded.examples,
                 "source": stmt.excluded.source,
                 "proposed_challenge_id": stmt.excluded.proposed_challenge_id,
+                "predicted_solve_rate": stmt.excluded.predicted_solve_rate,
+                "predicted_time_ms": stmt.excluded.predicted_time_ms,
+                "prediction_model": stmt.excluded.prediction_model,
                 "updated_at": now,
             },
         )

@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine  # noqa: E402
 
 from api.config import settings  # noqa: E402
+from services.calibrator import HeuristicPredictor  # noqa: E402
 from services.engine.repository import ChallengeRepository  # noqa: E402
 
 try:
@@ -36,6 +37,7 @@ async def _run(dry_run: bool) -> None:
     engine = create_async_engine(settings.database_url, echo=False)
     Session = async_sessionmaker(engine, expire_on_commit=False)
     repo = ChallengeRepository()
+    predictor = HeuristicPredictor()
 
     async with Session() as db:
         if dry_run:
@@ -45,7 +47,16 @@ async def _run(dry_run: bool) -> None:
             return
 
         for cid, data in sorted(CHALLENGES.items()):
-            await repo.upsert(db, data, source="seed", proposed_challenge_id=None)
+            prediction = predictor.predict(data)
+            await repo.upsert(
+                db,
+                data,
+                source="seed",
+                proposed_challenge_id=None,
+                predicted_solve_rate=prediction.solve_rate,
+                predicted_time_ms=prediction.time_ms,
+                prediction_model=prediction.model_version,
+            )
             print(f"  upserted {cid}")
         await db.commit()
         print(f"\nDone. {len(CHALLENGES)} challenge(s) seeded.")

@@ -88,6 +88,11 @@ class Challenge(Base):
         String, nullable=False, default="seed", server_default=text("'seed'")
     )
     proposed_challenge_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Calibrator predictions, captured at the point a challenge enters the
+    # bank. Nullable for legacy seed rows that pre-date the calibrator.
+    predicted_solve_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    predicted_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    prediction_model: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -123,6 +128,9 @@ class ProposedChallenge(Base):
     )
     reviewer_notes: Mapped[str | None] = mapped_column(String, nullable=True)
     approved_challenge_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    predicted_solve_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    predicted_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    prediction_model: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class DailyChallenge(Base):
