@@ -19,6 +19,7 @@ dependencies = [
     "aiosmtplib>=3.0",
     "slowapi>=0.1.9",
     "sentry-sdk[fastapi]>=2.0",
+    "posthog>=3.5,<5.0",
 ]
 
 [project.optional-dependencies]

@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     sentry_dsn: str = ""
     sentry_traces_sample_rate: float = 0.0  # bump for perf monitoring
 
+    # PostHog — server-side analytics. Empty key disables capture entirely.
+    # Use the same project the frontend posts to so funnels can join client
+    # and server events on distinct_id.
+    posthog_key: str = ""
+    posthog_host: str = "https://us.posthog.com"
+
     # Cookie auth — set cookie_secure=true and cookie_samesite='none' in
     # production behind HTTPS with a different frontend domain. Defaults
     # are tuned for localhost dev where the frontend (3001) and API (8000)

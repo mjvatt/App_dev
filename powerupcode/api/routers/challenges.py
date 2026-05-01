@@ -22,6 +22,8 @@ from api.schemas.challenge import (
     ReviewRequest,
     ReviewResponse,
 )
+from services.analytics import Events as AnalyticsEvents
+from services.analytics import capture as analytics_capture
 from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
 from services.engine.similarity import hash_solution
@@ -276,6 +278,19 @@ async def submit_attempt(
     )
 
     await db.commit()
+
+    if result.passed and not is_repeat_pass:
+        analytics_capture(
+            user_id,
+            AnalyticsEvents.AttemptFirstPass,
+            {
+                "challenge_id": challenge_id,
+                "topic": result.topic.value if result.topic else None,
+                "difficulty": result.difficulty.value if result.difficulty else None,
+                "hints_used": result.hints_used,
+                "time_ms": result.time_ms,
+            },
+        )
 
     return AttemptResponse(
         attempt_id=attempt.id,

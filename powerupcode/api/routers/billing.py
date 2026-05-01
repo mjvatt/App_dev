@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.dependencies import get_current_user, get_db, require_verified_user
 from api.models.user import ProcessedStripeEvent, Subscription
 from api.schemas.billing import SubscriptionStatusResponse
+from services.analytics import Events as AnalyticsEvents
+from services.analytics import capture as analytics_capture
 from services.billing.stripe_client import create_checkout_session, handle_webhook
 
 logger = logging.getLogger(__name__)
@@ -111,6 +113,12 @@ async def stripe_webhook(
                         sub_obj["current_period_end"], tz=UTC
                     ),
                 )
+                if sub_obj["status"] in ("active", "trialing"):
+                    analytics_capture(
+                        user_id,
+                        AnalyticsEvents.SubscriptionActivated,
+                        {"tier": plan, "stripe_status": sub_obj["status"]},
+                    )
         case "customer.subscription.updated":
             await _update_subscription(
                 db,
@@ -132,6 +140,13 @@ async def stripe_webhook(
                     else None
                 ),
             )
+            owner = await _user_id_for_subscription(db, sub_obj["id"])
+            if owner:
+                analytics_capture(
+                    owner,
+                    AnalyticsEvents.SubscriptionCanceled,
+                    {"stripe_subscription_id": sub_obj["id"]},
+                )
 
     return {"received": True}
 
@@ -164,6 +179,20 @@ async def _upsert_subscription(
         sub.status = status
         sub.current_period_end = current_period_end
     await db.commit()
+
+
+async def _user_id_for_subscription(
+    db: AsyncSession, stripe_sub_id: str
+) -> str | None:
+    """Look up the owning user_id for a Stripe subscription. Used by the
+    cancellation analytics hook where the webhook payload doesn't carry
+    the user_id metadata directly."""
+    result = await db.execute(
+        select(Subscription.user_id).where(
+            Subscription.stripe_subscription_id == stripe_sub_id
+        )
+    )
+    return result.scalar_one_or_none()
 
 
 async def _update_subscription(

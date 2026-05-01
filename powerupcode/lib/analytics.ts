@@ -49,6 +49,7 @@ export function resetIdentity(): void {
 
 // Stable event name constants so callsites stay consistent.
 export const Events = {
+  RegisterStarted: "register.started",
   RegisterCompleted: "register.completed",
   LoginCompleted: "login.completed",
   Logout: "auth.logout",

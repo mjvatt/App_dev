@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { Events, identify, track } from "@/lib/analytics";
 import { rememberEmail } from "@/lib/auth";
@@ -15,6 +15,10 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    track(Events.RegisterStarted);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
