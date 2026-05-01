@@ -34,6 +34,9 @@ dev = [
 loadtest = [
     "locust>=2.30",
 ]
+backups = [
+    "boto3>=1.34,<2.0",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
