@@ -1,11 +1,12 @@
 import csv
 import json
+from datetime import date
 from pathlib import Path
 
 import re
 import unicodedata
 
-DATA_DIR        = Path(__file__).parent / "Data"
+DATA_DIR        = Path(__file__).parent / "data"
 OUT_FILE        = Path(__file__).parent / "data" / "draft_data.json"
 STANDINGS_FILE  = Path(__file__).parent / "data" / "standings.csv"
 AV_FILE         = Path(__file__).parent / "data" / "av_data.csv"
@@ -273,6 +274,7 @@ with open(OUT_FILE, "w", encoding="utf-8") as f:
                 "colleges": colleges,
                 "total_picks": len(picks),
                 "total_standings": len(standings),
+                "built_at": date.today().isoformat(),
             },
         },
         f,

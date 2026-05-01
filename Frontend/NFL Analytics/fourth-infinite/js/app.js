@@ -91,12 +91,20 @@
      DASHBOARD
   ═══════════════════════════════════════════════════════════════════ */
   function initDashboard() {
+    const refreshedSuffix = meta.built_at ? ` · data refreshed ${meta.built_at}` : '';
     document.getElementById('viewSub').textContent =
-      `${meta.years.length} seasons · ${meta.total_picks.toLocaleString()} picks · all NFL teams`;
+      `${meta.years.length} seasons · ${meta.total_picks.toLocaleString()} picks · all NFL teams${refreshedSuffix}`;
     document.getElementById('kpi-years').textContent    = meta.years.length;
     document.getElementById('kpi-picks').textContent    = meta.total_picks.toLocaleString();
     document.getElementById('kpi-teams').textContent    = meta.teams.length;
     document.getElementById('kpi-colleges').textContent = meta.colleges.length;
+
+    const ppySub = document.getElementById('dashboard-picksPerYear-sub');
+    if (ppySub && meta.years.length) {
+      const yMin = Math.min(...meta.years);
+      const yMax = Math.max(...meta.years);
+      ppySub.textContent = `Total selections across all rounds, ${yMin}–${yMax}`;
+    }
 
     /* picks per year */
     DraftCharts.picksPerYear('chart-picksPerYear', DraftData.picksPerYear());

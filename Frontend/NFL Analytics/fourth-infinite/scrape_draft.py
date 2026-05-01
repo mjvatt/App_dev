@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-DATA_DIR = Path(__file__).parent / "Data"
+DATA_DIR = Path(__file__).parent / "data"
 BASE_URL = "https://www.footballdb.com/draft/draft.html"
 HEADERS = {
     "User-Agent": (
