@@ -55,6 +55,16 @@ export default function InterviewSessionPage({
   const [ending, setEnding] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const startTime = useRef<number>(Date.now());
+  // Re-renders once a second while the session is live so the header
+  // timer stays current. Elapsed itself is derived from Date.now() at
+  // render, not stored, so we don't drift.
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!session || session.status !== "in_progress") return;
+    const id = window.setInterval(() => setTick((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [session]);
 
   // Speech recognition appends finalized phrases to the same textarea
   // the user can also type into. One source of truth for the transcript.
@@ -165,12 +175,15 @@ export default function InterviewSessionPage({
             </span>
             {tier && <TierBadge difficulty={tier} size="sm" />}
           </div>
-          <button
-            onClick={() => setConfirming(true)}
-            className="px-3 py-1.5 border border-zinc-700 text-white text-xs font-semibold rounded-lg hover:border-white transition-colors"
-          >
-            End interview
-          </button>
+          <div className="flex items-center gap-3">
+            <InterviewTimer startedAt={startTime.current} />
+            <button
+              onClick={() => setConfirming(true)}
+              className="px-3 py-1.5 border border-zinc-700 text-white text-xs font-semibold rounded-lg hover:border-white transition-colors"
+            >
+              End interview
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 overflow-hidden">
@@ -302,6 +315,43 @@ export default function InterviewSessionPage({
   );
 }
 
+// Soft target for an interview problem, in milliseconds. Roughly the
+// midpoint of a typical phone-screen window — past this, the timer
+// shifts to amber as a non-blocking pressure cue. The post-mortem
+// also gets the raw elapsed and grades accordingly.
+const INTERVIEW_TARGET_MS = 30 * 60_000;
+const INTERVIEW_OVERTIME_MS = 35 * 60_000;
+
+function formatElapsed(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function pressureColor(ms: number): string {
+  if (ms >= INTERVIEW_OVERTIME_MS) return "text-red-400";
+  if (ms >= INTERVIEW_TARGET_MS) return "text-amber-300";
+  return "text-zinc-300";
+}
+
+function InterviewTimer({ startedAt }: { startedAt: number }) {
+  const elapsed = Math.max(0, Date.now() - startedAt);
+  const overtime = elapsed > INTERVIEW_TARGET_MS;
+  return (
+    <div className="flex flex-col items-end leading-tight">
+      <span
+        className={`font-mono text-sm font-semibold tabular-nums ${pressureColor(elapsed)}`}
+      >
+        {formatElapsed(elapsed)}
+      </span>
+      <span className="text-[10px] uppercase tracking-[0.15em] text-zinc-600">
+        {overtime ? "running long" : `target ${formatElapsed(INTERVIEW_TARGET_MS)}`}
+      </span>
+    </div>
+  );
+}
+
 function ConfirmDialog({
   disabled,
   ending,
@@ -373,7 +423,7 @@ function ReportView({ session }: { session: InterviewSession }) {
         </span>
       </div>
 
-      <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-1">
             Overall score
@@ -383,6 +433,21 @@ function ReportView({ session }: { session: InterviewSession }) {
             <span className="text-base text-zinc-500">/100</span>
           </p>
         </div>
+        {session.time_ms !== null && (
+          <div className="md:text-center">
+            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-1">
+              Time taken
+            </p>
+            <p className={`text-2xl font-mono font-semibold tabular-nums ${pressureColor(session.time_ms)}`}>
+              {formatElapsed(session.time_ms)}
+            </p>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-zinc-600">
+              {session.time_ms > INTERVIEW_TARGET_MS
+                ? "over target"
+                : `target ${formatElapsed(INTERVIEW_TARGET_MS)}`}
+            </p>
+          </div>
+        )}
         <div className="md:text-right">
           <p
             className={`text-base font-semibold ${verdict.color}`}
