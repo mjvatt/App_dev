@@ -39,6 +39,9 @@ data/opm/
 data/bls/
 data/cache/
 
+# Eval results regenerate locally; commit only cases + scripts.
+eval/results.json
+
 # OS
 .DS_Store
 Thumbs.db

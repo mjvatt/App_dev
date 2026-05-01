@@ -1,0 +1,193 @@
+{
+  "version": "1",
+  "description": "Hand-curated retrieval eval cases. Each case carries a synthetic-but-realistic veteran profile and a small set of anchor O*NET SOC codes that a competent retrieval system should surface in top-5 or top-10. The cases span all four service branches and a mix of combat-arms, technical, medical, logistics, and admin MOCs to expose the crosswalk's combat-arms gap (see project_pathfinder.md) and to verify pgvector embedding fallback is doing real work.",
+  "cases": [
+    {
+      "id": "11b-junior-enlisted",
+      "description": "Army 11B Infantry, junior enlisted, no degree, no civilian skills. Combat-arms gap case; relies entirely on pgvector embedding.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "11B", "pay_grade": "E-4",
+        "years_of_service": 4, "combat_deployments": 1,
+        "leadership_roles": null,
+        "additional_skills": "Air Assault badge",
+        "education_level": "high_school", "certifications": null, "civilian_skills": null,
+        "location": "Fayetteville, NC", "open_to_relocate": true,
+        "dependents": 0, "target_salary": 50000, "work_style": "in_person",
+        "goals": "Steady paycheck, hands-on work, room to grow into supervisor role"
+      },
+      "expected_socs": ["33-9032.00", "13-1151.00", "33-3051.00"],
+      "expected_titles_hint": ["Security Guard", "Training Specialist", "Police Officer"]
+    },
+    {
+      "id": "11a-officer-captain",
+      "description": "Army Infantry Officer, O-3 Captain, multiple combat tours, MBA-bound. Officer leadership profile should pull operations management.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "11A", "pay_grade": "O-3",
+        "years_of_service": 8, "combat_deployments": 2,
+        "leadership_roles": "Platoon Leader, Company Executive Officer, Company Commander (rifle company, 120 personnel)",
+        "additional_skills": "Ranger, Airborne, US Army Master Resilience Trainer",
+        "education_level": "bachelor",
+        "certifications": "PMP candidate",
+        "civilian_skills": "Project planning, briefing senior executives",
+        "location": "Washington, DC", "open_to_relocate": false,
+        "dependents": 2, "target_salary": 110000, "work_style": "hybrid",
+        "goals": "Leverage leadership experience into operations or program management; eventual general management"
+      },
+      "expected_socs": ["11-9111.00", "11-3071.00", "13-1082.00"],
+      "expected_titles_hint": ["Operations Manager", "Logistics Manager", "Project Management Specialist"]
+    },
+    {
+      "id": "0311-marine-rifleman",
+      "description": "USMC 0311 Rifleman, similar to 11B but Marine Corps. Should produce equivalent combat-arms civilian transitions.",
+      "profile": {
+        "branch": "marines", "component": "active",
+        "occupation_code": "0311", "pay_grade": "E-5",
+        "years_of_service": 6, "combat_deployments": 2,
+        "leadership_roles": "Squad Leader (12 Marines)",
+        "additional_skills": "Combat Marksmanship Coach",
+        "education_level": "some_college", "certifications": null,
+        "civilian_skills": "Coaching, range safety",
+        "location": "San Diego, CA", "open_to_relocate": true,
+        "dependents": 1, "target_salary": 65000, "work_style": "in_person",
+        "goals": "Use coaching and leadership skills, stay active, possible law enforcement"
+      },
+      "expected_socs": ["33-3051.00", "33-9032.00", "13-1151.00"],
+      "expected_titles_hint": ["Police Officer", "Security Guard", "Training Specialist"]
+    },
+    {
+      "id": "68w-combat-medic",
+      "description": "Army 68W Combat Medic. Strong crosswalk match to civilian healthcare.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "68W", "pay_grade": "E-5",
+        "years_of_service": 6, "combat_deployments": 1,
+        "leadership_roles": "Senior line medic, mentored junior medics",
+        "additional_skills": "Tactical Combat Casualty Care, EMT-B equivalent training",
+        "education_level": "associate",
+        "certifications": "NREMT-B",
+        "civilian_skills": null,
+        "location": "Tampa, FL", "open_to_relocate": false,
+        "dependents": 1, "target_salary": 55000, "work_style": "in_person",
+        "goals": "Civilian paramedic or RN bridge program"
+      },
+      "expected_socs": ["29-2042.00", "29-2043.00", "31-1131.00"],
+      "expected_titles_hint": ["EMT", "Paramedic", "Nursing Assistant"]
+    },
+    {
+      "id": "25b-it-specialist",
+      "description": "Army 25B Information Technology Specialist with Sec+. Should map cleanly to civilian IT.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "25B", "pay_grade": "E-5",
+        "years_of_service": 6, "combat_deployments": 0,
+        "leadership_roles": "NCOIC of small communications shop",
+        "additional_skills": "Active Directory, group policy, Cisco IOS basics",
+        "education_level": "bachelor",
+        "certifications": "Sec+, Net+",
+        "civilian_skills": "Helpdesk tier 2 in college job",
+        "location": "Austin, TX", "open_to_relocate": true,
+        "dependents": 0, "target_salary": 80000, "work_style": "hybrid",
+        "goals": "Cybersecurity analyst track, CISSP within 3 years"
+      },
+      "expected_socs": ["15-1212.00", "15-1232.00", "15-1244.00"],
+      "expected_titles_hint": ["Information Security Analyst", "Computer User Support", "Network Administrator"]
+    },
+    {
+      "id": "88m-motor-transport",
+      "description": "Army 88M Motor Transport Operator. Crosswalk to commercial driving / logistics.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "88M", "pay_grade": "E-4",
+        "years_of_service": 4, "combat_deployments": 1,
+        "leadership_roles": null,
+        "additional_skills": "HET (Heavy Equipment Transport) qualified",
+        "education_level": "high_school",
+        "certifications": "Military CDL equivalent (not transferred yet)",
+        "civilian_skills": null,
+        "location": "Phoenix, AZ", "open_to_relocate": false,
+        "dependents": 2, "target_salary": 60000, "work_style": "in_person",
+        "goals": "OTR or regional truck driver, possible owner-operator later"
+      },
+      "expected_socs": ["53-3032.00", "53-1047.00", "53-7062.00"],
+      "expected_titles_hint": ["Heavy Truck Driver", "Transportation Supervisor", "Material Mover"]
+    },
+    {
+      "id": "15t-helicopter-mechanic",
+      "description": "Army 15T UH-60 Black Hawk Repairer. Direct civilian aviation maintenance path.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "15T", "pay_grade": "E-5",
+        "years_of_service": 7, "combat_deployments": 0,
+        "leadership_roles": "Crew chief on flight line",
+        "additional_skills": "UH-60M phase maintenance, EOS qualified",
+        "education_level": "associate",
+        "certifications": "FAA A&P pursuing",
+        "civilian_skills": null,
+        "location": "Dallas, TX", "open_to_relocate": true,
+        "dependents": 1, "target_salary": 80000, "work_style": "in_person",
+        "goals": "Civilian airline or regional aircraft maintenance, A&P licensure"
+      },
+      "expected_socs": ["49-3011.00", "49-2091.00", "49-1011.00"],
+      "expected_titles_hint": ["Aircraft Mechanic", "Avionics Technician", "Mechanic Supervisor"]
+    },
+    {
+      "id": "92y-supply-specialist",
+      "description": "Army 92Y Unit Supply. Logistics / supply-chain civilian path.",
+      "profile": {
+        "branch": "army", "component": "national_guard",
+        "occupation_code": "92Y", "pay_grade": "E-6",
+        "years_of_service": 12, "combat_deployments": 1,
+        "leadership_roles": "Supply Sergeant, ran company supply room",
+        "additional_skills": "GCSS-Army, property book operations",
+        "education_level": "bachelor",
+        "certifications": "APICS CPIM in progress",
+        "civilian_skills": "Inventory control",
+        "location": "Atlanta, GA", "open_to_relocate": false,
+        "dependents": 3, "target_salary": 75000, "work_style": "hybrid",
+        "goals": "Logistics analyst or supply chain coordinator role at a Fortune 500"
+      },
+      "expected_socs": ["13-1081.00", "43-5061.00", "13-1199.00"],
+      "expected_titles_hint": ["Logistician", "Production Planning Clerk", "Business Operations Specialist"]
+    },
+    {
+      "id": "27d-paralegal",
+      "description": "Army 27D Paralegal Specialist. Direct civilian paralegal mapping.",
+      "profile": {
+        "branch": "army", "component": "active",
+        "occupation_code": "27D", "pay_grade": "E-5",
+        "years_of_service": 5, "combat_deployments": 0,
+        "leadership_roles": null,
+        "additional_skills": "Court martial preparation, legal assistance",
+        "education_level": "bachelor",
+        "certifications": "ABA-approved paralegal certificate (NCO Academy)",
+        "civilian_skills": "Legal research, document drafting",
+        "location": "Denver, CO", "open_to_relocate": true,
+        "dependents": 0, "target_salary": 70000, "work_style": "hybrid",
+        "goals": "Civilian paralegal at a mid-sized firm; pre-law track later"
+      },
+      "expected_socs": ["23-2011.00", "23-2093.00", "13-1041.00"],
+      "expected_titles_hint": ["Paralegal", "Title Examiner", "Compliance Officer"]
+    },
+    {
+      "id": "1n0x1-af-intel-analyst",
+      "description": "Air Force 1N0X1 All-Source Intelligence. Tests AFSC code parsing + intelligence-to-analyst mapping.",
+      "profile": {
+        "branch": "air_force", "component": "active",
+        "occupation_code": "1N0X1", "pay_grade": "E-5",
+        "years_of_service": 7, "combat_deployments": 1,
+        "leadership_roles": "Watch NCOIC, briefed wing commander daily",
+        "additional_skills": "TS/SCI cleared, all-source fusion, GEOINT exposure",
+        "education_level": "bachelor",
+        "certifications": null,
+        "civilian_skills": "Briefing senior leaders, structured analytic techniques",
+        "location": "flexible", "open_to_relocate": true,
+        "dependents": 0, "target_salary": 95000, "work_style": "hybrid",
+        "goals": "Federal intelligence civilian role, defense contractor analyst, eventual policy work"
+      },
+      "expected_socs": ["33-3021.00", "13-1041.00", "15-1212.00"],
+      "expected_titles_hint": ["Detective/Investigator (federal)", "Compliance Officer", "Information Security Analyst"]
+    }
+  ]
+}
