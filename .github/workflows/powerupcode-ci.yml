@@ -65,4 +65,14 @@ jobs:
       - run: npm ci
       - run: npm run type-check
       - run: npm run lint
-      - run: npm run build
+      - name: Build (uploads source maps to Sentry when secrets are set)
+        run: npm run build
+        env:
+          # SENTRY_AUTH_TOKEN must be set as a GitHub Actions secret;
+          # SENTRY_ORG and SENTRY_PROJECT can be either secrets or
+          # repository variables. When any of them are missing the
+          # withSentryConfig plugin no-ops and the build still succeeds.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG || vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT || vars.SENTRY_PROJECT }}
+          SENTRY_RELEASE: ${{ github.sha }}
