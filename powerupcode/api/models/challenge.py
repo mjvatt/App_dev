@@ -68,6 +68,12 @@ class UserProgress(Base):
         Integer, nullable=False, default=0, server_default=text("0")
     )
     last_daily_solved_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # Power-up currency. Earned via level-ups, streak milestones, and
+    # boss-rush completions; spent on Boss Rush revives. Phase 2 will
+    # add Mock Interview time-freeze and per-challenge hint discounts.
+    token_balance: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
 
 
 class Challenge(Base):

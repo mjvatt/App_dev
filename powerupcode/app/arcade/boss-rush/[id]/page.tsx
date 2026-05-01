@@ -10,10 +10,12 @@ import type {
   BossRushAttemptResponse,
   BossRushSession,
   Challenge,
+  UserProgress,
 } from "@/lib/types";
 
 const PROBLEM_COUNT = 3;
 const STARTING_LIVES = 3;
+const REVIVE_COST = 5;
 
 const STARTER = "def solution(*args):\n    # Boss problem — write your solution here.\n    pass\n";
 
@@ -30,8 +32,10 @@ export default function BossRushRunPage({
   const { id } = use(params);
 
   const [session, setSession] = useState<BossRushSession | null>(null);
+  const [tokens, setTokens] = useState<number | null>(null);
   const [code, setCode] = useState(STARTER);
   const [submitting, setSubmitting] = useState(false);
+  const [reviving, setReviving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [lastPassed, setLastPassed] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +50,44 @@ export default function BossRushRunPage({
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load run.")
       );
+    // Fetch the user's token balance in parallel so the header counter
+    // and revive button know what to show. Failure is silent — the
+    // counter just won't render and revive stays disabled.
+    authedRequest<UserProgress>("/api/progress/me")
+      .then((p) => setTokens(p.token_balance))
+      .catch(() => null);
   }, [id]);
+
+  async function refreshTokens() {
+    try {
+      const p = await authedRequest<UserProgress>("/api/progress/me");
+      setTokens(p.token_balance);
+    } catch {
+      // best-effort
+    }
+  }
+
+  async function handleRevive() {
+    if (!session || reviving) return;
+    setReviving(true);
+    setError(null);
+    try {
+      const updated = await authedRequest<BossRushSession>(
+        `/api/boss-rush/${id}/revive`,
+        { method: "POST" }
+      );
+      setSession(updated);
+      setCode(STARTER);
+      setStartTime(Date.now());
+      setFeedback(null);
+      setLastPassed(null);
+      void refreshTokens();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Revive failed.");
+    } finally {
+      setReviving(false);
+    }
+  }
 
   async function handleSubmit() {
     if (!session || session.status !== "in_progress" || !session.current_challenge) {
@@ -86,6 +127,11 @@ export default function BossRushRunPage({
         setCode(STARTER);
         setStartTime(Date.now());
       }
+      // Tokens are granted on terminal status; pull a fresh balance
+      // so the wipe screen knows whether a revive is affordable.
+      if (res.status !== "in_progress") {
+        void refreshTokens();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed.");
     } finally {
@@ -120,7 +166,13 @@ export default function BossRushRunPage({
   if (session.status !== "in_progress") {
     return (
       <AuthGuard>
-        <EndScreen session={session} />
+        <EndScreen
+          session={session}
+          tokens={tokens}
+          onRevive={handleRevive}
+          reviving={reviving}
+          error={error}
+        />
       </AuthGuard>
     );
   }
@@ -140,7 +192,7 @@ export default function BossRushRunPage({
   return (
     <AuthGuard>
       <div className="flex flex-col h-screen bg-black text-white">
-        <RunHeader session={session} />
+        <RunHeader session={session} tokens={tokens} />
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 overflow-hidden">
           <ProblemPane challenge={challenge} feedback={feedback} lastPassed={lastPassed} />
           <div className="flex flex-col border-l border-zinc-900">
@@ -167,7 +219,13 @@ export default function BossRushRunPage({
   );
 }
 
-function RunHeader({ session }: { session: BossRushSession }) {
+function RunHeader({
+  session,
+  tokens,
+}: {
+  session: BossRushSession;
+  tokens: number | null;
+}) {
   return (
     <div className="shrink-0 border-b border-zinc-900 px-4 h-12 flex items-center justify-between bg-zinc-950">
       <div className="flex items-center gap-3">
@@ -182,7 +240,28 @@ function RunHeader({ session }: { session: BossRushSession }) {
           Problem {session.current_index + 1} of {PROBLEM_COUNT}
         </span>
       </div>
-      <Lives remaining={session.lives_remaining} />
+      <div className="flex items-center gap-4">
+        {tokens !== null && <TokenCounter balance={tokens} />}
+        <Lives remaining={session.lives_remaining} />
+      </div>
+    </div>
+  );
+}
+
+function TokenCounter({ balance }: { balance: number }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-4 w-4 text-amber-300"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path d="M13 2L3 14h7l-1 8 11-14h-7z" />
+      </svg>
+      <span className="text-xs font-semibold tabular-nums text-amber-200">
+        {balance}
+      </span>
     </div>
   );
 }
@@ -278,10 +357,25 @@ function ProblemPane({
   );
 }
 
-function EndScreen({ session }: { session: BossRushSession }) {
+function EndScreen({
+  session,
+  tokens,
+  onRevive,
+  reviving,
+  error,
+}: {
+  session: BossRushSession;
+  tokens: number | null;
+  onRevive: () => void;
+  reviving: boolean;
+  error: string | null;
+}) {
   const completed = session.status === "completed";
   const flawless = completed && session.lives_remaining === STARTING_LIVES;
   const xp = session.xp_awarded ?? 0;
+  const wiped = session.status === "wiped";
+  const canRevive = wiped && tokens !== null && tokens >= REVIVE_COST;
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-8">
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-8 max-w-md w-full text-center">
@@ -303,7 +397,29 @@ function EndScreen({ session }: { session: BossRushSession }) {
             <p className="text-xs text-emerald-400 mt-1">No-fail bonus included</p>
           )}
         </div>
+        {error && (
+          <p className="text-xs text-red-400 mb-3">{error}</p>
+        )}
         <div className="flex flex-col gap-2">
+          {wiped && (
+            <button
+              onClick={onRevive}
+              disabled={!canRevive || reviving}
+              className={`w-full py-2 rounded-lg text-sm font-semibold transition-colors ${
+                canRevive
+                  ? "bg-amber-500 text-black hover:bg-amber-400"
+                  : "bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800"
+              }`}
+            >
+              {reviving
+                ? "Reviving…"
+                : canRevive
+                  ? `Spend ${REVIVE_COST} ⚡ Revive (1 life)`
+                  : tokens === null
+                    ? "Revive (loading balance…)"
+                    : `Need ${REVIVE_COST} ⚡ to revive (you have ${tokens})`}
+            </button>
+          )}
           <Link
             href="/arcade/boss-rush"
             className="w-full py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"

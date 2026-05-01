@@ -43,6 +43,7 @@ export interface UserProgress {
   xp_to_next: number;
   streak_days: number;
   daily_streak_days: number;
+  token_balance: number;
   topics: Record<Topic, number>;
   difficulty_stats: Partial<Record<Difficulty, DifficultyStats>>;
 }

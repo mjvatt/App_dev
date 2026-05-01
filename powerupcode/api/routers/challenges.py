@@ -31,6 +31,7 @@ from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
 from services.engine.similarity import hash_solution
 from services.review.scheduler import ReviewState, grade_attempt, schedule_next
+from services.tokens import grant_for_level_up
 
 router = APIRouter()
 
@@ -309,6 +310,7 @@ async def submit_attempt(
         progress.total_xp += awarded_xp
 
     progress.level = _compute_level(progress.total_xp)
+    progress.token_balance += grant_for_level_up(prior_level, progress.level)
     _update_streak(progress)
 
     if result.passed and result.topic is not None and not is_repeat_pass:

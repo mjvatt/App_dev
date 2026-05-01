@@ -27,6 +27,7 @@ from services.boss_rush import PROBLEM_COUNT, apply_attempt
 from services.engine import get_engine
 from services.engine.interface import ChallengeData, Difficulty
 from services.engine.repository import ChallengeRepository
+from services.tokens import TOKENS_BOSS_RUSH_REVIVE, grant_for_boss_rush
 
 router = APIRouter()
 
@@ -151,8 +152,13 @@ async def submit_boss_rush_attempt(
     if outcome.new_status != "in_progress":
         run.ended_at = datetime.now(UTC)
         run.xp_awarded = outcome.xp_awarded
-        if outcome.xp_awarded:
-            await _credit_user_progress(db, user_id, outcome.xp_awarded)
+        token_grant = grant_for_boss_rush(
+            outcome.new_status, outcome.new_lives_remaining
+        )
+        if outcome.xp_awarded or token_grant:
+            await _credit_user_progress(
+                db, user_id, outcome.xp_awarded or 0, token_grant
+            )
 
     next_challenge: ChallengeResponse | None = None
     if run.status == "in_progress" and run.current_index < len(run.challenge_ids):
@@ -176,17 +182,57 @@ async def submit_boss_rush_attempt(
     )
 
 
-async def _credit_user_progress(db: AsyncSession, user_id: str, xp: int) -> None:
-    """Add boss-rush XP to the user's total. Mirrors the tail of
-    submit_attempt without the per-attempt XP / streak / topic logic
-    — boss-rush is a separate XP source from regular attempts."""
+async def _credit_user_progress(
+    db: AsyncSession, user_id: str, xp: int, tokens: int
+) -> None:
+    """Add boss-rush XP and any token grant to the user's progress.
+    Mirrors the tail of submit_attempt without the per-attempt XP /
+    streak / topic logic — boss-rush is a separate source."""
     progress = await db.get(UserProgress, user_id)
     if progress is None:
-        progress = UserProgress(user_id=user_id, total_xp=xp)
+        progress = UserProgress(user_id=user_id, total_xp=xp, token_balance=tokens)
         db.add(progress)
     else:
         progress.total_xp += xp
+        progress.token_balance += tokens
     progress.level = progress.total_xp // 100 + 1
+
+
+@router.post("/{run_id}/revive", response_model=BossRushSessionResponse)
+async def revive_boss_rush(
+    run_id: str,
+    user_id: Annotated[str, Depends(require_verified_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> BossRushSessionResponse:
+    """Spend tokens to revive a wiped run. Restores one life and flips
+    status back to in_progress. Each revive is independent so a player
+    can chain revives at the same cost — the price itself bounds abuse."""
+    run = await db.get(BossRushRun, run_id)
+    if run is None or run.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if run.status != "wiped":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Can't revive a run with status {run.status!r}",
+        )
+
+    progress = await db.get(UserProgress, user_id)
+    if progress is None or progress.token_balance < TOKENS_BOSS_RUSH_REVIVE:
+        raise HTTPException(
+            status_code=402,
+            detail=(
+                f"Need {TOKENS_BOSS_RUSH_REVIVE} tokens to revive "
+                f"(balance {progress.token_balance if progress else 0})."
+            ),
+        )
+
+    progress.token_balance -= TOKENS_BOSS_RUSH_REVIVE
+    run.status = "in_progress"
+    run.lives_remaining = 1
+    run.xp_awarded = None
+    run.ended_at = None
+    await db.commit()
+    return await _build_session_response(db, run)
 
 
 @router.get("/me/history", response_model=BossRushHistoryResponse)

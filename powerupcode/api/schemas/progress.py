@@ -16,6 +16,7 @@ class UserProgressResponse(BaseModel):
     xp_to_next: int
     streak_days: int
     daily_streak_days: int = 0
+    token_balance: int = 0
     topics: dict[str, int]
     difficulty_stats: dict[str, DifficultyStats]
 

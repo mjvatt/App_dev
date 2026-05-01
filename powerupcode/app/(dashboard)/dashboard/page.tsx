@@ -244,6 +244,30 @@ export default function DashboardPage() {
         />
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-amber-950/40 to-zinc-950 border border-amber-900 rounded-xl p-5 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-amber-400 mb-1">
+              Power-up tokens
+            </p>
+            <p className="text-3xl font-bold text-white tabular-nums">
+              {progress.token_balance}
+            </p>
+            <p className="text-xs text-zinc-500 mt-1">
+              Earn via level-ups + Boss Rush. Spend in Boss Rush.
+            </p>
+          </div>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-10 w-10 text-amber-300/60"
+            fill="currentColor"
+            aria-hidden
+          >
+            <path d="M13 2L3 14h7l-1 8 11-14h-7z" />
+          </svg>
+        </div>
+      </div>
+
       <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 mb-6">
         <p className="text-zinc-500 text-sm mb-3">XP Progress</p>
         <XPBar current={xpInLevel} max={XP_PER_LEVEL} level={progress.level} />
