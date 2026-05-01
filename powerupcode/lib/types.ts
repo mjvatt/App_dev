@@ -102,6 +102,16 @@ export interface DailyLeaderboardResponse {
   total_solvers: number;
 }
 
+export interface ExplanationGrade {
+  correctness: number;
+  clarity: number;
+  completeness: number;
+  communication: number;
+  overall: number;
+  feedback: string;
+  available: boolean;
+}
+
 export interface CurriculumResponse {
   weak_topic: Topic;
   suggested_difficulty: Difficulty;

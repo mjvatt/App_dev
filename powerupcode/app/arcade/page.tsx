@@ -8,6 +8,7 @@ import CodeEditor from "@/components/game/CodeEditor";
 import BossDefeatedOverlay from "@/components/game/BossDefeatedOverlay";
 import LevelUpOverlay from "@/components/game/LevelUpOverlay";
 import StreakMilestoneOverlay from "@/components/game/StreakMilestoneOverlay";
+import VerbalExplanationPanel from "@/components/game/VerbalExplanationPanel";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
 import type {
@@ -521,6 +522,13 @@ export default function ArcadePage() {
                 solution={code}
                 language={language}
                 onNext={loadChallenge}
+              />
+            )}
+
+            {result?.passed && challenge && (
+              <VerbalExplanationPanel
+                challengeId={challenge.id}
+                solution={code}
               />
             )}
           </div>

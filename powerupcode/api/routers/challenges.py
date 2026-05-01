@@ -17,6 +17,8 @@ from api.schemas.challenge import (
     DailyLeaderboardEntry,
     DailyLeaderboardResponse,
     DailyStatusResponse,
+    ExplanationRequest,
+    ExplanationResponse,
     HintRequest,
     HintResponse,
     ReviewRequest,
@@ -545,3 +547,29 @@ async def request_hint(
         db, user_id, challenge_id, body.current_attempt
     )
     return HintResponse(hint=hint.hint, hints_remaining=hint.hints_remaining)
+
+
+@router.post("/{challenge_id}/explanation", response_model=ExplanationResponse)
+@limiter.limit("20/15minute")
+async def request_explanation_grade(
+    request: Request,
+    challenge_id: str,
+    body: ExplanationRequest,
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ExplanationResponse:
+    """Grade a verbal-explanation transcript across four interview-style
+    dimensions. Same rate-limit cohort as code review since each call is
+    a Haiku request."""
+    grade = await get_engine().grade_explanation(
+        db, user_id, challenge_id, body.solution, body.transcript
+    )
+    return ExplanationResponse(
+        correctness=grade.correctness,
+        clarity=grade.clarity,
+        completeness=grade.completeness,
+        communication=grade.communication,
+        overall=grade.overall,
+        feedback=grade.feedback,
+        available=grade.available,
+    )

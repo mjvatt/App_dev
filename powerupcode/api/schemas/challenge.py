@@ -52,6 +52,21 @@ class ReviewResponse(BaseModel):
     available: bool
 
 
+class ExplanationRequest(BaseModel):
+    solution: str
+    transcript: str
+
+
+class ExplanationResponse(BaseModel):
+    correctness: int
+    clarity: int
+    completeness: int
+    communication: int
+    overall: int
+    feedback: str
+    available: bool
+
+
 class DailyStatusResponse(BaseModel):
     """Per-user state for today's daily, returned alongside the challenge."""
     solved: bool

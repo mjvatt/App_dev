@@ -60,6 +60,20 @@ class ReviewResult:
 
 
 @dataclass
+class ExplanationGrade:
+    """Structured grade for a verbal-explanation transcript. Each
+    dimension is 0-5 (0 = absent, 5 = excellent); overall is a 0-100
+    composite that callers can render as a single number."""
+    correctness: int
+    clarity: int
+    completeness: int
+    communication: int
+    overall: int
+    feedback: str
+    available: bool = True
+
+
+@dataclass
 class UserLevel:
     user_id: str
     total_xp: int
@@ -126,6 +140,27 @@ class GameEngine(ABC):
         interface. The real engine overrides with a Haiku call."""
         return ReviewResult(
             review="Code review is not available in this engine.",
+            available=False,
+        )
+
+    async def grade_explanation(
+        self,
+        db: AsyncSession,
+        user_id: str,
+        challenge_id: str,
+        solution: str,
+        transcript: str,
+    ) -> "ExplanationGrade":
+        """Optional: grade a verbal-explanation transcript across four
+        interview-style dimensions. Default is unavailable; HaikuEngine
+        overrides with a real call."""
+        return ExplanationGrade(
+            correctness=0,
+            clarity=0,
+            completeness=0,
+            communication=0,
+            overall=0,
+            feedback="Explanation grading is not available in this engine.",
             available=False,
         )
 
