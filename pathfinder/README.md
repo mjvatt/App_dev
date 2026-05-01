@@ -18,7 +18,10 @@ agent pipeline, retrieval store, and ingestion modules are stubs.
 
 ## Running locally
 
-1. Copy `.env.example` to `.env` and fill in `ANTHROPIC_API_KEY`.
+1. Copy `.env.example` to `.env`. Required: `ANTHROPIC_API_KEY`. Recommended:
+   `USAJOBS_USER_AGENT` (a contact email) and `USAJOBS_API_KEY` from
+   <https://developer.usajobs.gov/>. Without a USAJobs key the live-postings
+   layer is a no-op (the rest of the recommendation flow still works).
 2. Start Postgres: `docker compose up -d`
 3. Install backend deps: `pip install -e .[dev]`
 4. Apply migrations: `alembic upgrade head`

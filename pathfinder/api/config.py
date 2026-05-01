@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     synthesizer_model: str = Field(default="claude-opus-4-7")
     default_model: str = Field(default="claude-sonnet-4-6")
     allowed_origins: str = Field(default="http://localhost:3002")
+    usajobs_user_agent: str = Field(default="pathfinder@example.com")
+    usajobs_api_key: str = Field(default="")
 
 
 @lru_cache
