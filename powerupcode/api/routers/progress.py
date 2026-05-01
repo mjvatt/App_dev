@@ -81,7 +81,7 @@ async def get_my_history(
 
     engine = get_engine()
     challenge_ids = list({a.challenge_id for a in attempts})
-    challenges = await engine.get_challenges(challenge_ids) if challenge_ids else {}
+    challenges = await engine.get_challenges(db, challenge_ids) if challenge_ids else {}
 
     items: list[AttemptHistoryItem] = [
         AttemptHistoryItem(

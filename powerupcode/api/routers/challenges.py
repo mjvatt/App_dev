@@ -205,7 +205,7 @@ async def get_next_challenge(
         difficulty = await _suggest_difficulty(db, user_id)
     if difficulty != Difficulty.EASY and not await _has_active_subscription(db, user_id):
         raise HTTPException(status_code=402, detail="subscription_required")
-    challenge = await get_engine().next_challenge(user_id, topic, difficulty)
+    challenge = await get_engine().next_challenge(db, user_id, topic, difficulty)
     return ChallengeResponse(
         id=challenge.id,
         topic=challenge.topic,
@@ -224,7 +224,9 @@ async def submit_attempt(
     user_id: Annotated[str, Depends(require_verified_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> AttemptResponse:
-    result = await get_engine().evaluate_attempt(user_id, challenge_id, body.solution, body.time_ms)
+    result = await get_engine().evaluate_attempt(
+        db, user_id, challenge_id, body.solution, body.time_ms
+    )
 
     is_repeat_pass = result.passed and await _has_previously_passed(db, user_id, challenge_id)
     awarded_xp = _award_xp(result.xp_earned, passed=result.passed, is_repeat_pass=is_repeat_pass)
@@ -297,7 +299,7 @@ async def _resolve_daily_challenge_id(db: AsyncSession) -> str:
     row = await db.scalar(select(DailyChallenge).where(DailyChallenge.date == today))
     if row is not None:
         return row.challenge_id
-    challenge = await get_engine().get_daily_challenge(today)
+    challenge = await get_engine().get_daily_challenge(db, today)
     db.add(DailyChallenge(date=today, challenge_id=challenge.id))
     await db.commit()
     return challenge.id
@@ -346,7 +348,7 @@ async def get_daily_challenge_route(
 ) -> DailyChallengeResponse:
     """Today's challenge — same problem for every user, ranked by completion time."""
     daily_id = await _resolve_daily_challenge_id(db)
-    challenge = await get_engine().get_challenge(daily_id)
+    challenge = await get_engine().get_challenge(db, daily_id)
     if challenge is None:
         raise HTTPException(status_code=500, detail="Daily challenge unavailable")
     status = await _daily_status(db, user_id, daily_id)
@@ -433,7 +435,7 @@ async def get_next_review(
     if row is None:
         raise HTTPException(status_code=404, detail="No reviews due")
 
-    challenge = await get_engine().get_challenge(row.challenge_id)
+    challenge = await get_engine().get_challenge(db, row.challenge_id)
     if challenge is None:
         raise HTTPException(status_code=404, detail="Challenge not found")
     return ChallengeResponse(
@@ -454,11 +456,12 @@ async def request_review(
     challenge_id: str,
     body: ReviewRequest,
     user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ReviewResponse:
     """Post-pass code review. Rate limited because each call is a Haiku
     request and a malicious user spam-clicking would burn API budget."""
     review = await get_engine().generate_review(
-        user_id, challenge_id, body.solution, body.language
+        db, user_id, challenge_id, body.solution, body.language
     )
     return ReviewResponse(review=review.review, available=review.available)
 
@@ -468,6 +471,9 @@ async def request_hint(
     challenge_id: str,
     body: HintRequest,
     user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> HintResponse:
-    hint = await get_engine().generate_hint(user_id, challenge_id, body.current_attempt)
+    hint = await get_engine().generate_hint(
+        db, user_id, challenge_id, body.current_attempt
+    )
     return HintResponse(hint=hint.hint, hints_remaining=hint.hints_remaining)

@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class Difficulty(StrEnum):
     EASY = "easy"
@@ -71,6 +73,7 @@ class GameEngine(ABC):
     @abstractmethod
     async def next_challenge(
         self,
+        db: AsyncSession,
         user_id: str,
         topic: Topic | None = None,
         difficulty: Difficulty | None = None,
@@ -79,6 +82,7 @@ class GameEngine(ABC):
     @abstractmethod
     async def evaluate_attempt(
         self,
+        db: AsyncSession,
         user_id: str,
         challenge_id: str,
         solution: str,
@@ -88,24 +92,30 @@ class GameEngine(ABC):
     @abstractmethod
     async def generate_hint(
         self,
+        db: AsyncSession,
         user_id: str,
         challenge_id: str,
         current_attempt: str,
     ) -> HintResult: ...
 
     @abstractmethod
-    async def get_challenge(self, challenge_id: str) -> ChallengeData | None: ...
+    async def get_challenge(
+        self, db: AsyncSession, challenge_id: str
+    ) -> ChallengeData | None: ...
 
     @abstractmethod
-    async def get_daily_challenge(self, on_date: datetime.date) -> ChallengeData:
+    async def get_daily_challenge(
+        self, db: AsyncSession, on_date: datetime.date
+    ) -> ChallengeData:
         """Deterministic daily-challenge selection. Must return the same
         ChallengeData for every caller on a given date so all users solve
-        the same problem. Real engines hash the date against their full
+        the same problem. Real engines hash the date against the full
         challenge bank; the stub returns its single challenge."""
         ...
 
     async def generate_review(
         self,
+        db: AsyncSession,
         user_id: str,
         challenge_id: str,
         solution: str,
@@ -120,14 +130,14 @@ class GameEngine(ABC):
         )
 
     async def get_challenges(
-        self, challenge_ids: list[str]
+        self, db: AsyncSession, challenge_ids: list[str]
     ) -> dict[str, ChallengeData]:
         """Batch fetch. Override for engines backed by a real datastore;
         the default falls back to per-id lookups, which is fine for
         in-memory engines but N+1 for DB-backed ones."""
         result: dict[str, ChallengeData] = {}
         for cid in challenge_ids:
-            challenge = await self.get_challenge(cid)
+            challenge = await self.get_challenge(db, cid)
             if challenge is not None:
                 result[cid] = challenge
         return result

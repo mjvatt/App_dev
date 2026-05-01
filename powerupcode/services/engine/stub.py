@@ -4,6 +4,10 @@ Daily challenge: returns the single stub problem regardless of date.
 All evaluation and hint logic returns placeholder responses.
 Replace at runtime by setting ENGINE_MODULE in the environment.
 
+The stub ignores its `db` parameter — the in-memory bank has exactly
+one challenge, so no DB read is needed. Production engines route the
+session through ChallengeRepository instead.
+
 NOTE: Transient state (the user's last-fetched difficulty per challenge)
 is held in a per-process dict. This is fine for single-worker dev and CI;
 under multi-worker production, a user that fetches on worker A and submits
@@ -13,6 +17,8 @@ to survive across requests or workers.
 """
 import datetime
 import uuid
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.engine.interface import (
     AttemptResult,
@@ -54,6 +60,7 @@ class StubEngine(GameEngine):
 
     async def next_challenge(
         self,
+        db: AsyncSession,
         user_id: str,
         topic: Topic | None = None,
         difficulty: Difficulty | None = None,
@@ -72,6 +79,7 @@ class StubEngine(GameEngine):
 
     async def evaluate_attempt(
         self,
+        db: AsyncSession,
         user_id: str,
         challenge_id: str,
         solution: str,
@@ -93,18 +101,23 @@ class StubEngine(GameEngine):
 
     async def generate_hint(
         self,
+        db: AsyncSession,
         user_id: str,
         challenge_id: str,
         current_attempt: str,
     ) -> HintResult:
         return HintResult(hint="Hints are not available in stub mode.", hints_remaining=0)
 
-    async def get_challenge(self, challenge_id: str) -> ChallengeData | None:
+    async def get_challenge(
+        self, db: AsyncSession, challenge_id: str
+    ) -> ChallengeData | None:
         if challenge_id == _STUB_CHALLENGE.id:
             return _STUB_CHALLENGE
         return None
 
-    async def get_daily_challenge(self, on_date: datetime.date) -> ChallengeData:
+    async def get_daily_challenge(
+        self, db: AsyncSession, on_date: datetime.date
+    ) -> ChallengeData:
         return _STUB_CHALLENGE
 
     async def get_user_level(self, user_id: str) -> UserLevel:

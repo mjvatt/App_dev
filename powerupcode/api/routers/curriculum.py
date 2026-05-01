@@ -44,7 +44,7 @@ async def get_curriculum_for_me(
 
     engine = get_engine()
     challenge_ids = list({row.challenge_id for row in rows})
-    challenges = await engine.get_challenges(challenge_ids) if challenge_ids else {}
+    challenges = await engine.get_challenges(db, challenge_ids) if challenge_ids else {}
 
     summaries: list[AttemptSummary] = []
     for row in rows:
