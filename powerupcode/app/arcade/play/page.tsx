@@ -12,6 +12,12 @@ import TierBadge from "@/components/game/TierBadge";
 import VerbalExplanationPanel from "@/components/game/VerbalExplanationPanel";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
+import {
+  playBossDefeated,
+  playLevelUp,
+  playPass,
+  playStreakMilestone,
+} from "@/lib/sounds";
 import type {
   AttemptResult,
   Challenge,
@@ -313,6 +319,18 @@ export default function ArcadePage() {
         setStreakMilestone({ open: true, days: data.streak_milestone });
       } else if (data.leveled_up) {
         setLevelUp({ open: true, level: data.new_level });
+      }
+      // Audio cue: boss defeats outrank streak/level which outrank a
+      // plain pass; failed attempts intentionally stay silent so we
+      // don't audio-shame a wrong submit.
+      if (data.passed && challenge.difficulty === "boss") {
+        playBossDefeated();
+      } else if (data.streak_milestone) {
+        playStreakMilestone();
+      } else if (data.leveled_up) {
+        playLevelUp();
+      } else if (data.passed) {
+        playPass();
       }
       track(Events.AttemptSubmitted, {
         challenge_id: challenge.id,

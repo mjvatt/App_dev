@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AuthGuard from "@/components/auth/AuthGuard";
 import LogoutButton from "@/components/auth/LogoutButton";
+import SoundToggle from "@/components/ui/SoundToggle";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <NavLink href="/leaderboard">Leaderboard</NavLink>
           <NavLink href="/friends">Friends</NavLink>
           <NavLink href="/billing">Billing</NavLink>
+          <div className="flex-1" />
+          <SoundToggle />
           <LogoutButton />
         </aside>
         {/* Mobile top nav */}
@@ -31,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink href="/leaderboard">Leaderboard</NavLink>
             <NavLink href="/friends">Friends</NavLink>
             <NavLink href="/billing">Billing</NavLink>
+            <SoundToggle className="shrink-0" />
             <LogoutButton className="shrink-0 px-3 py-2 rounded-lg text-zinc-600 hover:text-white hover:bg-zinc-900 transition-colors text-sm" />
           </div>
         </header>

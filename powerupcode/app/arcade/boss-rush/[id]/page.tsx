@@ -6,6 +6,12 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
 import TierBadge from "@/components/game/TierBadge";
 import { authedRequest } from "@/lib/api";
+import {
+  playBossDefeated,
+  playFail,
+  playPass,
+  playWipe,
+} from "@/lib/sounds";
 import type {
   BossRushAttemptResponse,
   BossRushSession,
@@ -106,6 +112,17 @@ export default function BossRushRunPage({
       );
       setLastPassed(res.passed);
       setFeedback(res.feedback);
+      // Audio cue precedence: terminal status outranks the per-attempt
+      // pass/fail so the player gets one definitive sound, not two.
+      if (res.status === "completed") {
+        playBossDefeated();
+      } else if (res.status === "wiped") {
+        playWipe();
+      } else if (res.passed) {
+        playPass();
+      } else {
+        playFail();
+      }
       // Roll the session forward locally rather than re-fetching.
       setSession((prev) =>
         prev
