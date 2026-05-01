@@ -32,6 +32,9 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 
+# Local artifacts
+logs/
+
 # IDE
 .vscode/
 .idea/
