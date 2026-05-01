@@ -102,6 +102,11 @@ export interface DailyLeaderboardResponse {
   total_solvers: number;
 }
 
+export interface PersonalBest {
+  best_time_ms: number | null;
+  pass_count: number;
+}
+
 export interface BossRushSession {
   id: string;
   status: "in_progress" | "completed" | "wiped";

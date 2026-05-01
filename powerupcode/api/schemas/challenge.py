@@ -52,6 +52,13 @@ class ReviewResponse(BaseModel):
     available: bool
 
 
+class PersonalBestResponse(BaseModel):
+    """Per-user fastest passing time on a challenge. Powers the
+    timer / PB chase UI in Quick Play."""
+    best_time_ms: int | None
+    pass_count: int  # how many times the user has passed this challenge
+
+
 class ExplanationRequest(BaseModel):
     solution: str
     transcript: str

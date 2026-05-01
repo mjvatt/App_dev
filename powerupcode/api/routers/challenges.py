@@ -21,6 +21,7 @@ from api.schemas.challenge import (
     ExplanationResponse,
     HintRequest,
     HintResponse,
+    PersonalBestResponse,
     ReviewRequest,
     ReviewResponse,
 )
@@ -547,6 +548,35 @@ async def request_hint(
         db, user_id, challenge_id, body.current_attempt
     )
     return HintResponse(hint=hint.hint, hints_remaining=hint.hints_remaining)
+
+
+@router.get("/{challenge_id}/personal-best", response_model=PersonalBestResponse)
+async def get_personal_best(
+    challenge_id: str,
+    user_id: Annotated[str, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> PersonalBestResponse:
+    """Fastest passing attempt + total pass count for this user on this
+    challenge. Drives the Quick Play timer's PB chase indicator."""
+    result = await db.execute(
+        select(
+            func.min(Attempt.time_ms).label("best"),
+            func.count().label("passes"),
+        )
+        .where(
+            Attempt.user_id == user_id,
+            Attempt.challenge_id == challenge_id,
+            Attempt.passed.is_(True),
+            # Exclude time_ms == 0 since older clients submitted without
+            # timing data and 0 would always win the MIN comparison.
+            Attempt.time_ms > 0,
+        )
+    )
+    row = result.one()
+    return PersonalBestResponse(
+        best_time_ms=row.best,
+        pass_count=int(row.passes or 0),
+    )
 
 
 @router.post("/{challenge_id}/explanation", response_model=ExplanationResponse)

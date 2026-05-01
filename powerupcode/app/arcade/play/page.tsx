@@ -16,6 +16,7 @@ import type {
   Challenge,
   DailyChallengeResponse,
   Difficulty,
+  PersonalBest,
 } from "@/lib/types";
 
 const LANGUAGES = ["python", "javascript", "typescript", "java"] as const;
@@ -107,6 +108,29 @@ export default function ArcadePage() {
   const [dailyMode, setDailyMode] = useState(false);
   const selectedDifficultyRef = useRef<Difficulty | "">("");
   const startTime = useRef<number>(Date.now());
+  const [personalBest, setPersonalBest] = useState<PersonalBest | null>(null);
+  // Tick state drives the live timer in the submit footer. Re-renders
+  // once per second; the actual elapsed value is computed from
+  // startTime.current at render time so we don't drift from the truth.
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!challenge || result) return;
+    const id = window.setInterval(() => setTick((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [challenge, result]);
+
+  const loadPersonalBest = useCallback(async (challengeId: string) => {
+    setPersonalBest(null);
+    try {
+      const pb = await authedRequest<PersonalBest>(
+        `/api/challenges/${challengeId}/personal-best`
+      );
+      setPersonalBest(pb);
+    } catch {
+      // PB is decoration — silently swallow so a 404/500 doesn't kill the page.
+    }
+  }, []);
 
   const loadChallenge = useCallback(
     async (difficulty?: Difficulty | "", topic?: string) => {
@@ -126,6 +150,7 @@ export default function ArcadePage() {
         setChallenge(data);
         setCode(loadDraft(data.id, language));
         startTime.current = Date.now();
+        void loadPersonalBest(data.id);
         track(Events.ChallengeFetched, {
           challenge_id: data.id,
           topic: data.topic,
@@ -144,7 +169,7 @@ export default function ArcadePage() {
         setFetching(false);
       }
     },
-    [language]
+    [language, loadPersonalBest]
   );
 
   // Persist code drafts per (challenge, language). Best-effort; throws on
@@ -203,6 +228,7 @@ export default function ArcadePage() {
       setChallenge(data.challenge);
       setCode(loadDraft(data.challenge.id, language));
       startTime.current = Date.now();
+      void loadPersonalBest(data.challenge.id);
       setDailyMode(true);
       setReviewMode(false);
     } catch {
@@ -210,7 +236,7 @@ export default function ArcadePage() {
     } finally {
       setFetching(false);
     }
-  }, [language]);
+  }, [language, loadPersonalBest]);
 
   function handleDailyClick() {
     void loadDaily();
@@ -229,6 +255,7 @@ export default function ArcadePage() {
       setChallenge(data);
       setCode(loadDraft(data.id, language));
       startTime.current = Date.now();
+      void loadPersonalBest(data.id);
       setReviewMode(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
@@ -577,16 +604,99 @@ export default function ArcadePage() {
                 {submitting ? "Running..." : "Submit"}
               </button>
               <span className="text-xs text-zinc-700 hidden sm:inline">⌘/Ctrl + Enter</span>
-              {result && !submitting && (
-                <span className={`text-sm font-medium ${result.passed ? "text-green-400" : "text-zinc-500"}`}>
-                  {result.passed ? "Passed" : "Try again"}
-                </span>
-              )}
+              <div className="flex-1" />
+              <TimerStrip
+                challengeLoaded={!!challenge}
+                startedAt={startTime.current}
+                personalBest={personalBest}
+                result={result}
+                submitting={submitting}
+              />
             </div>
           </div>
         </div>
       </div>
     </AuthGuard>
+  );
+}
+
+function formatMs(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+interface TimerStripProps {
+  challengeLoaded: boolean;
+  startedAt: number;
+  personalBest: PersonalBest | null;
+  result: AttemptResult | null;
+  submitting: boolean;
+}
+
+function TimerStrip({
+  challengeLoaded,
+  startedAt,
+  personalBest,
+  result,
+  submitting,
+}: TimerStripProps) {
+  if (!challengeLoaded) return null;
+
+  // After a result lands, freeze the timer at the recorded time so the
+  // player can read it. While solving, render now-startedAt; the parent
+  // re-renders once per second to keep this fresh.
+  const elapsed =
+    result !== null ? result.time_ms : Math.max(0, Date.now() - startedAt);
+
+  const pbMs = personalBest?.best_time_ms ?? null;
+  const newBest =
+    result?.passed === true &&
+    (pbMs === null || result.time_ms < pbMs);
+
+  let pbLabel: string;
+  if (result?.passed && newBest) {
+    pbLabel = pbMs === null ? "First clear!" : `New PB! Was ${formatMs(pbMs)}`;
+  } else if (pbMs !== null) {
+    pbLabel = `PB ${formatMs(pbMs)}`;
+  } else {
+    pbLabel = "No PB yet";
+  }
+
+  let timerColor = "text-zinc-400";
+  if (result?.passed) {
+    timerColor = newBest ? "text-emerald-300" : "text-zinc-300";
+  } else if (result && !result.passed) {
+    timerColor = "text-zinc-500";
+  } else if (submitting) {
+    timerColor = "text-zinc-500";
+  }
+
+  return (
+    <div className="flex items-center gap-3 text-right">
+      <div className="flex flex-col items-end">
+        <span className={`font-mono text-base font-semibold tabular-nums ${timerColor}`}>
+          {formatMs(elapsed)}
+        </span>
+        <span
+          className={`text-[10px] uppercase tracking-[0.15em] ${
+            newBest && result?.passed ? "text-emerald-400" : "text-zinc-600"
+          }`}
+        >
+          {pbLabel}
+        </span>
+      </div>
+      {result && !submitting && (
+        <span
+          className={`text-sm font-medium ${
+            result.passed ? "text-green-400" : "text-zinc-500"
+          }`}
+        >
+          {result.passed ? "Passed" : "Try again"}
+        </span>
+      )}
+    </div>
   );
 }
 
