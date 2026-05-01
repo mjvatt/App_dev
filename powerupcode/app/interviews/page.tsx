@@ -10,7 +10,20 @@ import type {
   Difficulty,
   InterviewHistoryResponse,
   InterviewSession,
+  Topic,
 } from "@/lib/types";
+
+const TOPICS: { value: Topic; label: string }[] = [
+  { value: "arrays", label: "Arrays" },
+  { value: "strings", label: "Strings" },
+  { value: "linked_lists", label: "Linked Lists" },
+  { value: "trees", label: "Trees" },
+  { value: "graphs", label: "Graphs" },
+  { value: "dynamic_programming", label: "DP" },
+  { value: "system_design", label: "System Design" },
+];
+
+const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard", "boss"];
 
 const KNOWN_DIFFICULTIES: ReadonlySet<Difficulty> = new Set([
   "easy",
@@ -37,6 +50,8 @@ export default function InterviewsLandingPage() {
   const [history, setHistory] = useState<InterviewHistoryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   // Strict mode + dev hot-reload would otherwise post twice on the
   // start handler if a user double-taps the button.
   const startInFlight = useRef(false);
@@ -55,11 +70,14 @@ export default function InterviewsLandingPage() {
     setStarting(true);
     setError(null);
     try {
+      const body: { topic?: Topic; difficulty?: Difficulty } = {};
+      if (selectedTopic) body.topic = selectedTopic;
+      if (selectedDifficulty) body.difficulty = selectedDifficulty;
       const session = await authedRequest<InterviewSession>(
         "/api/interviews/start",
         {
           method: "POST",
-          body: JSON.stringify({}),
+          body: JSON.stringify(body),
         }
       );
       router.push(`/interviews/${session.id}`);
@@ -89,13 +107,80 @@ export default function InterviewsLandingPage() {
           <p className="text-red-400 text-sm mb-4">{error}</p>
         )}
 
-        <button
-          onClick={startInterview}
-          disabled={starting}
-          className="px-5 py-3 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50 mb-10"
-        >
-          {starting ? "Starting…" : "Start interview"}
-        </button>
+        <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-5 mb-10 space-y-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+              Topic
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <PickerPill
+                active={selectedTopic === null}
+                onClick={() => setSelectedTopic(null)}
+              >
+                Any
+              </PickerPill>
+              {TOPICS.map((t) => (
+                <PickerPill
+                  key={t.value}
+                  active={selectedTopic === t.value}
+                  onClick={() =>
+                    setSelectedTopic(selectedTopic === t.value ? null : t.value)
+                  }
+                >
+                  {t.label}
+                </PickerPill>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+              Difficulty
+            </p>
+            <div className="flex flex-wrap gap-2 items-center">
+              <PickerPill
+                active={selectedDifficulty === null}
+                onClick={() => setSelectedDifficulty(null)}
+              >
+                Any
+              </PickerPill>
+              {DIFFICULTIES.map((d) => (
+                <button
+                  key={d}
+                  onClick={() =>
+                    setSelectedDifficulty(selectedDifficulty === d ? null : d)
+                  }
+                  className={`rounded-full transition-opacity ${
+                    selectedDifficulty === d || selectedDifficulty === null
+                      ? "opacity-100"
+                      : "opacity-40 hover:opacity-70"
+                  }`}
+                >
+                  <TierBadge difficulty={d} size="sm" />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="pt-2">
+            <button
+              onClick={startInterview}
+              disabled={starting}
+              className="px-5 py-3 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            >
+              {starting ? "Starting…" : "Start interview"}
+            </button>
+            {(selectedTopic || selectedDifficulty) && (
+              <button
+                onClick={() => {
+                  setSelectedTopic(null);
+                  setSelectedDifficulty(null);
+                }}
+                className="ml-3 text-xs text-zinc-500 hover:text-white transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
 
         <div>
           <h2 className="text-base font-semibold text-white mb-3">
@@ -169,5 +254,28 @@ export default function InterviewsLandingPage() {
         </div>
       </div>
     </AuthGuard>
+  );
+}
+
+function PickerPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+        active
+          ? "bg-white text-black border-white"
+          : "bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500 hover:text-zinc-200"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
