@@ -27,9 +27,11 @@ agent pipeline, retrieval store, and ingestion modules are stubs.
 6. Embed and load occupations into pgvector (one-time, downloads
    ~80 MB embedding model on first run, ~1–2 min):
    `python -m services.ingest.pgvector_load`
-7. Run backend: `uvicorn api.main:app --reload --port 8001`
-8. Install frontend deps: `npm install`
-9. Run frontend: `npm run dev` (port 3002)
+7. Load BLS OEWS wages (one-time, ~50 MB download, ~1–3 min parse):
+   `python -m services.ingest.bls build`
+8. Run backend: `uvicorn api.main:app --reload --port 8001`
+9. Install frontend deps: `npm install`
+10. Run frontend: `npm run dev` (port 3002)
 
 The O*NET build downloads ~18 MB of public archives into `data/onet/raw/` and
 writes a denormalized JSON index to `data/onet/parsed/occupation_index.json`.

@@ -36,6 +36,7 @@ out/
 # Data (large public corpora — not committed)
 data/onet/
 data/opm/
+data/bls/
 data/cache/
 
 # OS
