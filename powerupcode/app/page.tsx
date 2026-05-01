@@ -171,23 +171,23 @@ function PricingTeaser() {
   const plans = [
     {
       label: "Weekly",
-      price: "$2",
+      price: "$5",
       period: "per week",
       note: "Try it out",
       highlight: false,
     },
     {
       label: "Monthly",
-      price: "$5",
+      price: "$12",
       period: "per month",
       note: "Most popular",
       highlight: true,
     },
     {
       label: "Annual",
-      price: "$40",
+      price: "$120",
       period: "per year",
-      note: "About $3.33 / month",
+      note: "$10 / month",
       highlight: false,
     },
   ];

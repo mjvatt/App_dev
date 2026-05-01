@@ -9,7 +9,7 @@ const PLANS = [
   {
     id: "weekly" as const,
     label: "Weekly",
-    price: "$2",
+    price: "$5",
     period: "/ week",
     note: "Try it out",
     highlight: false,
@@ -17,7 +17,7 @@ const PLANS = [
   {
     id: "monthly" as const,
     label: "Monthly",
-    price: "$5",
+    price: "$12",
     period: "/ month",
     note: "Most popular",
     highlight: true,
@@ -25,9 +25,9 @@ const PLANS = [
   {
     id: "annual" as const,
     label: "Annual",
-    price: "$40",
+    price: "$120",
     period: "/ year",
-    note: "~$3.33 / month",
+    note: "$10 / month",
     highlight: false,
   },
 ];
