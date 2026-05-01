@@ -102,6 +102,37 @@ export interface DailyLeaderboardResponse {
   total_solvers: number;
 }
 
+export interface InterviewSession {
+  id: string;
+  status: "in_progress" | "completed" | "abandoned";
+  challenge: Challenge;
+  topic: string | null;
+  difficulty: string | null;
+  started_at: string;
+  ended_at: string | null;
+  overall_score: number | null;
+  feedback: string | null;
+  strengths: string[];
+  improvements: string[];
+  time_ms: number | null;
+}
+
+export interface InterviewHistoryEntry {
+  id: string;
+  status: "in_progress" | "completed" | "abandoned";
+  challenge_id: string;
+  challenge_title: string | null;
+  topic: string | null;
+  difficulty: string | null;
+  overall_score: number | null;
+  started_at: string;
+  ended_at: string | null;
+}
+
+export interface InterviewHistoryResponse {
+  items: InterviewHistoryEntry[];
+}
+
 export interface PersonalBest {
   best_time_ms: number | null;
   pass_count: number;

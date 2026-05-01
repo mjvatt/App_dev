@@ -45,11 +45,11 @@ const MODES: Mode[] = [
     accent: "from-red-500/60 to-red-800/30",
   },
   {
-    href: null,
+    href: "/interviews",
     title: "Mock Interview",
-    blurb: "Solve under pressure, explain out loud, get a post-mortem.",
-    rule: "Single problem, timed, with a Haiku-graded debrief at the end.",
-    badge: "Soon",
+    blurb: "Solve under pressure, explain your approach, get a post-mortem.",
+    rule: "One problem with a Haiku-graded debrief on a 0-100 scale.",
+    badge: "Live",
     accent: "from-indigo-500/60 to-indigo-800/30",
   },
 ];
