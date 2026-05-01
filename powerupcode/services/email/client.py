@@ -122,6 +122,88 @@ async def send_reengagement_email(to_email: str, username: str, prior_streak: in
     await _send(to_email, subject, html, plain)
 
 
+async def send_friend_digest_email(
+    to_email: str,
+    username: str,
+    your_weekly_xp: int,
+    your_weekly_passes: int,
+    your_friend_rank: int,
+    total_friends: int,
+    top_movers: list[tuple[str, int, int]],
+) -> None:
+    """Weekly friend-leaderboard digest. `top_movers` is a list of
+    (username, weekly_xp, weekly_passes) ordered by weekly_xp desc."""
+    url = f"{settings.app_url}/leaderboard"
+    subject = "Your weekly friend leaderboard recap"
+
+    rank_line = (
+        f"You're ranked #{your_friend_rank} of {total_friends + 1} "
+        "in your friend group."
+    )
+    you_line = (
+        f"This week: {your_weekly_xp} XP from {your_weekly_passes} "
+        f"pass{'es' if your_weekly_passes != 1 else ''}."
+    )
+
+    plain_movers: list[str] = []
+    html_mover_rows: list[str] = []
+    for name, w_xp, w_passes in top_movers:
+        plain_movers.append(
+            f"  - {name}: {w_xp} XP, "
+            f"{w_passes} pass{'es' if w_passes != 1 else ''}"
+        )
+        html_mover_rows.append(
+            f'<tr><td style="padding:6px 0;font-size:14px;color:#e4e4e7;">'
+            f'<span style="color:#ffffff;font-weight:600;">{name}</span> '
+            f'<span style="color:#a1a1aa;">— {w_xp} XP, '
+            f"{w_passes} pass{'es' if w_passes != 1 else ''}</span>"
+            f"</td></tr>"
+        )
+
+    movers_section_plain = (
+        "Top movers this week:\n" + "\n".join(plain_movers)
+        if plain_movers
+        else "Nobody else moved this week — you're the one to chase."
+    )
+    movers_section_html = (
+        '<p style="margin:8px 0 4px;font-size:13px;font-weight:600;'
+        'color:#a1a1aa;text-transform:uppercase;letter-spacing:0.1em;">'
+        "Top movers this week</p>"
+        f'<table cellpadding="0" cellspacing="0" style="margin:0 0 16px;">'
+        f"{''.join(html_mover_rows)}</table>"
+        if html_mover_rows
+        else (
+            '<p style="margin:8px 0 16px;font-size:14px;color:#a1a1aa;">'
+            "Nobody else moved this week — you're the one to chase.</p>"
+        )
+    )
+
+    plain = (
+        f"Hi {username},\n\n"
+        f"{rank_line}\n"
+        f"{you_line}\n\n"
+        f"{movers_section_plain}\n\n"
+        f"See the full board: {url}\n\n"
+        "You're getting this because you have at least one PowerUpCode "
+        "friend. Reply to this email or visit your account settings if "
+        "you'd rather not receive these."
+    )
+    html = _build_html(
+        heading="Your weekly friend recap",
+        username=username,
+        body=f"{rank_line} {you_line}",
+        cta_url=url,
+        cta_text="Open Leaderboard",
+    )
+    # Inject the movers section between the body paragraph and the CTA.
+    html = html.replace(
+        f'<a href="{url}"',
+        movers_section_html + f'<a href="{url}"',
+        1,
+    )
+    await _send(to_email, subject, html, plain)
+
+
 async def send_password_reset_email(to_email: str, username: str, token: str) -> None:
     url = f"{settings.app_url}/reset-password?token={token}"
     subject = "Reset your PowerUpCode password"

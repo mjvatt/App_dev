@@ -58,6 +58,9 @@ class UserProgress(Base):
     last_reengagement_email_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    last_friend_digest_email_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     # Distinct from streak_days. The activity streak counts any submission;
     # daily_streak_days only ticks up when the user passes the daily challenge
     # on a UTC calendar day. Harder to maintain, stronger retention signal.
