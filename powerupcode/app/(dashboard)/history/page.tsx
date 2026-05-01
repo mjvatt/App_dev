@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import TierBadge from "@/components/game/TierBadge";
 import { authedRequest } from "@/lib/api";
+import type { Difficulty } from "@/lib/types";
 
 interface AttemptHistoryItem {
   attempt_id: string;
@@ -16,12 +18,18 @@ interface AttemptHistoryItem {
   submitted_at: string;
 }
 
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: "text-green-400",
-  medium: "text-yellow-400",
-  hard: "text-orange-400",
-  boss: "text-red-400",
-};
+const KNOWN_DIFFICULTIES: ReadonlySet<Difficulty> = new Set([
+  "easy",
+  "medium",
+  "hard",
+  "boss",
+]);
+
+function asDifficulty(value: string | null): Difficulty | null {
+  return value !== null && KNOWN_DIFFICULTIES.has(value as Difficulty)
+    ? (value as Difficulty)
+    : null;
+}
 
 function formatTime(ms: number): string {
   if (ms < 1000) return `${ms}ms`;
@@ -96,14 +104,11 @@ export default function HistoryPage() {
                       {item.topic.replace(/_/g, " ")}
                     </span>
                   )}
-                  {item.difficulty && (
-                    <span
-                      className={`text-xs font-medium ${
-                        DIFFICULTY_COLOR[item.difficulty] ?? "text-zinc-400"
-                      }`}
-                    >
-                      {item.difficulty}
-                    </span>
+                  {asDifficulty(item.difficulty) && (
+                    <TierBadge
+                      difficulty={asDifficulty(item.difficulty)!}
+                      size="sm"
+                    />
                   )}
                 </div>
               </div>

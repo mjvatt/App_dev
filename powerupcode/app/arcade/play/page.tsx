@@ -8,6 +8,7 @@ import CodeEditor from "@/components/game/CodeEditor";
 import BossDefeatedOverlay from "@/components/game/BossDefeatedOverlay";
 import LevelUpOverlay from "@/components/game/LevelUpOverlay";
 import StreakMilestoneOverlay from "@/components/game/StreakMilestoneOverlay";
+import TierBadge from "@/components/game/TierBadge";
 import VerbalExplanationPanel from "@/components/game/VerbalExplanationPanel";
 import { authedRequest } from "@/lib/api";
 import { Events, track } from "@/lib/analytics";
@@ -61,13 +62,6 @@ function clearDraft(challengeId: string, lang: Language): void {
     // best-effort
   }
 }
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: "text-green-400",
-  medium: "text-yellow-400",
-  hard: "text-orange-400",
-  boss: "text-red-400",
-};
 
 const DIFFICULTY_OPTIONS: { value: Difficulty | ""; label: string; color: string }[] = [
   { value: "", label: "Auto", color: "text-zinc-400" },
@@ -405,9 +399,7 @@ export default function ArcadePage() {
             <>
               <span className="text-zinc-800 hidden sm:inline">—</span>
               <span className="text-zinc-400 text-sm truncate hidden sm:inline">{challenge.title}</span>
-              <span className={`text-xs font-medium shrink-0 ${DIFFICULTY_COLOR[challenge.difficulty] ?? ""}`}>
-                {challenge.difficulty}
-              </span>
+              <TierBadge difficulty={challenge.difficulty} size="sm" />
             </>
           )}
         </header>
@@ -488,7 +480,7 @@ export default function ArcadePage() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <h1 className="text-lg font-bold">{challenge.title}</h1>
-                    <DifficultyBadge difficulty={challenge.difficulty} />
+                    <TierBadge difficulty={challenge.difficulty} size="sm" />
                   </div>
                   <p className="text-zinc-400 text-sm leading-relaxed">{challenge.prompt}</p>
                 </div>
@@ -697,14 +689,6 @@ function TimerStrip({
         </span>
       )}
     </div>
-  );
-}
-
-function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
-  return (
-    <span className={`text-xs font-medium ${DIFFICULTY_COLOR[difficulty] ?? "text-zinc-400"}`}>
-      {difficulty}
-    </span>
   );
 }
 

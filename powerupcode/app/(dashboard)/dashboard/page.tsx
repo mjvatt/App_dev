@@ -11,6 +11,7 @@ import type {
   UserMe,
   UserProgress,
 } from "@/lib/types";
+import TierBadge from "@/components/game/TierBadge";
 import XPBar from "@/components/game/XPBar";
 
 const TOPIC_LABELS: Record<Topic, string> = {
@@ -25,12 +26,7 @@ const TOPIC_LABELS: Record<Topic, string> = {
 
 const XP_PER_LEVEL = 100;
 
-const DIFFICULTIES: { key: Difficulty; label: string; color: string }[] = [
-  { key: "easy", label: "Easy", color: "text-green-400" },
-  { key: "medium", label: "Medium", color: "text-yellow-400" },
-  { key: "hard", label: "Hard", color: "text-orange-400" },
-  { key: "boss", label: "Boss", color: "text-red-400" },
-];
+const DIFFICULTY_KEYS: readonly Difficulty[] = ["easy", "medium", "hard", "boss"];
 
 function formatDuration(ms: number): string {
   if (ms < 1000) return `${ms}ms`;
@@ -40,13 +36,6 @@ function formatDuration(ms: number): string {
   const rem = s % 60;
   return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
 }
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: "text-green-400",
-  medium: "text-yellow-400",
-  hard: "text-orange-400",
-  boss: "text-red-400",
-};
 
 export default function DashboardPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -150,13 +139,7 @@ export default function DashboardPage() {
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-400">
                 Today&apos;s Daily
               </span>
-              <span
-                className={`text-xs font-medium ${
-                  DIFFICULTY_COLOR[daily.challenge.difficulty] ?? "text-zinc-400"
-                }`}
-              >
-                {daily.challenge.difficulty}
-              </span>
+              <TierBadge difficulty={daily.challenge.difficulty} size="sm" />
             </div>
             <p className="text-base font-semibold text-white truncate">
               {daily.challenge.title}
@@ -281,11 +264,13 @@ export default function DashboardPage() {
       <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6">
         <p className="text-zinc-500 text-sm mb-4">By Difficulty</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {DIFFICULTIES.map(({ key, label, color }) => {
+          {DIFFICULTY_KEYS.map((key) => {
             const stats = progress.difficulty_stats[key];
             return (
               <div key={key} className="bg-zinc-900 rounded-lg p-3">
-                <p className={`text-xs font-medium mb-1 ${color}`}>{label}</p>
+                <div className="mb-1">
+                  <TierBadge difficulty={key} size="sm" />
+                </div>
                 <p className="text-xl font-bold text-white">{stats?.attempts ?? 0}</p>
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {stats ? `${Math.round(stats.pass_rate * 100)}% pass` : "No attempts"}
