@@ -49,11 +49,15 @@ KEEP_COLUMNS = [
     "qb_kneel", "qb_spike", "two_point_attempt",
     "air_yards", "pass_length",
     "shotgun", "no_huddle",
-    "epa",
+    "yards_gained", "epa",
 ]
 
 DEEP_PASS_THRESHOLD = 10  # air yards; nflverse short/deep convention
-HISTORY_N = 5             # last N play labels in current drive
+HISTORY_N = 5             # last N plays in current drive
+
+# Per-step features kept on each prior play in the drive history. The LSTM
+# in Phase C consumes this as its sequence input.
+HISTORY_NUMERIC = ["yards_gained", "epa"]
 
 
 def download_year(year: int) -> Path:
@@ -126,12 +130,25 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_play_history(df: pd.DataFrame, n: int = HISTORY_N) -> pd.DataFrame:
-    """Last-N play labels within each drive. Resets at change of possession.
-    Pre-drive slots are filled with 'NONE'."""
+    """Last-N play history within each drive. Resets at change of possession.
+
+    Per step we keep:
+      - play_label  -> 'NONE' for pre-drive slots
+      - yards_gained, epa  -> 0.0 for pre-drive slots
+    All are KNOWN at the time the next play is called, so they are valid
+    predictive features for the current row.
+    """
     df = df.sort_values(["game_id", "play_id"]).reset_index(drop=True)
-    grp = df.groupby(["game_id", "drive"], dropna=False)["play_label"]
+    grp = df.groupby(["game_id", "drive"], dropna=False)
     for i in range(1, n + 1):
-        df[f"prev_play_label_{i}"] = grp.shift(i).fillna("NONE").astype("string")
+        df[f"prev_play_label_{i}"] = (
+            grp["play_label"].shift(i).fillna("NONE").astype("string")
+        )
+        for feat in HISTORY_NUMERIC:
+            df[f"prev_{feat}_{i}"] = (
+                pd.to_numeric(grp[feat].shift(i), errors="coerce")
+                  .fillna(0.0).astype("float32")
+            )
     return df
 
 
