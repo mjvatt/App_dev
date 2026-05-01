@@ -21,9 +21,15 @@ agent pipeline, retrieval store, and ingestion modules are stubs.
 1. Copy `.env.example` to `.env` and fill in `ANTHROPIC_API_KEY`.
 2. Start Postgres: `docker compose up -d`
 3. Install backend deps: `pip install -e .[dev]`
-4. Run backend: `uvicorn api.main:app --reload --port 8001`
-5. Install frontend deps: `npm install`
-6. Run frontend: `npm run dev` (port 3002)
+4. Build the O*NET cache (one-time, ~30s on a fresh machine):
+   `python -m services.ingest.onet build`
+5. Run backend: `uvicorn api.main:app --reload --port 8001`
+6. Install frontend deps: `npm install`
+7. Run frontend: `npm run dev` (port 3002)
+
+The O*NET build downloads ~18 MB of public archives into `data/onet/raw/` and
+writes a denormalized JSON index to `data/onet/parsed/occupation_index.json`.
+Both directories are gitignored. Re-run with `--force` to refresh from upstream.
 
 ## Layout
 
