@@ -23,6 +23,8 @@
   --atlas-dim:   rgba(14,165,233,.12);
   --oracle:      #f97316;
   --oracle-dim:  rgba(249,115,22,.12);
+  --playbook:    #f43f5e;
+  --playbook-dim: rgba(244,63,94,.12);
 
   --chart-grid:          rgba(255,255,255,0.06);
   --chart-tick:          #777777;
@@ -66,6 +68,8 @@
   --atlas-dim:   rgba(2,132,199,.1);
   --oracle:      #ea580c;
   --oracle-dim:  rgba(234,88,12,.1);
+  --playbook:    #e11d48;
+  --playbook-dim: rgba(225,29,72,.1);
 
   --chart-grid:          rgba(0,0,0,0.07);
   --chart-tick:          #6b7280;
@@ -220,10 +224,11 @@ body { display: flex; overflow: hidden; }
   margin-left: auto;
   flex-shrink: 0;
 }
-.sage-badge   { background: var(--sage-dim);       color: var(--sage); }
-.ghost-badge  { background: var(--ghost-dim);      color: var(--ghost); }
-.atlas-badge  { background: var(--atlas-dim);      color: var(--atlas); }
-.oracle-badge { background: var(--oracle-dim);     color: var(--oracle); }
+.sage-badge     { background: var(--sage-dim);     color: var(--sage); }
+.ghost-badge    { background: var(--ghost-dim);    color: var(--ghost); }
+.atlas-badge    { background: var(--atlas-dim);    color: var(--atlas); }
+.oracle-badge   { background: var(--oracle-dim);   color: var(--oracle); }
+.playbook-badge { background: var(--playbook-dim); color: var(--playbook); }
 .new-badge   { background: rgba(245,158,11,.12);  color: #f59e0b; }
 
 .sidebar.collapsed .nav-label,
@@ -610,10 +615,11 @@ td.empty-state {
   padding: 6px 18px;
   border-radius: 8px;
 }
-.sage-hero   .engine-hero-badge { background: var(--sage-dim);   color: var(--sage);   border: 1px solid var(--sage); }
-.ghost-hero  .engine-hero-badge { background: var(--ghost-dim);  color: var(--ghost);  border: 1px solid var(--ghost); }
-.atlas-hero  .engine-hero-badge { background: var(--atlas-dim);  color: var(--atlas);  border: 1px solid var(--atlas); }
-.oracle-hero .engine-hero-badge { background: var(--oracle-dim); color: var(--oracle); border: 1px solid var(--oracle); }
+.sage-hero     .engine-hero-badge { background: var(--sage-dim);     color: var(--sage);     border: 1px solid var(--sage); }
+.ghost-hero    .engine-hero-badge { background: var(--ghost-dim);    color: var(--ghost);    border: 1px solid var(--ghost); }
+.atlas-hero    .engine-hero-badge { background: var(--atlas-dim);    color: var(--atlas);    border: 1px solid var(--atlas); }
+.oracle-hero   .engine-hero-badge { background: var(--oracle-dim);   color: var(--oracle);   border: 1px solid var(--oracle); }
+.playbook-hero .engine-hero-badge { background: var(--playbook-dim); color: var(--playbook); border: 1px solid var(--playbook); }
 .ghost-badge-hero { color: var(--ghost) !important; }
 
 /* ── Player Profile Modal ───────────────────────────────────────── */

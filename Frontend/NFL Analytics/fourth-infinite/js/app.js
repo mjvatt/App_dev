@@ -37,6 +37,8 @@
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
+    oracle:     ['ORACLE',           'Optimized Regression & Analytical Championship Learning Engine'],
+    playbook:   ['PLAYBOOK',         'Play-call Prediction Engine — multi-task LSTM with EPA head'],
   };
 
   let _currentView = 'dashboard';
@@ -66,6 +68,7 @@
     if (id === 'sage')       initSAGE();
     if (id === 'ghost')      initGHOST();
     if (id === 'oracle')     initORACLE();
+    if (id === 'playbook')   initPlaybook();
   }
 
   document.querySelectorAll('.nav-item').forEach(el => {
@@ -1020,6 +1023,9 @@
   let _atlasInited     = false;
   let _atlasTabInited  = {};
   let _oracleInited    = false;
+  let _playbookInited  = false;
+  let _playbookBlob    = null;
+  let _playbookCharts  = {};
 
   function initSAGE() {
     if (!_sageInited) {
@@ -2441,10 +2447,145 @@
       _atlasInited      = false;
       _atlasTabInited   = {};
       _oracleInited     = false;
+      _playbookInited   = false;
+      Object.values(_playbookCharts).forEach(c => c?.destroy?.());
+      _playbookCharts   = {};
       _class2027Inited  = false;
       showView(_currentView);
     });
   });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PLAYBOOK — play-call prediction engine (LSTM + EPA head)
+  ═══════════════════════════════════════════════════════════════════ */
+
+  const PLAYBOOK_COLORS = {
+    RUN:        '#f59e0b',
+    SHORT_PASS: '#3b82f6',
+    DEEP_PASS:  '#ef4444',
+  };
+
+  async function initPlaybook() {
+    if (_playbookInited) {
+      const sel = document.getElementById('playbook-scenario-sel');
+      if (sel?.value) renderPlaybookScenario(sel.value);
+      return;
+    }
+
+    const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+    const opts    = isLocal ? { cache: 'no-store' } : undefined;
+    let blob;
+    try {
+      const resp = await fetch('data/playbook_predictions.json', opts);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      blob = await resp.json();
+    } catch (err) {
+      const desc = document.getElementById('playbook-scenario-desc');
+      if (desc) {
+        desc.textContent = 'PLAYBOOK predictions JSON not found. From the playbook venv, run: python build_predictions.py';
+      }
+      return;
+    }
+
+    _playbookBlob   = blob;
+    _playbookInited = true;
+
+    const m = blob.metrics || {};
+    const fmt = v => (typeof v === 'number') ? v.toFixed(3) : '—';
+    document.getElementById('playbook-n-train').textContent = '837k';
+    document.getElementById('playbook-rmse').textContent    = fmt(m.test_epa_rmse);
+    document.getElementById('playbook-acc').textContent     = fmt(m.test_accuracy);
+
+    const sel = document.getElementById('playbook-scenario-sel');
+    sel.innerHTML = '';
+    blob.scenarios.forEach(sc => sel.add(new Option(sc.name, sc.id)));
+    sel.addEventListener('change', () => renderPlaybookScenario(sel.value));
+
+    document.getElementById('playbook-model-notes').innerHTML = `
+      <ul style="margin:0;padding-left:20px">
+        <li>Multi-task LSTM (~31k params) trained on nflverse play-by-play 1999–2023, held out 2024–2025. Per-step input is [play_label_emb · prev_yards_gained · prev_epa] over the last 5 plays in the current drive.</li>
+        <li>Classification accuracy 0.59 — does not beat the LightGBM tabular baseline. The win is the joint output: a single forward pass returns calibrated P(play_type) plus expected EPA per play type.</li>
+        <li>EPA RMSE 1.37 overall (per-class 1.0/1.4/1.9) is in the band of public play-by-play EPA models.</li>
+        <li>Predictions on this view use a fixed PHI/NYG team pair so the answer reflects this-situation-not-this-team coaching insight. Different team identities would shift predictions slightly.</li>
+        <li>The EPA head's "deep is highest-EV" verdict in many situations partly reflects selection bias: deep passes get called when the matchup invites them, and connect for big EPA. Treat counterfactual EPA as "if a coach decided to call deep here, expected outcome is..." not "deep is always the right call."</li>
+      </ul>`;
+
+    if (blob.scenarios.length) renderPlaybookScenario(blob.scenarios[0].id);
+  }
+
+  function renderPlaybookScenario(scenarioId) {
+    const blob = _playbookBlob;
+    if (!blob) return;
+    const sc = blob.scenarios.find(s => s.id === scenarioId) || blob.scenarios[0];
+
+    document.getElementById('playbook-scenario-desc').textContent = sc.description;
+
+    const labels = blob.labels;
+    const probs  = labels.map(l => +(sc.predictions[l].prob * 100).toFixed(1));
+    const epas   = labels.map(l => +sc.predictions[l].epa.toFixed(3));
+    const colors = labels.map(l => PLAYBOOK_COLORS[l] || '#888');
+    const labelText = labels.map(l => l.replace('_', ' '));
+
+    const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-tick').trim() || '#777';
+    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() || 'rgba(255,255,255,0.06)';
+    const baseFont  = { family: getComputedStyle(document.body).fontFamily, size: 12 };
+
+    _playbookCharts.prob?.destroy?.();
+    _playbookCharts.prob = new Chart(document.getElementById('chart-playbook-prob'), {
+      type: 'bar',
+      data: {
+        labels: labelText,
+        datasets: [{ data: probs, backgroundColor: colors, borderWidth: 0, borderRadius: 4 }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend:  { display: false },
+          tooltip: { callbacks: { label: ctx => `${ctx.parsed.x.toFixed(1)}%` } },
+        },
+        scales: {
+          x: { beginAtZero: true, max: 100, ticks: { color: tickColor, font: baseFont, callback: v => `${v}%` }, grid: { color: gridColor } },
+          y: { ticks: { color: tickColor, font: baseFont }, grid: { display: false } },
+        },
+      },
+    });
+
+    const epaMax = Math.max(0.5, ...epas.map(Math.abs));
+    _playbookCharts.epa?.destroy?.();
+    _playbookCharts.epa = new Chart(document.getElementById('chart-playbook-epa'), {
+      type: 'bar',
+      data: {
+        labels: labelText,
+        datasets: [{ data: epas, backgroundColor: colors, borderWidth: 0, borderRadius: 4 }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend:  { display: false },
+          tooltip: { callbacks: { label: ctx => `${ctx.parsed.x >= 0 ? '+' : ''}${ctx.parsed.x.toFixed(2)} EPA` } },
+        },
+        scales: {
+          x: { min: -epaMax, max: epaMax, ticks: { color: tickColor, font: baseFont, callback: v => v.toFixed(2) }, grid: { color: gridColor } },
+          y: { ticks: { color: tickColor, font: baseFont }, grid: { display: false } },
+        },
+      },
+    });
+
+    const argmaxClassIdx = probs.indexOf(Math.max(...probs));
+    const argmaxEpaIdx   = epas.indexOf(Math.max(...epas));
+    const insightEl = document.getElementById('playbook-insight');
+    if (argmaxClassIdx === argmaxEpaIdx) {
+      insightEl.innerHTML = `<strong>Aligned.</strong> ${labelText[argmaxClassIdx]} is both the most likely call (P = ${probs[argmaxClassIdx].toFixed(0)}%) and the highest-EV play (EPA = ${epas[argmaxClassIdx] >= 0 ? '+' : ''}${epas[argmaxClassIdx].toFixed(2)}). The data and the model agree.`;
+    } else {
+      const probPct = probs[argmaxClassIdx].toFixed(0);
+      const epaVal  = epas[argmaxEpaIdx];
+      insightEl.innerHTML = `<strong>Most likely call:</strong> ${labelText[argmaxClassIdx]} (P = ${probPct}%). <strong>Highest expected EPA:</strong> ${labelText[argmaxEpaIdx]} (EPA = ${epaVal >= 0 ? '+' : ''}${epaVal.toFixed(2)}). The disagreement is the decision-support signal — ${labelText[argmaxEpaIdx]} is rarely the called play here, but the model's expected outcome on it is the best of the three options.`;
+    }
+  }
 
   /* ── Boot sequence ────────────────────────────────────────────────── */
   initCollegeFilters();

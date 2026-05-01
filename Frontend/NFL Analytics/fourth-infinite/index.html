@@ -98,6 +98,11 @@
           <span>ORACLE</span>
           <span class="engine-badge oracle-badge">NEW</span>
         </a>
+        <a href="#" class="nav-item engine-item" data-view="playbook">
+          <i class="fas fa-clipboard-list"></i>
+          <span>PLAYBOOK</span>
+          <span class="engine-badge playbook-badge">BETA</span>
+        </a>
       </div>
     </nav>
 
@@ -1302,6 +1307,67 @@
             </div>
             <div id="oracle-model-notes" style="padding:16px 20px;font-size:13px;line-height:1.7;color:var(--text-sub)"></div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PLAYBOOK ENGINE VIEW ─── -->
+    <section class="view" id="view-playbook">
+      <div class="engine-hero playbook-hero">
+        <div class="engine-hero-badge">PLAYBOOK</div>
+        <h2>Play-call Prediction Engine</h2>
+        <p>Multi-task LSTM that predicts next play type AND expected EPA per play type, given game state. Trained on <strong id="playbook-n-train">—</strong> plays (1999–2023). Held-out 2024–2025 EPA RMSE <strong id="playbook-rmse">—</strong> · classification accuracy <strong id="playbook-acc">—</strong>.</p>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Game Scenario</h3>
+              <p id="playbook-scenario-desc">Select a scenario to see the model's predicted play distribution and expected EPA per play type.</p>
+            </div>
+            <select id="playbook-scenario-sel" class="filter-select"></select>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Predicted Play Probability</h3>
+              <p>What the model expects an offense to call</p>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-playbook-prob"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Expected EPA per Play Type</h3>
+              <p>Expected Points Added if each play type were called here</p>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-playbook-epa"></canvas></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Decision-Support Insight</h3>
+              <p>Where probability and expected EPA disagree</p>
+            </div>
+          </div>
+          <div id="playbook-insight" style="padding:16px 20px;font-size:13px;line-height:1.7;color:var(--text)"></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Honest Model Notes</h3>
+              <p>What PLAYBOOK can and cannot do</p>
+            </div>
+          </div>
+          <div id="playbook-model-notes" style="padding:16px 20px;font-size:13px;line-height:1.7;color:var(--text-sub)"></div>
         </div>
       </div>
     </section>

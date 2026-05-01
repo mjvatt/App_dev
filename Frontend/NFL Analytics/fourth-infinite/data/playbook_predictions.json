@@ -1,0 +1,419 @@
+{
+  "version": "1",
+  "model": "lstm_multitask_epa",
+  "labels": [
+    "RUN",
+    "SHORT_PASS",
+    "DEEP_PASS"
+  ],
+  "team_pair": {
+    "posteam": "PHI",
+    "defteam": "NYG"
+  },
+  "metrics": {
+    "test_accuracy": 0.5926,
+    "test_log_loss": 0.8951,
+    "test_epa_rmse": 1.3701,
+    "test_epa_mae": 0.9523,
+    "train_years": [
+      1999,
+      2023
+    ],
+    "test_years": [
+      2024,
+      2025
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "drive-opener",
+      "name": "1st & 10 from own 25",
+      "description": "Standard drive opener after a touchback. Tied game, early 2nd quarter.",
+      "state": {
+        "down": 1,
+        "ydstogo": 10,
+        "yardline_100": 75,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.5492,
+          "epa": -0.0882
+        },
+        "SHORT_PASS": {
+          "prob": 0.3519,
+          "epa": -0.0112
+        },
+        "DEEP_PASS": {
+          "prob": 0.099,
+          "epa": 0.4235
+        }
+      }
+    },
+    {
+      "id": "midfield-1st",
+      "name": "1st & 10 at midfield",
+      "description": "Drive into opponent territory. Neutral score, run/pass balance test.",
+      "state": {
+        "down": 1,
+        "ydstogo": 10,
+        "yardline_100": 50,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.5375,
+          "epa": -0.0928
+        },
+        "SHORT_PASS": {
+          "prob": 0.3631,
+          "epa": -0.0146
+        },
+        "DEEP_PASS": {
+          "prob": 0.0994,
+          "epa": 0.4243
+        }
+      }
+    },
+    {
+      "id": "2nd-medium",
+      "name": "2nd & 7 at own 35",
+      "description": "Standard medium-yards 2nd down. Pass-leaning across the league.",
+      "state": {
+        "down": 2,
+        "ydstogo": 7,
+        "yardline_100": 65,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.5434,
+          "epa": -0.0662
+        },
+        "SHORT_PASS": {
+          "prob": 0.355,
+          "epa": -0.0134
+        },
+        "DEEP_PASS": {
+          "prob": 0.1016,
+          "epa": 0.3741
+        }
+      }
+    },
+    {
+      "id": "2nd-long",
+      "name": "2nd & 14 at own 25",
+      "description": "Pass-down territory after a sack or TFL. Deep threat increases.",
+      "state": {
+        "down": 2,
+        "ydstogo": 14,
+        "yardline_100": 75,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 1,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.2938,
+          "epa": -0.1401
+        },
+        "SHORT_PASS": {
+          "prob": 0.5156,
+          "epa": -0.086
+        },
+        "DEEP_PASS": {
+          "prob": 0.1906,
+          "epa": 0.332
+        }
+      }
+    },
+    {
+      "id": "3rd-short",
+      "name": "3rd & 1 at midfield",
+      "description": "Conversion situation \u2014 short yardage rewards the run.",
+      "state": {
+        "down": 3,
+        "ydstogo": 1,
+        "yardline_100": 50,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.7093,
+          "epa": 0.0055
+        },
+        "SHORT_PASS": {
+          "prob": 0.259,
+          "epa": -0.0315
+        },
+        "DEEP_PASS": {
+          "prob": 0.0317,
+          "epa": 0.3473
+        }
+      }
+    },
+    {
+      "id": "3rd-medium",
+      "name": "3rd & 4 at own 35",
+      "description": "Balanced 3rd down. Most teams pass to the sticks.",
+      "state": {
+        "down": 3,
+        "ydstogo": 4,
+        "yardline_100": 65,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 1,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.1292,
+          "epa": -0.0936
+        },
+        "SHORT_PASS": {
+          "prob": 0.637,
+          "epa": -0.1223
+        },
+        "DEEP_PASS": {
+          "prob": 0.2338,
+          "epa": 0.3025
+        }
+      }
+    },
+    {
+      "id": "3rd-long",
+      "name": "3rd & 8 at opponent 40",
+      "description": "Passing down. Deep threat real if the matchup invites it.",
+      "state": {
+        "down": 3,
+        "ydstogo": 8,
+        "yardline_100": 40,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 1,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.1153,
+          "epa": -0.1724
+        },
+        "SHORT_PASS": {
+          "prob": 0.6375,
+          "epa": -0.2172
+        },
+        "DEEP_PASS": {
+          "prob": 0.2473,
+          "epa": 0.318
+        }
+      }
+    },
+    {
+      "id": "3rd-very-long",
+      "name": "3rd & 12 at own 25",
+      "description": "Almost certainly passing. Look for deep over short.",
+      "state": {
+        "down": 3,
+        "ydstogo": 12,
+        "yardline_100": 75,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 1,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.1122,
+          "epa": -0.1873
+        },
+        "SHORT_PASS": {
+          "prob": 0.6126,
+          "epa": -0.2357
+        },
+        "DEEP_PASS": {
+          "prob": 0.2752,
+          "epa": 0.2973
+        }
+      }
+    },
+    {
+      "id": "4th-short",
+      "name": "4th & 1 at opponent 35",
+      "description": "Aggressive coaches go for it. The model sees what tendencies say.",
+      "state": {
+        "down": 4,
+        "ydstogo": 1,
+        "yardline_100": 35,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.7882,
+          "epa": 0.0818
+        },
+        "SHORT_PASS": {
+          "prob": 0.1936,
+          "epa": -0.0404
+        },
+        "DEEP_PASS": {
+          "prob": 0.0181,
+          "epa": 0.3965
+        }
+      }
+    },
+    {
+      "id": "goal-line-5",
+      "name": "1st & goal at 5",
+      "description": "Red zone scoring opportunity. Run rate elevates near the goal line.",
+      "state": {
+        "down": 1,
+        "ydstogo": 5,
+        "yardline_100": 5,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.6833,
+          "epa": 0.0093
+        },
+        "SHORT_PASS": {
+          "prob": 0.3021,
+          "epa": -0.0078
+        },
+        "DEEP_PASS": {
+          "prob": 0.0146,
+          "epa": 0.3509
+        }
+      }
+    },
+    {
+      "id": "goal-line-1",
+      "name": "1st & goal at 1",
+      "description": "Goal-to-go from the 1. Heaviest run rate situation in football.",
+      "state": {
+        "down": 1,
+        "ydstogo": 1,
+        "yardline_100": 1,
+        "score_differential": 0,
+        "qtr": 2,
+        "quarter_seconds_remaining": 600,
+        "game_seconds_remaining": 1500,
+        "shotgun": 0,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.8064,
+          "epa": 0.034
+        },
+        "SHORT_PASS": {
+          "prob": 0.1884,
+          "epa": -0.0001
+        },
+        "DEEP_PASS": {
+          "prob": 0.0051,
+          "epa": 0.4538
+        }
+      }
+    },
+    {
+      "id": "two-minute-down-7",
+      "name": "1st & 10, two-minute drill, down 7",
+      "description": "Late 4th, must score a TD. Pace and pass rate spike.",
+      "state": {
+        "down": 1,
+        "ydstogo": 10,
+        "yardline_100": 70,
+        "score_differential": -7,
+        "qtr": 4,
+        "quarter_seconds_remaining": 110,
+        "game_seconds_remaining": 110,
+        "shotgun": 1,
+        "no_huddle": 1
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.1916,
+          "epa": -0.0565
+        },
+        "SHORT_PASS": {
+          "prob": 0.5558,
+          "epa": -0.0508
+        },
+        "DEEP_PASS": {
+          "prob": 0.2526,
+          "epa": 0.2673
+        }
+      }
+    },
+    {
+      "id": "garbage-time",
+      "name": "1st & 10, down 28, mid 4th quarter",
+      "description": "Garbage time. Trailing team passes; winning defense sits coverage.",
+      "state": {
+        "down": 1,
+        "ydstogo": 10,
+        "yardline_100": 70,
+        "score_differential": -28,
+        "qtr": 4,
+        "quarter_seconds_remaining": 400,
+        "game_seconds_remaining": 400,
+        "shotgun": 1,
+        "no_huddle": 0
+      },
+      "predictions": {
+        "RUN": {
+          "prob": 0.2457,
+          "epa": -0.1077
+        },
+        "SHORT_PASS": {
+          "prob": 0.5602,
+          "epa": -0.1066
+        },
+        "DEEP_PASS": {
+          "prob": 0.194,
+          "epa": 0.226
+        }
+      }
+    }
+  ]
+}
