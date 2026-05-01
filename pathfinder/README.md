@@ -21,15 +21,23 @@ agent pipeline, retrieval store, and ingestion modules are stubs.
 1. Copy `.env.example` to `.env` and fill in `ANTHROPIC_API_KEY`.
 2. Start Postgres: `docker compose up -d`
 3. Install backend deps: `pip install -e .[dev]`
-4. Build the O*NET cache (one-time, ~30s on a fresh machine):
+4. Apply migrations: `alembic upgrade head`
+5. Build the O*NET JSON cache (one-time, ~30s):
    `python -m services.ingest.onet build`
-5. Run backend: `uvicorn api.main:app --reload --port 8001`
-6. Install frontend deps: `npm install`
-7. Run frontend: `npm run dev` (port 3002)
+6. Embed and load occupations into pgvector (one-time, downloads
+   ~80 MB embedding model on first run, ~1–2 min):
+   `python -m services.ingest.pgvector_load`
+7. Run backend: `uvicorn api.main:app --reload --port 8001`
+8. Install frontend deps: `npm install`
+9. Run frontend: `npm run dev` (port 3002)
 
 The O*NET build downloads ~18 MB of public archives into `data/onet/raw/` and
 writes a denormalized JSON index to `data/onet/parsed/occupation_index.json`.
 Both directories are gitignored. Re-run with `--force` to refresh from upstream.
+
+Embeddings are computed locally via `fastembed` (BAAI/bge-small-en-v1.5,
+384-dim). The first call downloads the model into the user's fastembed cache.
+Re-running `pgvector_load` upserts on `soc_code` so it's idempotent.
 
 ## Layout
 

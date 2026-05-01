@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str = Field(default="")
     database_url: str = Field(
-        default="postgresql+asyncpg://pathfinder:pathfinder@localhost:5433/pathfinder"
+        default="postgresql+asyncpg://pathfinder:pathfinder@localhost:5436/pathfinder"
     )
     synthesizer_model: str = Field(default="claude-opus-4-7")
     default_model: str = Field(default="claude-sonnet-4-6")
