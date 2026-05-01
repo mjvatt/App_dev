@@ -1569,6 +1569,13 @@
         pos_group: mlPos.value    || undefined,
         round:     mlRound.value  || undefined,
       };
+
+      const caveatEl = document.getElementById('ghost-ml-caveat');
+      if (caveatEl) {
+        const yfrom = +mlYfrom.value;
+        const yto   = +mlYto.value;
+        caveatEl.hidden = !(yfrom <= 2026 && yto >= 2026);
+      }
       const mode   = mlMode.value;
       const result = DraftData.sleeperModelRankings(filter, 30, mode);
 

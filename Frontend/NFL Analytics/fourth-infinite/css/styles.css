@@ -1078,6 +1078,18 @@ td.empty-state {
   border-color: rgba(139,92,246,.35);
 }
 
+.ml-caveat {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(139,92,246,.35);
+  background: var(--ghost-dim);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.ml-caveat strong { color: var(--ghost); margin-right: 4px; }
+
 .ghost-panel { display: none; }
 .ghost-panel.active { display: block; }
 
