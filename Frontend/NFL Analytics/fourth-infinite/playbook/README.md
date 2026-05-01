@@ -21,24 +21,24 @@ Phase A — scaffolding only. No model code yet.
 
 ## Setup
 
-Separate virtual environment is required. PyTorch alone is ~2 GB and should not be in the F&I top-level Python.
+Separate virtual environment is required. PyTorch alone is ~2 GB and should not be in the F&I top-level Python. Tested on Python 3.13 + RTX 4080 SUPER (Ada Lovelace).
 
 ```
 cd "Frontend/NFL Analytics/fourth-infinite/playbook"
 python -m venv .venv
 .venv\Scripts\activate
+pip install torch --index-url https://download.pytorch.org/whl/cu124
 pip install -r requirements.txt
 ```
 
-GPU build: install PyTorch with CUDA support first, then the rest.
+`cu124` is the CUDA 12.4 channel and is the lowest PyTorch index that ships Python 3.13 wheels at the time of writing. RTX 30/40-series cards work cleanly on cu124.
+
+CPU-only fallback (skip the first command and let pip pick a CPU torch wheel):
 
 ```
 .venv\Scripts\activate
-pip install torch --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
-
-`cu121` matches CUDA 12.1. Adjust the URL for your driver version.
 
 ## Run
 
@@ -53,7 +53,9 @@ python -m playbook.eval                # Phase F
 
 ## Data sources
 
-- **nflverse play-by-play** via `nfl_data_py`. Every play 1999–present with EPA, formation, personnel, win probability, success indicators.
+- **nflverse play-by-play** pulled directly as parquet from GitHub releases:
+  `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{YEAR}.parquet`.
+  Every play 1999–present with EPA, formation, personnel, win probability, success indicators. Direct fetch over the `nfl_data_py` wrapper because the latter pins `numpy<2.0`, which has no Python 3.13 wheels — and we lose nothing by reading the parquet ourselves.
 - **F&I `data/draft_data.json`** for player-level joins (rookie indicator, draft pedigree).
 
 ## Boundary rules
