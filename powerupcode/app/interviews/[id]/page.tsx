@@ -7,6 +7,7 @@ import CodeEditor from "@/components/game/CodeEditor";
 import TierBadge from "@/components/game/TierBadge";
 import { authedRequest } from "@/lib/api";
 import type { Difficulty, InterviewSession } from "@/lib/types";
+import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 
 const LANGUAGES = ["python", "javascript", "typescript", "java"] as const;
 type Language = (typeof LANGUAGES)[number];
@@ -55,6 +56,13 @@ export default function InterviewSessionPage({
   const [confirming, setConfirming] = useState(false);
   const startTime = useRef<number>(Date.now());
 
+  // Speech recognition appends finalized phrases to the same textarea
+  // the user can also type into. One source of truth for the transcript.
+  const speech = useSpeechRecognition({
+    onFinalTranscript: (text) =>
+      setTranscript((prev) => (prev ? `${prev} ${text}` : text)),
+  });
+
   useEffect(() => {
     authedRequest<InterviewSession>(`/api/interviews/${id}`)
       .then((s) => {
@@ -77,6 +85,7 @@ export default function InterviewSessionPage({
 
   async function handleEnd() {
     if (!session || ending) return;
+    speech.stop();
     setEnding(true);
     setError(null);
     try {
@@ -211,13 +220,38 @@ export default function InterviewSessionPage({
               </div>
             )}
             <div className="border-t border-zinc-900 pt-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
-                Your explanation
-              </p>
+              <div className="flex items-center justify-between mb-2 gap-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                  Your explanation
+                </p>
+                {speech.supported && (
+                  <button
+                    onClick={speech.recording ? speech.stop : speech.start}
+                    className={`text-xs font-semibold rounded-lg px-3 py-1.5 transition-colors ${
+                      speech.recording
+                        ? "bg-red-950/60 text-red-300 border border-red-800 hover:bg-red-900/50"
+                        : "border border-zinc-700 text-white hover:border-white"
+                    }`}
+                  >
+                    {speech.recording ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />
+                        Stop
+                      </span>
+                    ) : (
+                      "Record"
+                    )}
+                  </button>
+                )}
+              </div>
               <p className="text-xs text-zinc-600 mb-2">
-                Type how you&apos;d talk through it. The post-mortem grades
-                clarity and completeness.
+                {speech.supported
+                  ? "Talk through it or type — both append to the same buffer. The post-mortem grades clarity and completeness."
+                  : "Type how you'd talk through it. Voice recording isn't supported in this browser."}
               </p>
+              {speech.error && (
+                <p className="text-xs text-red-400 mb-2">{speech.error}</p>
+              )}
               <textarea
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
@@ -225,6 +259,11 @@ export default function InterviewSessionPage({
                 placeholder="Walk through your approach: what pattern, why, how the data flows, what the complexity is…"
                 className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 resize-y"
               />
+              {speech.recording && speech.interim && (
+                <p className="text-xs text-zinc-500 italic mt-2">
+                  &ldquo;{speech.interim}&rdquo;
+                </p>
+              )}
             </div>
           </div>
 
