@@ -143,6 +143,37 @@ class DailyChallenge(Base):
     )
 
 
+class InterviewSession(Base):
+    """One mock-interview run. Created when the user clicks Start, completed
+    when they click End and the post-mortem is synthesized. Single-problem
+    in Phase 1; Phase 2 will add a sequence (warmup -> main -> follow-up)."""
+
+    __tablename__ = "interview_sessions"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String, nullable=False, default="in_progress", server_default=text("'in_progress'")
+    )
+    challenge_id: Mapped[str] = mapped_column(String, nullable=False)
+    topic: Mapped[str | None] = mapped_column(String, nullable=True)
+    difficulty: Mapped[str | None] = mapped_column(String, nullable=True)
+    solution: Mapped[str | None] = mapped_column(String, nullable=True)
+    transcript: Mapped[str | None] = mapped_column(String, nullable=True)
+    language: Mapped[str | None] = mapped_column(String, nullable=True)
+    time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    overall_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    feedback: Mapped[str | None] = mapped_column(String, nullable=True)
+    strengths: Mapped[str | None] = mapped_column(String, nullable=True)
+    improvements: Mapped[str | None] = mapped_column(String, nullable=True)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
 class ReviewSchedule(Base):
     __tablename__ = "review_schedule"
     __table_args__ = (

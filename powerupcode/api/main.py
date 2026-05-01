@@ -17,6 +17,7 @@ from api.routers import (
     challenges,
     curriculum,
     friends,
+    interview,
     leaderboard,
     progress,
 )
@@ -69,6 +70,7 @@ app.include_router(billing.router, prefix="/api/billing", tags=["billing"])
 app.include_router(leaderboard.router, prefix="/api/leaderboard", tags=["leaderboard"])
 app.include_router(curriculum.router, prefix="/api/curriculum", tags=["curriculum"])
 app.include_router(friends.router, prefix="/api/friends", tags=["friends"])
+app.include_router(interview.router, prefix="/api/interviews", tags=["interviews"])
 
 
 @app.get("/health", tags=["meta"])

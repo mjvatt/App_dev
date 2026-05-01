@@ -74,6 +74,19 @@ class ExplanationGrade:
 
 
 @dataclass
+class InterviewPostMortem:
+    """End-of-interview report synthesized from the user's solution,
+    verbal explanation, and time-to-solve. overall_score is 0-100;
+    strengths and improvements are short bullet lists (3-5 items each)
+    joined by newlines for storage."""
+    overall_score: int
+    feedback: str
+    strengths: list[str]
+    improvements: list[str]
+    available: bool = True
+
+
+@dataclass
 class UserLevel:
     user_id: str
     total_xp: int
@@ -161,6 +174,29 @@ class GameEngine(ABC):
             communication=0,
             overall=0,
             feedback="Explanation grading is not available in this engine.",
+            available=False,
+        )
+
+    async def generate_interview_post_mortem(
+        self,
+        db: AsyncSession,
+        user_id: str,
+        challenge_id: str,
+        solution: str,
+        transcript: str,
+        language: str,
+        time_ms: int,
+    ) -> "InterviewPostMortem":
+        """Optional: synthesize an end-of-interview report from the
+        user's solution, verbal explanation, and time-to-solve.
+        HaikuEngine overrides with a structured Haiku call; the default
+        returns unavailable so engines that don't ship this still
+        satisfy the interface."""
+        return InterviewPostMortem(
+            overall_score=0,
+            feedback="Interview post-mortem is not available in this engine.",
+            strengths=[],
+            improvements=[],
             available=False,
         )
 
