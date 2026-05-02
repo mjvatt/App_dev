@@ -70,6 +70,14 @@ TOKENS_BOSS_RUSH_EXTRA_LIFE = 7        # mid-run; cost > revive on purpose
                                        # so post-wipe rescue stays the
                                        # cheaper, more dramatic option
 TOKENS_INTERVIEW_TIME_FREEZE = 5       # bumps soft target by +5 minutes
+TOKENS_DAILY_STREAK_SHIELD = 5         # one shield = covers one missed
+                                       # daily; auto-consumed on next
+                                       # solve when a gap exists
+MAX_DAILY_STREAK_SHIELDS = 3           # stockpile cap. Three is enough
+                                       # to bridge a long weekend (Sat-
+                                       # Sun-Mon) but doesn't let a
+                                       # wealthy account vacation through
+                                       # a streak indefinitely
 
 
 # ---------------------------------------------------------------------

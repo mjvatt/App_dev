@@ -91,6 +91,20 @@ export default function AttemptResultPanel({
             +{result.tokens_earned}
           </motion.span>
         )}
+        {result.streak_shields_consumed > 0 && (
+          <motion.span
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.34, duration: 0.3 }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-sky-200 bg-sky-950/40 border border-sky-900 px-2 py-0.5 rounded-full"
+            title={`Streak shield${result.streak_shields_consumed > 1 ? "s" : ""} auto-spent to bridge a missed day`}
+          >
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
+              <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z" />
+            </svg>
+            -{result.streak_shields_consumed} shield streak saved
+          </motion.span>
+        )}
       </div>
       <p className="text-zinc-400 text-sm leading-relaxed mb-4">{result.feedback}</p>
 

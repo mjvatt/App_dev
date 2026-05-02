@@ -194,7 +194,12 @@ async def _credit_user_progress(
     streak / topic logic — boss-rush is a separate source."""
     progress = await db.get(UserProgress, user_id)
     if progress is None:
-        progress = UserProgress(user_id=user_id, total_xp=xp, token_balance=tokens)
+        progress = UserProgress(
+            user_id=user_id,
+            total_xp=xp,
+            token_balance=tokens,
+            streak_shields=0,
+        )
         db.add(progress)
     else:
         progress.total_xp += xp

@@ -32,6 +32,7 @@ class AttemptResponse(BaseModel):
     daily_streak_days: int = 0
     daily_streak_milestone: int | None = None  # one of 3, 7, 14, 30, 100, 365 when crossed
     tokens_earned: int = 0  # power-up tokens granted on this attempt (sum across earn paths)
+    streak_shields_consumed: int = 0  # shields auto-spent to bridge a gap on this attempt
 
 
 class HintRequest(BaseModel):

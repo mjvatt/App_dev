@@ -193,23 +193,44 @@ def _compute_level(total_xp: int) -> int:
     return total_xp // 100 + 1
 
 
-def _update_daily_streak(progress: UserProgress, today_utc: date) -> None:
+def _update_daily_streak(progress: UserProgress, today_utc: date) -> int:
     """Tick the user's daily-challenge streak when they pass the daily for
     a UTC calendar day they haven't already solved. Same calendar-math
     shape as _update_streak but driven off `last_daily_solved_date` so the
-    activity streak and the daily streak don't interfere."""
+    activity streak and the daily streak don't interfere.
+
+    Returns the number of streak shields auto-consumed to bridge a gap.
+    A gap of N days needs (N - 1) shields to preserve the streak; if the
+    user has fewer, the streak resets and zero shields are spent (the
+    spend would have been wasted on a partial bridge)."""
     last = progress.last_daily_solved_date
     if last is None:
         progress.daily_streak_days = 1
-    else:
-        delta = (today_utc - last).days
-        if delta == 0:
-            return  # already solved today's daily; idempotent
-        if delta == 1:
-            progress.daily_streak_days += 1
-        else:
-            progress.daily_streak_days = 1
+        progress.last_daily_solved_date = today_utc
+        return 0
+
+    delta = (today_utc - last).days
+    if delta == 0:
+        return 0  # already solved today's daily; idempotent
+    if delta == 1:
+        progress.daily_streak_days += 1
+        progress.last_daily_solved_date = today_utc
+        return 0
+
+    # delta > 1 → user missed (delta - 1) days. Spend shields if enough.
+    # `or 0` guards against an in-memory progress instance constructed
+    # without the column populated (the DB default only fires on flush).
+    missed_days = delta - 1
+    shields_held = progress.streak_shields or 0
+    if shields_held >= missed_days:
+        progress.streak_shields = shields_held - missed_days
+        progress.daily_streak_days += 1
+        progress.last_daily_solved_date = today_utc
+        return missed_days
+
+    progress.daily_streak_days = 1
     progress.last_daily_solved_date = today_utc
+    return 0
 
 
 async def _get_today_daily_id(db: AsyncSession) -> str | None:
@@ -306,10 +327,15 @@ async def submit_attempt(
         prior_level = 1
         prior_streak = 0
         prior_daily_streak = 0
-        # token_balance must be initialized explicitly — the column has a
-        # server_default of 0 but that only applies on flush, leaving the
-        # in-memory attribute None and breaking the += grants below.
-        progress = UserProgress(user_id=user_id, total_xp=awarded_xp, token_balance=0)
+        # token_balance + streak_shields must be initialized explicitly
+        # — column server_defaults only fire on flush, so the in-memory
+        # attributes start as None and break += / shield-consumption below.
+        progress = UserProgress(
+            user_id=user_id,
+            total_xp=awarded_xp,
+            token_balance=0,
+            streak_shields=0,
+        )
         db.add(progress)
     else:
         prior_level = progress.level
@@ -328,11 +354,12 @@ async def submit_attempt(
         progress.topics = topics
 
     daily_milestone: int | None = None
+    streak_shields_consumed = 0
     if result.passed:
         today_daily_id = await _get_today_daily_id(db)
         if today_daily_id == challenge_id:
             today_utc = datetime.now(UTC).date()
-            _update_daily_streak(progress, today_utc)
+            streak_shields_consumed = _update_daily_streak(progress, today_utc)
             daily_milestone = _daily_milestone_just_hit(
                 prior_daily_streak, progress.daily_streak_days
             )
@@ -381,6 +408,7 @@ async def submit_attempt(
         daily_streak_days=progress.daily_streak_days,
         daily_streak_milestone=daily_milestone,
         tokens_earned=tokens_earned,
+        streak_shields_consumed=streak_shields_consumed,
     )
 
 

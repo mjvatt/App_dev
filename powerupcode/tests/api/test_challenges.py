@@ -125,6 +125,87 @@ def test_daily_streak_resets_after_a_gap() -> None:
     assert progress.daily_streak_days == 1
 
 
+def test_daily_streak_one_day_gap_consumes_one_shield() -> None:
+    """Missed yesterday but had a shield — streak survives, one shield
+    spent, returned count tells the caller to fire the toast."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=12,
+        last_daily_solved_date=date(2026, 5, 1),
+        streak_shields=2,
+    )
+    consumed = _update_daily_streak(progress, today_utc=date(2026, 5, 3))
+    assert consumed == 1
+    assert progress.streak_shields == 1
+    assert progress.daily_streak_days == 13
+
+
+def test_daily_streak_multi_day_gap_consumes_multiple_shields() -> None:
+    """Two missed days needs two shields. Streak still counts as one
+    new solve on top, so 12 -> 13."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=12,
+        last_daily_solved_date=date(2026, 5, 1),
+        streak_shields=3,
+    )
+    consumed = _update_daily_streak(progress, today_utc=date(2026, 5, 4))
+    assert consumed == 2
+    assert progress.streak_shields == 1
+    assert progress.daily_streak_days == 13
+
+
+def test_daily_streak_insufficient_shields_resets_and_keeps_them() -> None:
+    """Two missed days but only one shield. We DON'T burn the shield
+    on a partial bridge — that would feel like a bug. Reset and keep
+    the inventory for next time."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=12,
+        last_daily_solved_date=date(2026, 5, 1),
+        streak_shields=1,
+    )
+    consumed = _update_daily_streak(progress, today_utc=date(2026, 5, 4))
+    assert consumed == 0
+    assert progress.streak_shields == 1  # untouched
+    assert progress.daily_streak_days == 1
+
+
+def test_daily_streak_no_shields_field_treated_as_zero() -> None:
+    """Defensive: a UserProgress instance that hasn't been flushed yet
+    has streak_shields = None until the server-default fires. The helper
+    must treat that as 0 rather than crashing on the >= comparison."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=5,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    # Don't pass streak_shields — exercise the `or 0` guard
+    consumed = _update_daily_streak(progress, today_utc=date(2026, 5, 3))
+    assert consumed == 0
+    assert progress.daily_streak_days == 1
+
+
+def test_daily_streak_consecutive_day_does_not_consume_shield() -> None:
+    """Sanity: shields are only spent on actual gaps. A normal next-day
+    solve must leave inventory untouched — otherwise we'd silently
+    burn through stockpiles on every solve."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=4,
+        last_daily_solved_date=date(2026, 5, 1),
+        streak_shields=2,
+    )
+    consumed = _update_daily_streak(progress, today_utc=date(2026, 5, 2))
+    assert consumed == 0
+    assert progress.streak_shields == 2
+
+
 def test_daily_streak_idempotent_within_same_day() -> None:
     """A second daily-pass on the same UTC date must not double-count.
     The submit handler can call _update_daily_streak twice in flight if

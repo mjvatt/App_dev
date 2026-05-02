@@ -74,6 +74,11 @@ class UserProgress(Base):
     token_balance: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")
     )
+    # Streak-shield inventory. Auto-consumed by _update_daily_streak
+    # when a one-day gap is detected; one shield bridges one missed day.
+    streak_shields: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
 
 
 class Challenge(Base):

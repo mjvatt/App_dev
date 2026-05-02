@@ -7,10 +7,14 @@ import type {
   CurriculumResponse,
   DailyChallengeResponse,
   Difficulty,
+  StreakShieldResponse,
   Topic,
   UserMe,
   UserProgress,
 } from "@/lib/types";
+
+const SHIELD_COST = 5;
+const MAX_SHIELDS = 3;
 import TierBadge from "@/components/game/TierBadge";
 import XPBar from "@/components/game/XPBar";
 
@@ -46,6 +50,8 @@ export default function DashboardPage() {
   const [retryCount, setRetryCount] = useState(0);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [resendMessage, setResendMessage] = useState("");
+  const [shieldState, setShieldState] = useState<"idle" | "buying" | "error">("idle");
+  const [shieldError, setShieldError] = useState<string | null>(null);
 
   useEffect(() => {
     setError(null);
@@ -63,6 +69,27 @@ export default function DashboardPage() {
       .then(setCurriculum)
       .catch(() => null);
   }, [retryCount]);
+
+  async function handleBuyShield() {
+    if (!progress || shieldState === "buying") return;
+    setShieldState("buying");
+    setShieldError(null);
+    try {
+      const updated = await authedRequest<StreakShieldResponse>(
+        "/api/progress/daily-streak/shield",
+        { method: "POST" }
+      );
+      setProgress({
+        ...progress,
+        streak_shields: updated.streak_shields,
+        token_balance: updated.token_balance,
+      });
+      setShieldState("idle");
+    } catch (err) {
+      setShieldState("error");
+      setShieldError(err instanceof Error ? err.message : "Could not buy shield.");
+    }
+  }
 
   async function handleResend() {
     setResendState("sending");
@@ -244,7 +271,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-gradient-to-br from-amber-950/40 to-zinc-950 border border-amber-900 rounded-xl p-5 flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-amber-400 mb-1">
@@ -266,6 +293,14 @@ export default function DashboardPage() {
             <path d="M13 2L3 14h7l-1 8 11-14h-7z" />
           </svg>
         </div>
+
+        <ShieldCard
+          shields={progress.streak_shields}
+          tokens={progress.token_balance}
+          buying={shieldState === "buying"}
+          error={shieldError}
+          onBuy={handleBuyShield}
+        />
       </div>
 
       <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 mb-6">
@@ -303,6 +338,69 @@ export default function DashboardPage() {
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ShieldCard({
+  shields,
+  tokens,
+  buying,
+  error,
+  onBuy,
+}: {
+  shields: number;
+  tokens: number;
+  buying: boolean;
+  error: string | null;
+  onBuy: () => void;
+}) {
+  const atCap = shields >= MAX_SHIELDS;
+  const canAfford = tokens >= SHIELD_COST;
+  const enabled = !atCap && canAfford && !buying;
+  const buttonLabel = buying
+    ? "Buying…"
+    : atCap
+      ? "Inventory full"
+      : !canAfford
+        ? `Need ${SHIELD_COST} ⚡`
+        : `Buy shield · ${SHIELD_COST} ⚡`;
+  return (
+    <div className="bg-gradient-to-br from-sky-950/40 to-zinc-950 border border-sky-900 rounded-xl p-5 flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <p className="text-xs uppercase tracking-[0.2em] text-sky-400 mb-1">
+          Streak shields
+        </p>
+        <p className="text-3xl font-bold text-white tabular-nums">
+          {shields}
+          <span className="text-base text-zinc-500"> / {MAX_SHIELDS}</span>
+        </p>
+        <p className="text-xs text-zinc-500 mt-1">
+          Auto-spent on a missed daily to keep your streak alive.
+        </p>
+        {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+      </div>
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-10 w-10 text-sky-300/60"
+          fill="currentColor"
+          aria-hidden
+        >
+          <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z" />
+        </svg>
+        <button
+          onClick={onBuy}
+          disabled={!enabled}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
+            enabled
+              ? "border-sky-700 text-sky-200 hover:bg-sky-950/40"
+              : "border-zinc-800 text-zinc-600 cursor-not-allowed"
+          }`}
+        >
+          {buttonLabel}
+        </button>
       </div>
     </div>
   );

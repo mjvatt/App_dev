@@ -172,7 +172,11 @@ async def end_interview(
     if tokens_earned:
         progress = await db.get(UserProgress, user_id)
         if progress is None:
-            progress = UserProgress(user_id=user_id, token_balance=tokens_earned)
+            progress = UserProgress(
+                user_id=user_id,
+                token_balance=tokens_earned,
+                streak_shields=0,
+            )
             db.add(progress)
         else:
             progress.token_balance += tokens_earned

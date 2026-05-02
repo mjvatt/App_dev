@@ -36,6 +36,7 @@ Thumbs.db
 logs/
 loadtest/users.csv
 reports/
+services/calibrator/artifacts/
 
 # IDE
 .vscode/

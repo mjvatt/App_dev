@@ -17,8 +17,16 @@ class UserProgressResponse(BaseModel):
     streak_days: int
     daily_streak_days: int = 0
     token_balance: int = 0
+    streak_shields: int = 0
     topics: dict[str, int]
     difficulty_stats: dict[str, DifficultyStats]
+
+
+class StreakShieldResponse(BaseModel):
+    """Returned after a successful shield purchase. Includes the new
+    inventory + balance so the client doesn't need a follow-up GET."""
+    streak_shields: int
+    token_balance: int
 
 
 class AttemptHistoryItem(BaseModel):
