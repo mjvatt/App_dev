@@ -23,11 +23,15 @@ from api.schemas.boss_rush import (
     BossRushSessionResponse,
 )
 from api.schemas.challenge import ChallengeResponse
-from services.boss_rush import PROBLEM_COUNT, apply_attempt
+from services.boss_rush import PROBLEM_COUNT, STARTING_LIVES, apply_attempt
 from services.engine import get_engine
 from services.engine.interface import ChallengeData, Difficulty
 from services.engine.repository import ChallengeRepository
-from services.tokens import TOKENS_BOSS_RUSH_REVIVE, grant_for_boss_rush
+from services.tokens import (
+    TOKENS_BOSS_RUSH_EXTRA_LIFE,
+    TOKENS_BOSS_RUSH_REVIVE,
+    grant_for_boss_rush,
+)
 
 router = APIRouter()
 
@@ -231,6 +235,46 @@ async def revive_boss_rush(
     run.lives_remaining = 1
     run.xp_awarded = None
     run.ended_at = None
+    await db.commit()
+    return await _build_session_response(db, run)
+
+
+@router.post("/{run_id}/extra-life", response_model=BossRushSessionResponse)
+async def buy_extra_life(
+    run_id: str,
+    user_id: Annotated[str, Depends(require_verified_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> BossRushSessionResponse:
+    """Spend tokens mid-run to add a life back. Allowed only on still-
+    in-progress runs that have already lost at least one life — otherwise
+    the spend is wasted on a full pool. Each purchase is independent so a
+    player can chain buys at the same cost."""
+    run = await db.get(BossRushRun, run_id)
+    if run is None or run.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if run.status != "in_progress":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Can't buy a life on a run with status {run.status!r}",
+        )
+    if run.lives_remaining >= STARTING_LIVES:
+        raise HTTPException(
+            status_code=409,
+            detail="Lives are already full — no need to buy one.",
+        )
+
+    progress = await db.get(UserProgress, user_id)
+    if progress is None or progress.token_balance < TOKENS_BOSS_RUSH_EXTRA_LIFE:
+        raise HTTPException(
+            status_code=402,
+            detail=(
+                f"Need {TOKENS_BOSS_RUSH_EXTRA_LIFE} tokens for an extra life "
+                f"(balance {progress.token_balance if progress else 0})."
+            ),
+        )
+
+    progress.token_balance -= TOKENS_BOSS_RUSH_EXTRA_LIFE
+    run.lives_remaining += 1
     await db.commit()
     return await _build_session_response(db, run)
 

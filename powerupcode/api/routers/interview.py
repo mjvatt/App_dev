@@ -29,7 +29,7 @@ from api.schemas.interview import (
 from services.engine import get_engine
 from services.engine.interface import ChallengeData, Difficulty, Topic
 from services.engine.repository import ChallengeRepository
-from services.tokens import grant_for_interview_score
+from services.tokens import TOKENS_INTERVIEW_TIME_FREEZE, grant_for_interview_score
 
 router = APIRouter()
 
@@ -37,6 +37,9 @@ _HISTORY_LIMIT = 20
 # Joiner used to flatten strengths/improvements into a single TEXT column
 # without imposing a JSON migration just for two list fields.
 _BULLET_JOIN = "\n"
+# Cap per-session time-freezes so a wealthy account can't buy unlimited
+# time and erase the soft-target pressure that defines the mode.
+_MAX_TIME_FREEZES_PER_SESSION = 3
 
 
 def _split_bullets(blob: str | None) -> list[str]:
@@ -177,6 +180,52 @@ async def end_interview(
     await db.commit()
     await db.refresh(session)
     return _to_session_response(session, challenge, tokens_earned=tokens_earned)
+
+
+@router.post("/{session_id}/time-freeze", response_model=InterviewSessionResponse)
+async def buy_time_freeze(
+    session_id: str,
+    user_id: Annotated[str, Depends(require_verified_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> InterviewSessionResponse:
+    """Spend tokens during an in-progress session to extend the soft
+    target by 5 minutes. Capped per session so the freeze stays a real
+    decision rather than a buyable infinite timer."""
+    session = await db.get(InterviewSession, session_id)
+    if session is None or session.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.status != "in_progress":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Can't freeze time on a {session.status!r} session",
+        )
+    if session.time_freezes_used >= _MAX_TIME_FREEZES_PER_SESSION:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Already used the maximum {_MAX_TIME_FREEZES_PER_SESSION} "
+                f"freezes on this session."
+            ),
+        )
+
+    progress = await db.get(UserProgress, user_id)
+    if progress is None or progress.token_balance < TOKENS_INTERVIEW_TIME_FREEZE:
+        raise HTTPException(
+            status_code=402,
+            detail=(
+                f"Need {TOKENS_INTERVIEW_TIME_FREEZE} tokens to freeze time "
+                f"(balance {progress.token_balance if progress else 0})."
+            ),
+        )
+
+    progress.token_balance -= TOKENS_INTERVIEW_TIME_FREEZE
+    session.time_freezes_used += 1
+    await db.commit()
+
+    challenge = await ChallengeRepository().get(db, session.challenge_id)
+    if challenge is None:
+        raise HTTPException(status_code=404, detail="Challenge no longer in bank")
+    return _to_session_response(session, challenge)
 
 
 @router.get("/me/history", response_model=InterviewHistoryResponse)
