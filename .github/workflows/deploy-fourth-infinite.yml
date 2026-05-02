@@ -18,7 +18,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node (for js syntax check)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run smoke test
+        working-directory: 'Frontend/NFL Analytics/fourth-infinite'
+        run: python smoke_test.py
+
   deploy:
+    needs: smoke
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
