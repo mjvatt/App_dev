@@ -31,7 +31,11 @@ from services.engine import get_engine
 from services.engine.interface import Difficulty, Topic
 from services.engine.similarity import hash_solution
 from services.review.scheduler import ReviewState, grade_attempt, schedule_next
-from services.tokens import grant_for_level_up
+from services.tokens import (
+    grant_for_activity_streak_milestone,
+    grant_for_daily_streak_milestone,
+    grant_for_level_up,
+)
 
 router = APIRouter()
 
@@ -310,7 +314,7 @@ async def submit_attempt(
         progress.total_xp += awarded_xp
 
     progress.level = _compute_level(progress.total_xp)
-    progress.token_balance += grant_for_level_up(prior_level, progress.level)
+    level_tokens = grant_for_level_up(prior_level, progress.level)
     _update_streak(progress)
 
     if result.passed and result.topic is not None and not is_repeat_pass:
@@ -328,6 +332,12 @@ async def submit_attempt(
             daily_milestone = _daily_milestone_just_hit(
                 prior_daily_streak, progress.daily_streak_days
             )
+
+    activity_milestone = _milestone_just_hit(prior_streak, progress.streak_days)
+    streak_tokens = grant_for_activity_streak_milestone(activity_milestone)
+    daily_streak_tokens = grant_for_daily_streak_milestone(daily_milestone)
+    tokens_earned = level_tokens + streak_tokens + daily_streak_tokens
+    progress.token_balance += tokens_earned
 
     await _update_review_schedule(
         db, user_id, challenge_id, passed=result.passed, hints_used=result.hints_used
@@ -358,9 +368,10 @@ async def submit_attempt(
         leveled_up=progress.level > prior_level,
         new_level=progress.level,
         streak_days=progress.streak_days,
-        streak_milestone=_milestone_just_hit(prior_streak, progress.streak_days),
+        streak_milestone=activity_milestone,
         daily_streak_days=progress.daily_streak_days,
         daily_streak_milestone=daily_milestone,
+        tokens_earned=tokens_earned,
     )
 
 
