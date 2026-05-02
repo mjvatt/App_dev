@@ -34,6 +34,7 @@
     positions:  ['Position Trends',  'How position drafting has evolved over 32 years'],
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
     'picks-calc': ['Pick Value Calc', 'Historical expected career AV by pick slot and position'],
+    'class-strength': ['Class Strength', 'Realized first-team AV vs slot expectation, by draft year'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -61,6 +62,7 @@
     if (id === 'class2026')  initClass2026();
     if (id === 'class2027')  initClass2027();
     if (id === 'picks-calc') initPicksCalc();
+    if (id === 'class-strength') initClassStrength();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -814,6 +816,134 @@
           ${surplusCell}
         </tr>`;
     }).join('');
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     CLASS STRENGTH
+  ═══════════════════════════════════════════════════════════════════ */
+  let _csInited      = false;
+  let _csSortCol     = 'surplusPerPick';
+  let _csSortDir     = -1;  // -1 = desc by default
+  let _csMetric      = 'surplusPerPick';
+  let _csData        = null;
+
+  function initClassStrength() {
+    _csData = DraftData.draftClassStrength();
+
+    const complete = _csData.filter(d => !d.incomplete && d.picks > 0);
+    const ranked   = complete.slice().sort((a, b) => b.surplusPerPick - a.surplusPerPick);
+    const best     = ranked[0];
+    const worst    = ranked[ranked.length - 1];
+    const meanPP   = complete.length
+      ? +(complete.reduce((s, d) => s + d.surplusPerPick, 0) / complete.length).toFixed(2)
+      : 0;
+
+    const fmtSurplus = v => `${v >= 0 ? '+' : ''}${v.toFixed(2)}`;
+    const kpis = [
+      { icon: 'fa-trophy',        label: 'Best class',   value: best  ? best.year  : '—',
+        sub: best  ? `${fmtSurplus(best.surplusPerPick)} per pick`  : '' },
+      { icon: 'fa-arrow-down',    label: 'Weakest class',value: worst ? worst.year : '—',
+        sub: worst ? `${fmtSurplus(worst.surplusPerPick)} per pick` : '' },
+      { icon: 'fa-chart-line',    label: 'Mean per-pick surplus',
+        value: fmtSurplus(meanPP),
+        sub: `across ${complete.length} complete classes` },
+      { icon: 'fa-clock-rotate-left', label: 'Incomplete classes',
+        value: _csData.filter(d => d.incomplete).length,
+        sub: 'careers still accumulating' },
+    ];
+    document.getElementById('cs-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${k.sub}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    if (!_csInited) {
+      document.getElementById('cs-metric').addEventListener('change', e => {
+        _csMetric = e.target.value;
+        renderClassStrength();
+      });
+      document.querySelectorAll('#cs-table th[data-cs-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+          const col = th.dataset.csSort;
+          if (_csSortCol === col) _csSortDir *= -1;
+          else { _csSortCol = col; _csSortDir = (col === 'year' ? 1 : -1); }
+          document.querySelectorAll('#cs-table th').forEach(h => {
+            h.classList.remove('sort-asc','sort-desc');
+            const i = h.querySelector('i'); if (i) i.className = 'fas fa-sort';
+          });
+          th.classList.add(_csSortDir === 1 ? 'sort-asc' : 'sort-desc');
+          const i = th.querySelector('i');
+          if (i) i.className = `fas fa-sort-${_csSortDir === 1 ? 'up' : 'down'}`;
+          renderClassStrengthTable();
+        });
+      });
+      _csInited = true;
+    }
+
+    renderClassStrength();
+  }
+
+  function renderClassStrength() {
+    const sorted = _csData.slice().sort((a, b) => a.year - b.year);
+    DraftCharts.classStrengthBar('chart-classStrength', sorted, _csMetric);
+    renderClassStrengthTable();
+  }
+
+  function renderClassStrengthTable() {
+    const rows = _csData.slice().sort((a, b) => {
+      const av = a[_csSortCol];
+      const bv = b[_csSortCol];
+      if (av < bv) return -_csSortDir;
+      if (av > bv) return  _csSortDir;
+      return a.year - b.year;
+    });
+    const tbody = document.getElementById('cs-table-body');
+    tbody.innerHTML = rows.map(d => {
+      const sp = d.surplusPerPick;
+      const st = d.surplusTotal;
+      const spColor = d.incomplete ? 'var(--text-muted)'
+                    : sp >= 0      ? '#10b981' : '#ef4444';
+      const stColor = d.incomplete ? 'var(--text-muted)'
+                    : st >= 0      ? '#10b981' : '#ef4444';
+      const bestCell = d.best
+        ? `<a href="#" class="cs-best-link" data-year="${d.year}" data-pick="${d.best.pick}" style="color:var(--text);text-decoration:none">
+             <strong>${_escapeHtml(d.best.player)}</strong>
+             <span style="color:var(--text-muted);font-size:11px"> · #${d.best.pick} · ${_escapeHtml(d.best.team)} · ${d.best.career_av} AV</span>
+           </a>`
+        : '<span style="color:var(--text-muted)">—</span>';
+      const yearCell = `<a href="#" class="cs-year-link" data-year="${d.year}" style="color:var(--text);text-decoration:none">
+                          ${d.year}${d.incomplete ? ' <span style="color:var(--text-muted);font-size:10px">(incomplete)</span>' : ''}
+                        </a>`;
+      return `<tr>
+        <td>${yearCell}</td>
+        <td style="text-align:right">${d.picks}</td>
+        <td style="text-align:right">${d.totalDraftAV.toLocaleString()}</td>
+        <td style="text-align:right">${d.expectedAV.toLocaleString()}</td>
+        <td style="text-align:right;color:${stColor};font-weight:600">${st >= 0 ? '+' : ''}${st.toFixed(0)}</td>
+        <td style="text-align:right;color:${spColor};font-weight:600">${sp >= 0 ? '+' : ''}${sp.toFixed(2)}</td>
+        <td>${bestCell}</td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('.cs-year-link').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        showView('draftboard');
+        document.getElementById('db-year').value = el.dataset.year;
+        _currentPage = 1;
+        filterAndRender();
+      });
+    });
+    tbody.querySelectorAll('.cs-best-link').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        openPlayerModal(+el.dataset.year, +el.dataset.pick);
+      });
+    });
   }
 
   /* ═══════════════════════════════════════════════════════════════════

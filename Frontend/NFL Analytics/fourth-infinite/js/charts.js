@@ -1589,5 +1589,74 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
+  /* ── Class strength bar — divergent (positive vs negative surplus) ── */
+  function classStrengthBar(canvasId, data, metric = 'surplusPerPick') {
+    _destroy(canvasId);
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const POS = '#10b981';   // emerald
+    const NEG = '#ef4444';   // red
+    const INC = 'rgba(107,114,128,0.4)';
+
+    const values = data.map(d => d[metric]);
+    const colors = data.map(d => {
+      if (d.incomplete)            return INC;
+      const v = d[metric] || 0;
+      return v >= 0 ? POS + 'cc' : NEG + 'cc';
+    });
+    const borders = data.map(d => {
+      if (d.incomplete)            return INC;
+      const v = d[metric] || 0;
+      return v >= 0 ? POS : NEG;
+    });
+
+    const yLabel = metric === 'surplusPerPick'
+      ? 'Surplus AV per pick'
+      : 'Total surplus AV';
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.map(d => d.year),
+        datasets: [{
+          label: yLabel,
+          data: values,
+          backgroundColor: colors,
+          borderColor: borders,
+          borderWidth: 1,
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              title: items => `${items[0]?.label} Draft Class`,
+              label: item => {
+                const d = data[item.dataIndex];
+                const sign = d.surplusTotal >= 0 ? '+' : '';
+                const lines = [
+                  `${sign}${d.surplusPerPick.toFixed(2)} surplus AV per pick`,
+                  `${sign}${d.surplusTotal.toFixed(0)} total surplus AV`,
+                  `${d.picks} picks · ${d.totalDraftAV.toLocaleString()} first-team AV`,
+                ];
+                if (d.best) {
+                  lines.push(`Best: ${d.best.player} (#${d.best.pick}, ${d.best.team}) — ${d.best.career_av} career AV`);
+                }
+                if (d.incomplete) lines.push('Note: career data incomplete');
+                return lines;
+              },
+            },
+          },
+        },
+        scales: _baseScales('Draft Year', yLabel),
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, classStrengthBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
 })();

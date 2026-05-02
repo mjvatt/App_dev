@@ -74,6 +74,9 @@
         <a href="#" class="nav-item" data-view="picks-calc">
           <i class="fas fa-calculator"></i><span>Pick Value Calc</span>
         </a>
+        <a href="#" class="nav-item" data-view="class-strength">
+          <i class="fas fa-trophy"></i><span>Class Strength</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -629,6 +632,58 @@
                 <tbody id="pc-history-body"></tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CLASS STRENGTH ─── -->
+    <section class="view" id="view-class-strength">
+      <div class="kpi-row" id="cs-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Class Strength by Draft Year</h3>
+              <p>Per-pick surplus AV beyond the position-aware slot expectation. Positive = the class outperformed expectation, negative = underperformed. Bars in gray are still accumulating career data (2022+).</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <label class="filter-label">Metric:</label>
+              <select id="cs-metric" class="filter-select">
+                <option value="surplusPerPick">Per-pick surplus</option>
+                <option value="surplusTotal">Total surplus</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-classStrength"></canvas></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Class Strength Table</h3>
+              <p>Click a column to sort. Click a year to filter the Draft Board to that class.</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:520px;overflow:auto">
+            <table class="draft-table" id="cs-table">
+              <thead>
+                <tr>
+                  <th data-cs-sort="year">Year <i class="fas fa-sort"></i></th>
+                  <th data-cs-sort="picks" style="text-align:right">Picks <i class="fas fa-sort"></i></th>
+                  <th data-cs-sort="totalDraftAV" style="text-align:right">First-team AV <i class="fas fa-sort"></i></th>
+                  <th data-cs-sort="expectedAV" style="text-align:right">Expected AV <i class="fas fa-sort"></i></th>
+                  <th data-cs-sort="surplusTotal" style="text-align:right">Total Surplus <i class="fas fa-sort"></i></th>
+                  <th data-cs-sort="surplusPerPick" class="sort-desc" style="text-align:right">Per-Pick Surplus <i class="fas fa-sort-down"></i></th>
+                  <th>Top Player</th>
+                </tr>
+              </thead>
+              <tbody id="cs-table-body"></tbody>
+            </table>
+          </div>
+          <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border)">
+            Methodology: surplus = first-team AV (with drafting team) − slot-expected AV from the position-aware curve (24-pick window per position group, fit on completed careers 1994–2021). Career-AV column is informational only and is not used in surplus.
           </div>
         </div>
       </div>

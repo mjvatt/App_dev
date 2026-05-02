@@ -880,6 +880,58 @@ const DraftData = (() => {
     });
   }
 
+  /* Per-year class strength based on slot expectation rather than synthetic
+     pick-value capital. surplusPerPick = mean(draft_av - expected_av_at_slot)
+     across every pick in the class, where expected_av is the position-aware
+     slot curve. Years 2022+ are flagged incomplete since careers haven't
+     fully accumulated yet. */
+  function draftClassStrength() {
+    const INCOMPLETE_YEAR = 2022;
+    const byYear = {};
+    _picks.filter(p => p.pick > 0).forEach(p => {
+      const exp     = _buildExpectedAv(p.pos_group)[p.pick] || 0;
+      const draftAv = p.draft_av || 0;
+      const surplus = draftAv - exp;
+      if (!byYear[p.year]) {
+        byYear[p.year] = {
+          surplusSum: 0, draftAvSum: 0, careerAvSum: 0, expSum: 0, n: 0,
+          best: null,
+        };
+      }
+      const c = byYear[p.year];
+      c.surplusSum  += surplus;
+      c.draftAvSum  += draftAv;
+      c.careerAvSum += (p.career_av || 0);
+      c.expSum      += exp;
+      c.n++;
+      if (!c.best || (p.career_av || 0) > (c.best.career_av || 0)) {
+        c.best = p;
+      }
+    });
+    return _meta.years.map(year => {
+      const c = byYear[year] || {
+        surplusSum: 0, draftAvSum: 0, careerAvSum: 0, expSum: 0, n: 0, best: null,
+      };
+      return {
+        year,
+        picks:           c.n,
+        totalDraftAV:    Math.round(c.draftAvSum),
+        totalCareerAV:   Math.round(c.careerAvSum),
+        expectedAV:      +c.expSum.toFixed(1),
+        surplusTotal:    +c.surplusSum.toFixed(1),
+        surplusPerPick:  c.n ? +(c.surplusSum / c.n).toFixed(2) : 0,
+        best: c.best ? {
+          player:    c.best.player,
+          team:      c.best.franchise,
+          pos:       c.best.pos_group,
+          pick:      c.best.pick,
+          career_av: c.best.career_av || 0,
+        } : null,
+        incomplete: year >= INCOMPLETE_YEAR,
+      };
+    });
+  }
+
   /* G1.5 — position groups ranked by avg Draft AV surplus per R4–R7 pick */
   function posLateRoundEfficiency(filter = {}) {
     const byPos = {};
@@ -1118,5 +1170,5 @@ const DraftData = (() => {
     return (_trades || []).filter(t => t.season === +year);
   }
 
-  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, teamCapAllocation, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, getSleeperPredictions, loadOraclePredictions, oracleData, dynastyIndex };
+  return { load, picks, meta, posColor, posColorAlpha, franchiseTeams, expectedAvForPick, playerProfile, playerContext, leagueDraftToWins, eraRankings, boomBustStats, loadTeamStats, teamSeasonStat, loadSalaries, teamCapSpace, teamTopEarners, teamCapAllocation, picksPerYear, byPosGroup, posGroupAvPerYear, posGroupSharePerYear, topColleges, round1ByPosGroup, teamByRound, standings, teamStandings, winsByYear, draftToWinsScatter, pickValueCurve, teamCapitalByYear, teamRoundCapitalSplit, slotGradeScatter, teamOutcomeEfficiency, proBowlRateByRound, draftClassGrades, draftClassStrength, teamDraftClassGrades, draftClassPosByYear, lateRoundSteals, sleeperScores, hiddenGemColleges, collegeSlotSurplus, posLateRoundEfficiency, teamLateRoundEfficiency, loadTrades, tradesForYear, loadSleeperPredictions, sleeperModelRankings, getSleeperPredictions, loadOraclePredictions, oracleData, dynastyIndex };
 })();
