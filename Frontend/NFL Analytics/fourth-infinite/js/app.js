@@ -2053,10 +2053,42 @@
   const playerModal      = document.getElementById('playerModal');
   const playerModalClose = document.getElementById('playerModalClose');
   let _modalOpenerEl     = null;  // element to restore focus to on close
+  let _suppressUrlPush   = false; // set during popstate / initial deep-link
+  let _modalPrimaryKey   = null;  // `${year}|${pick}` of currently-open primary
+
+  function _serializeModalUrl(year, pick, compareYear, comparePick) {
+    const params = new URLSearchParams();
+    params.set('player', `${+year}-${+pick}`);
+    if (compareYear && comparePick) {
+      params.set('vs', `${+compareYear}-${+comparePick}`);
+    }
+    return `${location.pathname}?${params.toString()}`;
+  }
+
+  function _parseModalUrl(search) {
+    const params = new URLSearchParams(search);
+    const player = params.get('player');
+    if (!player) return null;
+    const [py, pp] = player.split('-').map(n => parseInt(n, 10));
+    if (!py || !pp) return null;
+    const out = { year: py, pick: pp, compareYear: null, comparePick: null };
+    const vs = params.get('vs');
+    if (vs) {
+      const [vy, vp] = vs.split('-').map(n => parseInt(n, 10));
+      if (vy && vp) { out.compareYear = vy; out.comparePick = vp; }
+    }
+    return out;
+  }
+
+  function _clearModalUrl() {
+    if (location.search) history.pushState({}, '', location.pathname);
+  }
 
   function closePlayerModal() {
     if (!playerModal.classList.contains('open')) return;
     playerModal.classList.remove('open');
+    _modalPrimaryKey = null;
+    if (!_suppressUrlPush) _clearModalUrl();
     if (_modalOpenerEl && typeof _modalOpenerEl.focus === 'function') {
       _modalOpenerEl.focus();
       _modalOpenerEl = null;
@@ -2069,6 +2101,20 @@
     if (e.key !== 'Escape') return;
     if (!playerModal.classList.contains('open')) return;
     closePlayerModal();
+  });
+
+  window.addEventListener('popstate', () => {
+    const parsed = _parseModalUrl(location.search);
+    _suppressUrlPush = true;
+    try {
+      if (parsed) {
+        openPlayerModal(parsed.year, parsed.pick, parsed.compareYear, parsed.comparePick);
+      } else if (playerModal.classList.contains('open')) {
+        closePlayerModal();
+      }
+    } finally {
+      _suppressUrlPush = false;
+    }
   });
 
   /* Tab-trap inside the modal so keyboard users can't escape into the
@@ -2480,6 +2526,18 @@
     const wasOpen = playerModal.classList.contains('open');
     playerModal.classList.add('open');
 
+    const newPrimaryKey = `${+year}|${+pick}`;
+    if (!_suppressUrlPush) {
+      // Replace history when staying on the same primary pick (compare
+      // add/remove/swap is an in-modal interaction). Push when opening fresh
+      // or switching to a different player so back button still works.
+      const samePrimary = wasOpen && _modalPrimaryKey === newPrimaryKey;
+      const url = _serializeModalUrl(year, pick, compareYear, comparePick);
+      if (samePrimary) history.replaceState({}, '', url);
+      else             history.pushState({}, '', url);
+    }
+    _modalPrimaryKey = newPrimaryKey;
+
     // Focus management: in single mode, focus the search input so keyboard
     // users can immediately type a name. In compare mode, focus the clear
     // button. Skip if modal was already open (re-render mid-interaction).
@@ -2711,4 +2769,18 @@
   /* ── Boot sequence ────────────────────────────────────────────────── */
   initCollegeFilters();
   showView('dashboard');
+
+  // Deep-link: if the page loaded with ?player=YYYY-PP[&vs=YYYY-PP], open the
+  // matching player modal. Suppress the URL push so the user's pasted link
+  // stays intact in the address bar.
+  const _initialModal = _parseModalUrl(location.search);
+  if (_initialModal) {
+    _suppressUrlPush = true;
+    Promise.resolve(openPlayerModal(
+      _initialModal.year,
+      _initialModal.pick,
+      _initialModal.compareYear,
+      _initialModal.comparePick
+    )).finally(() => { _suppressUrlPush = false; });
+  }
 })();
