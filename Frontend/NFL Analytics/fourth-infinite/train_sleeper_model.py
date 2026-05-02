@@ -48,6 +48,7 @@ Usage:
 import json
 import math
 import numpy as np
+import shap
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score
@@ -303,11 +304,41 @@ def main():
     X_all = np.array([build_feature_row(p, college_enc, college_gm, imputers) for p in valid])
     probas = model.predict_proba(X_all)[:, 1]
 
+    # Per-pick SHAP attributions for the positive class (log-odds units).
+    # TreeExplainer returns either an (n, k) array, an [neg, pos] list, or an
+    # (n, k, 2) tensor depending on SHAP version. Normalize to (n, k) for the
+    # positive class.
+    explainer = shap.TreeExplainer(model)
+    shap_raw  = explainer.shap_values(X_all)
+    if isinstance(shap_raw, list):
+        shap_pos = np.asarray(shap_raw[1])
+    else:
+        shap_pos = np.asarray(shap_raw)
+        if shap_pos.ndim == 3:
+            shap_pos = shap_pos[:, :, 1]
+    expected_logodds = float(getattr(explainer, 'expected_value', 0.0)
+                             if not isinstance(explainer.expected_value, (list, np.ndarray))
+                             else np.asarray(explainer.expected_value).ravel()[-1])
+
     results = []
-    for p, prob in zip(valid, probas):
+    for idx, (p, prob) in enumerate(zip(valid, probas)):
         s    = surplus(p)
         hit  = bool(s > HIT_THRESHOLD)
         complete = p['year'] < INCOMPLETE_YEAR
+
+        sv = shap_pos[idx]
+        fv = X_all[idx]
+        # Top 3 features by absolute SHAP magnitude. shap > 0 raises hit
+        # probability, shap < 0 lowers it.
+        triples = sorted(
+            zip(FEATURE_NAMES, sv, fv),
+            key=lambda t: -abs(float(t[1])),
+        )[:3]
+        top_features = [
+            {'name': n, 'value': round(float(v), 3), 'shap': round(float(sh), 4)}
+            for n, sh, v in triples
+        ]
+
         results.append({
             'player':            p['player'],
             'year':              p['year'],
@@ -324,6 +355,7 @@ def main():
             'actual_surplus':    round(s, 1),
             'actual_hit':        hit if complete else None,
             'incomplete':        not complete,
+            'top_features':      top_features,
         })
 
     results.sort(key=lambda r: r['predicted_prob'], reverse=True)
@@ -352,6 +384,7 @@ def main():
             'n_scored':         len(results),
             'cv_auc_mean':      round(float(cv_aucs.mean()), 3),
             'cv_auc_std':       round(float(cv_aucs.std()), 3),
+            'shap_baseline_logodds': round(expected_logodds, 4),
         },
     }
 

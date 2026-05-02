@@ -2278,6 +2278,66 @@
     return `${Math.floor(n / 12)}'${n % 12}"`;
   }
 
+  /* Friendly labels for SHAP-attributed feature contributions. Each entry
+     receives the raw feature value the model saw and returns a human label
+     that includes the value inline. Position one-hots are generated below. */
+  const _SHAP_LABELS = {
+    pick:           v => `Pick slot (#${Math.round(v)})`,
+    round:          v => `Round ${Math.round(v)}`,
+    college_enc:    v => `College program signal (${(+v).toFixed(2)})`,
+    age:            v => `Age at draft (${Math.round(v)})`,
+    era:            v => `Era cohort (${Math.round(v)})`,
+    ht_in:          v => `Height (${_ftIn(v) || `${Math.round(v)}"`})`,
+    wt:             v => `Weight (${Math.round(v)} lb)`,
+    forty:          v => `40-yard (${(+v).toFixed(2)}s)`,
+    bench:          v => `Bench (${Math.round(v)} reps)`,
+    vertical:       v => `Vertical (${(+v).toFixed(1)}")`,
+    broad_jump:     v => `Broad jump (${_ftIn(v) || `${Math.round(v)}"`})`,
+    cone:           v => `3-cone (${(+v).toFixed(2)}s)`,
+    shuttle:        v => `Shuttle (${(+v).toFixed(2)}s)`,
+    cfb_present:    v => v >= 1 ? 'College record present' : 'No college record',
+    cfb_seasons:    v => `College seasons (${Math.round(v)})`,
+    cfb_pos_volume: v => `College volume (${Math.round(v).toLocaleString()})`,
+    cfb_pos_scoring: v => `College scoring (${Math.round(v)})`,
+  };
+  ['QB','RB','WR','TE','OL','DL','LB','DB','ST'].forEach(g => {
+    _SHAP_LABELS[`pos_${g}`] = v => v >= 1 ? `Position: ${g}` : `Not ${g}`;
+  });
+
+  function _shapLabel(name, value) {
+    const fn = _SHAP_LABELS[name];
+    return fn ? fn(value) : `${name} (${value})`;
+  }
+
+  /* Render the per-pick "Why GHOST flagged this" panel. topFeatures comes
+     from the trainer's SHAP attribution: top 3 features by |SHAP|, with raw
+     SHAP value (log-odds) and the actual feature value the model saw. Bars
+     are normalized to the largest |SHAP| in the set so the relative
+     contribution is visible at a glance. */
+  function _buildShapHtml(topFeatures) {
+    if (!Array.isArray(topFeatures) || !topFeatures.length) return '';
+    const maxAbs = Math.max(...topFeatures.map(f => Math.abs(+f.shap || 0)), 1e-6);
+    const rows = topFeatures.map(f => {
+      const shap = +f.shap || 0;
+      const pct  = (Math.abs(shap) / maxAbs) * 100;
+      const dir  = shap >= 0 ? '+' : '−';
+      const color = shap >= 0 ? '#10b981' : '#ef4444';
+      const label = _shapLabel(f.name, f.value);
+      return `<div class="ghost-shap-row">
+        <div class="ghost-shap-label">
+          <span style="color:${color};font-weight:700;width:10px;display:inline-block">${dir}</span>
+          <span>${label}</span>
+        </div>
+        <div class="ghost-shap-bar"><span style="width:${pct.toFixed(0)}%;background:${color}"></span></div>
+      </div>`;
+    }).join('');
+    return `<div class="profile-shap">
+      <div class="profile-shap-title">Why GHOST flagged this</div>
+      ${rows}
+      <div class="profile-shap-foot">Top 3 features by SHAP magnitude · green raised the hit probability, red lowered it</div>
+    </div>`;
+  }
+
   /* Build the inner HTML for a single player profile card. compareMode=true
      drops the Historical Comps and Combine & Bio sections to keep two
      side-by-side cards comparable in length. */
@@ -2335,6 +2395,8 @@
       ? `<span style="color:#10b981;font-weight:600">✓ college (${cfbSeasons} season${cfbSeasons !== 1 ? 's' : ''})</span>`
       : `<span style="color:var(--text-muted);font-weight:600">○ no college data</span>`;
 
+    const shapHtml = mlPick ? _buildShapHtml(mlPick.top_features) : '';
+
     const mlHtml = mlPick && mlPick.predicted_prob !== undefined ? `
       <div class="profile-section">
         <h4>GHOST · Hit Probability</h4>
@@ -2358,6 +2420,7 @@
             ${mlPick.actual_hit ? 'Hit' : 'Miss'}
           </span>
         </div>` : ''}
+        ${shapHtml}
       </div>` : '';
 
     /* Combine & Bio section — surfaces age + measurables that GHOST uses
