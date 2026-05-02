@@ -634,6 +634,42 @@
             </div>
           </div>
         </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Trade Simulator</h3>
+              <p>Add picks for each side. Output is the total expected career AV (pooled slot curve) and Jimmy Johnson power-law value for each side, plus the net delta. Pick numbers are 1–256.</p>
+            </div>
+            <button id="ts-reset" class="filter-select" type="button" style="cursor:pointer">Reset</button>
+          </div>
+          <div class="trade-sim-grid">
+            <div class="trade-sim-side" data-side="A">
+              <div class="trade-sim-side-header">
+                <span class="trade-sim-side-title">Team A gives</span>
+                <span class="trade-sim-side-totals" id="ts-A-totals">0 picks</span>
+              </div>
+              <div class="trade-sim-chips" id="ts-A-chips"></div>
+              <div class="trade-sim-add">
+                <input type="number" id="ts-A-input" min="1" max="256" placeholder="Pick #" class="filter-select" style="width:100px;text-align:center" />
+                <button id="ts-A-add" class="filter-select" type="button" style="cursor:pointer">Add</button>
+              </div>
+            </div>
+
+            <div class="trade-sim-side" data-side="B">
+              <div class="trade-sim-side-header">
+                <span class="trade-sim-side-title">Team B gives</span>
+                <span class="trade-sim-side-totals" id="ts-B-totals">0 picks</span>
+              </div>
+              <div class="trade-sim-chips" id="ts-B-chips"></div>
+              <div class="trade-sim-add">
+                <input type="number" id="ts-B-input" min="1" max="256" placeholder="Pick #" class="filter-select" style="width:100px;text-align:center" />
+                <button id="ts-B-add" class="filter-select" type="button" style="cursor:pointer">Add</button>
+              </div>
+            </div>
+          </div>
+          <div id="ts-verdict" class="trade-sim-verdict">Add picks on both sides to see the trade verdict.</div>
+        </div>
       </div>
     </section>
 

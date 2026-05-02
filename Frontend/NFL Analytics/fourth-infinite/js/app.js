@@ -720,8 +720,115 @@
         pickInput.value = String(v);
         renderPicksCalc();
       });
+      _wireTradeSim();
     }
     renderPicksCalc();
+    renderTradeSim();
+  }
+
+  /* ── Trade Simulator (lives inside the Pick Value Calc view) ─────── */
+  const _tradeSides = { A: [], B: [] };
+  const TS_PICK_VALUE = pick => +(100 * Math.pow(pick, -0.66)).toFixed(1);
+
+  function _wireTradeSim() {
+    ['A', 'B'].forEach(side => {
+      const input = document.getElementById(`ts-${side}-input`);
+      const btn   = document.getElementById(`ts-${side}-add`);
+      const chips = document.getElementById(`ts-${side}-chips`);
+      const tryAdd = () => {
+        const n = parseInt(input.value, 10);
+        if (!n || n < 1 || n > 256) return;
+        _tradeSides[side].push(n);
+        _tradeSides[side].sort((a, b) => a - b);
+        input.value = '';
+        renderTradeSim();
+        input.focus();
+      };
+      btn.addEventListener('click', tryAdd);
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); tryAdd(); }
+      });
+      chips.addEventListener('click', e => {
+        const x = e.target.closest('.trade-sim-chip-x');
+        if (!x) return;
+        const idx = parseInt(x.dataset.idx, 10);
+        _tradeSides[side].splice(idx, 1);
+        renderTradeSim();
+      });
+    });
+    document.getElementById('ts-reset').addEventListener('click', () => {
+      _tradeSides.A = [];
+      _tradeSides.B = [];
+      renderTradeSim();
+    });
+  }
+
+  function _sideTotals(picks) {
+    let av = 0, val = 0;
+    picks.forEach(p => {
+      av  += DraftData.expectedAvForPick(p);
+      val += TS_PICK_VALUE(p);
+    });
+    return { av: +av.toFixed(1), val: +val.toFixed(1), n: picks.length };
+  }
+
+  function _tradeVerdict(deltaAV, deltaVal) {
+    // Verdict scales with the magnitude of the AV delta — a few AV is noise,
+    // double-digit deltas are real value gaps. Direction comes from the AV
+    // metric (closer to actual outcomes); the power-law column is reported
+    // alongside for the conventional "Jimmy Johnson chart" comparison.
+    const abs = Math.abs(deltaAV);
+    if (abs < 1)   return { tone: 'even',   label: 'Even trade — both sides give roughly equal expected value.' };
+    if (abs < 5)   return { tone: 'slight', label: `Slight edge to Team ${deltaAV > 0 ? 'A' : 'B'} — within typical variance.` };
+    if (abs < 12)  return { tone: 'clear',  label: `Clear edge to Team ${deltaAV > 0 ? 'A' : 'B'}.` };
+    return            { tone: 'lopsided', label: `Lopsided in Team ${deltaAV > 0 ? 'A' : 'B'}'s favor.` };
+  }
+
+  function renderTradeSim() {
+    ['A', 'B'].forEach(side => {
+      const picks = _tradeSides[side];
+      const totals = _sideTotals(picks);
+      const chips = document.getElementById(`ts-${side}-chips`);
+      const totalsEl = document.getElementById(`ts-${side}-totals`);
+      chips.innerHTML = picks.length
+        ? picks.map((p, i) => {
+            const av  = DraftData.expectedAvForPick(p).toFixed(1);
+            const val = TS_PICK_VALUE(p).toFixed(1);
+            return `<span class="trade-sim-chip">
+              #${p}
+              <span class="trade-sim-chip-meta">${av} AV · ${val} val</span>
+              <button class="trade-sim-chip-x" data-idx="${i}" type="button" aria-label="Remove pick ${p}">×</button>
+            </span>`;
+          }).join('')
+        : `<span style="color:var(--text-muted);font-size:12px">No picks added yet</span>`;
+      totalsEl.textContent = picks.length
+        ? `${picks.length} pick${picks.length !== 1 ? 's' : ''} · ${totals.av.toFixed(1)} AV · ${totals.val.toFixed(1)} val`
+        : '0 picks';
+    });
+
+    const A = _sideTotals(_tradeSides.A);
+    const B = _sideTotals(_tradeSides.B);
+    const verdictEl = document.getElementById('ts-verdict');
+    if (!A.n || !B.n) {
+      verdictEl.innerHTML = `<span style="color:var(--text-muted)">Add picks on both sides to see the trade verdict.</span>`;
+      return;
+    }
+    const dAV  = +(A.av  - B.av).toFixed(1);
+    const dVal = +(A.val - B.val).toFixed(1);
+    const v    = _tradeVerdict(dAV, dVal);
+    const colorAV  = dAV > 0  ? 'var(--sage)' : dAV < 0  ? '#ef4444' : 'var(--text-muted)';
+    const colorVal = dVal > 0 ? 'var(--sage)' : dVal < 0 ? '#ef4444' : 'var(--text-muted)';
+    const fmt = v => `${v >= 0 ? '+' : ''}${v.toFixed(1)}`;
+    verdictEl.innerHTML = `
+      <span class="trade-sim-metric">
+        <span class="trade-sim-metric-label">Net AV (A − B)</span>
+        <span class="trade-sim-metric-val" style="color:${colorAV}">${fmt(dAV)}</span>
+      </span>
+      <span class="trade-sim-metric">
+        <span class="trade-sim-metric-label">Net Power-law (A − B)</span>
+        <span class="trade-sim-metric-val" style="color:${colorVal}">${fmt(dVal)}</span>
+      </span>
+      <span style="flex:1;min-width:0"><strong>${v.label}</strong></span>`;
   }
 
   function renderPicksCalc() {
