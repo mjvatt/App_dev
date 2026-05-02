@@ -16,7 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies import get_db, require_verified_user
-from api.models.challenge import InterviewSession
+from api.models.challenge import InterviewSession, UserProgress
 from api.rate_limit import limiter
 from api.schemas.challenge import ChallengeResponse
 from api.schemas.interview import (
@@ -29,6 +29,7 @@ from api.schemas.interview import (
 from services.engine import get_engine
 from services.engine.interface import ChallengeData, Difficulty, Topic
 from services.engine.repository import ChallengeRepository
+from services.tokens import grant_for_interview_score
 
 router = APIRouter()
 
@@ -45,7 +46,10 @@ def _split_bullets(blob: str | None) -> list[str]:
 
 
 def _to_session_response(
-    session: InterviewSession, challenge: ChallengeData
+    session: InterviewSession,
+    challenge: ChallengeData,
+    *,
+    tokens_earned: int = 0,
 ) -> InterviewSessionResponse:
     return InterviewSessionResponse(
         id=session.id,
@@ -68,6 +72,8 @@ def _to_session_response(
         strengths=_split_bullets(session.strengths),
         improvements=_split_bullets(session.improvements),
         time_ms=session.time_ms,
+        tokens_earned=tokens_earned,
+        time_freezes_used=session.time_freezes_used,
     )
 
 
@@ -156,9 +162,21 @@ async def end_interview(
     )
     session.status = "completed"
     session.ended_at = datetime.now(UTC)
+
+    # Score-band token grant — only on this first-end transition since the
+    # idempotent re-fetch path above returns before reaching here.
+    tokens_earned = grant_for_interview_score(grade.overall_score)
+    if tokens_earned:
+        progress = await db.get(UserProgress, user_id)
+        if progress is None:
+            progress = UserProgress(user_id=user_id, token_balance=tokens_earned)
+            db.add(progress)
+        else:
+            progress.token_balance += tokens_earned
+
     await db.commit()
     await db.refresh(session)
-    return _to_session_response(session, challenge)
+    return _to_session_response(session, challenge, tokens_earned=tokens_earned)
 
 
 @router.get("/me/history", response_model=InterviewHistoryResponse)

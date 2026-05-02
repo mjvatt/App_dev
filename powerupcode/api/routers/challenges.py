@@ -34,6 +34,7 @@ from services.review.scheduler import ReviewState, grade_attempt, schedule_next
 from services.tokens import (
     grant_for_activity_streak_milestone,
     grant_for_daily_streak_milestone,
+    grant_for_first_pass,
     grant_for_level_up,
 )
 
@@ -336,7 +337,12 @@ async def submit_attempt(
     activity_milestone = _milestone_just_hit(prior_streak, progress.streak_days)
     streak_tokens = grant_for_activity_streak_milestone(activity_milestone)
     daily_streak_tokens = grant_for_daily_streak_milestone(daily_milestone)
-    tokens_earned = level_tokens + streak_tokens + daily_streak_tokens
+    first_pass_tokens = grant_for_first_pass(
+        result.difficulty, passed=result.passed, is_repeat_pass=is_repeat_pass
+    )
+    tokens_earned = (
+        level_tokens + streak_tokens + daily_streak_tokens + first_pass_tokens
+    )
     progress.token_balance += tokens_earned
 
     await _update_review_schedule(

@@ -33,6 +33,12 @@ class InterviewSessionResponse(BaseModel):
     strengths: list[str]
     improvements: list[str]
     time_ms: int | None
+    # Tokens granted on the first /end transition only. Idempotent
+    # re-fetches return 0 since the grant has already been applied.
+    tokens_earned: int = 0
+    # Cumulative count of time-freeze power-ups spent on this session.
+    # Frontend extends the soft target by N * 5 min.
+    time_freezes_used: int = 0
 
 
 class InterviewHistoryItem(BaseModel):
