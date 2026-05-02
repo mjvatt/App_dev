@@ -35,6 +35,7 @@
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
     'picks-calc': ['Pick Value Calc', 'Historical expected career AV by pick slot and position'],
     'class-strength': ['Class Strength', 'Realized first-team AV vs slot expectation, by draft year'],
+    'qb-lab':         ['QB Lab', 'Quarterback prospect deep-dive — hit rates, college pipelines, age and athletic effects'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -63,6 +64,7 @@
     if (id === 'class2027')  initClass2027();
     if (id === 'picks-calc') initPicksCalc();
     if (id === 'class-strength') initClassStrength();
+    if (id === 'qb-lab') initQBLab();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -1051,6 +1053,189 @@
         openPlayerModal(+el.dataset.year, +el.dataset.pick);
       });
     });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     QB LAB
+  ═══════════════════════════════════════════════════════════════════ */
+  let _qbLabInited = false;
+  const QB_HIT_THRESHOLD = 10;
+  const QB_INCOMPLETE_YEAR = 2022;
+
+  // Wilson 95% confidence interval for a binomial proportion. Used because
+  // late-round QB samples are small enough that the normal-approximation CI
+  // (which can run negative) misleads. Returns [lower, upper] in [0, 1].
+  function _wilsonCI(hits, n, z = 1.96) {
+    if (!n) return [0, 0];
+    const p   = hits / n;
+    const denom = 1 + z*z / n;
+    const center = (p + z*z / (2*n)) / denom;
+    const margin = (z * Math.sqrt(p*(1-p)/n + z*z / (4*n*n))) / denom;
+    return [Math.max(0, center - margin), Math.min(1, center + margin)];
+  }
+
+  function _qbSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function initQBLab() {
+    if (_qbLabInited) return;
+    _qbLabInited = true;
+
+    const qbs = DraftData.picks({ pos_group: 'QB' }).filter(p => p.pick > 0);
+    const completeQbs = qbs.filter(p => p.year < QB_INCOMPLETE_YEAR);
+
+    /* ── KPIs ──────────────────────────────────────────────────────── */
+    const totalCareerAV = completeQbs.reduce((s, p) => s + (p.career_av || 0), 0);
+    const hits          = completeQbs.filter(p => _qbSurplusFor(p) > QB_HIT_THRESHOLD).length;
+    const hitRate       = completeQbs.length ? hits / completeQbs.length : 0;
+    const r1Qbs         = completeQbs.filter(p => p.round === 1);
+    const r1Hits        = r1Qbs.filter(p => _qbSurplusFor(p) > QB_HIT_THRESHOLD).length;
+    const r1HitRate     = r1Qbs.length ? r1Hits / r1Qbs.length : 0;
+
+    const kpis = [
+      { icon: 'fa-football',   label: 'QB picks (1994–2025)', value: qbs.length.toLocaleString(),
+        sub: `${completeQbs.length.toLocaleString()} with complete careers` },
+      { icon: 'fa-bullseye',   label: 'Overall hit rate',
+        value: `${(hitRate * 100).toFixed(1)}%`,
+        sub: `${hits} hits / ${completeQbs.length}` },
+      { icon: 'fa-medal',      label: 'Round-1 hit rate',
+        value: `${(r1HitRate * 100).toFixed(1)}%`,
+        sub: `${r1Hits} / ${r1Qbs.length} R1 QBs` },
+      { icon: 'fa-chart-line', label: 'Career AV (complete)',
+        value: totalCareerAV.toLocaleString(),
+        sub: 'sum across 1994–2021' },
+    ];
+    document.getElementById('qb-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${k.sub}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    /* ── Hit rate by round ─────────────────────────────────────────── */
+    const byRound = {};
+    completeQbs.forEach(p => {
+      const r = p.round;
+      if (!byRound[r]) byRound[r] = { n: 0, hits: 0 };
+      byRound[r].n++;
+      if (_qbSurplusFor(p) > QB_HIT_THRESHOLD) byRound[r].hits++;
+    });
+    const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+    const rates  = rounds.map(r => +(byRound[r].hits / byRound[r].n).toFixed(3));
+    const colors = rounds.map(r => r === 1 ? '#10b981cc' : '#3b82f6aa');
+    DraftCharts.vbar('chart-qb-round-hit', {
+      labels: rounds.map(r => `R${r}`),
+      values: rates.map(v => +(v * 100).toFixed(1)),
+      colors,
+    });
+
+    document.getElementById('qb-round-table').innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:11px;color:var(--text-sub);margin-top:8px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Round</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">QBs</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Hits</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Rate</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Wilson 95% CI</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rounds.map(r => {
+            const c = byRound[r];
+            const [lo, hi] = _wilsonCI(c.hits, c.n);
+            return `<tr>
+              <td style="padding:4px 6px">R${r}</td>
+              <td style="text-align:right;padding:4px 6px">${c.n}</td>
+              <td style="text-align:right;padding:4px 6px">${c.hits}</td>
+              <td style="text-align:right;padding:4px 6px;color:var(--text);font-weight:600">${(c.hits/c.n*100).toFixed(1)}%</td>
+              <td style="text-align:right;padding:4px 6px">[${(lo*100).toFixed(1)}%, ${(hi*100).toFixed(1)}%]</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+
+    /* ── Top QB college pipelines ──────────────────────────────────── */
+    const byCollege = {};
+    completeQbs.forEach(p => {
+      const c = (p.college || '').trim();
+      if (!c) return;
+      if (!byCollege[c]) byCollege[c] = { n: 0, totalAV: 0, hits: 0, top: null };
+      const ent = byCollege[c];
+      ent.n++;
+      ent.totalAV += (p.career_av || 0);
+      if (_qbSurplusFor(p) > QB_HIT_THRESHOLD) ent.hits++;
+      if (!ent.top || (p.career_av || 0) > (ent.top.career_av || 0)) ent.top = p;
+    });
+    const colleges = Object.entries(byCollege)
+      .filter(([, c]) => c.n >= 3)
+      .map(([college, c]) => ({
+        college, n: c.n, avgAV: +(c.totalAV / c.n).toFixed(1),
+        hitRate: c.hits / c.n, top: c.top,
+      }))
+      .sort((a, b) => b.avgAV - a.avgAV)
+      .slice(0, 12);
+
+    document.getElementById('qb-college-body').innerHTML = colleges.map(c => `
+      <tr>
+        <td><strong>${_escapeHtml(c.college)}</strong></td>
+        <td style="text-align:right">${c.n}</td>
+        <td style="text-align:right;color:var(--text);font-weight:600">${c.avgAV}</td>
+        <td style="text-align:right">${(c.hitRate * 100).toFixed(0)}%</td>
+        <td>
+          <a href="#" class="qb-link" data-year="${c.top.year}" data-pick="${c.top.pick}" style="color:var(--text);text-decoration:none">
+            ${_escapeHtml(c.top.player)} <span style="color:var(--text-muted);font-size:11px">(${c.top.year}, ${c.top.career_av || 0} AV)</span>
+          </a>
+        </td>
+      </tr>`).join('');
+
+    /* ── Scatter: age at draft vs career AV ────────────────────────── */
+    const agePoints = completeQbs
+      .filter(p => p.age != null && p.career_av != null)
+      .map(p => ({ x: p.age, y: p.career_av, label: p.player }));
+    DraftCharts.genericScatter('chart-qb-age', agePoints,
+      'Age at draft', 'Career AV', '#3b82f6');
+
+    /* ── Scatter: 40-yard time vs career AV ────────────────────────── */
+    const fortyPoints = completeQbs
+      .filter(p => p.forty != null && p.career_av != null)
+      .map(p => ({ x: +p.forty, y: p.career_av, label: p.player }));
+    DraftCharts.genericScatter('chart-qb-forty', fortyPoints,
+      '40-yard time (s)', 'Career AV', '#f59e0b');
+
+    /* ── Top 25 QB leaderboard ─────────────────────────────────────── */
+    const top25 = completeQbs
+      .slice()
+      .sort((a, b) => (b.career_av || 0) - (a.career_av || 0))
+      .slice(0, 25);
+    const lbBody = document.getElementById('qb-leaderboard-body');
+    lbBody.innerHTML = top25.map((p, i) => {
+      const surplus = _qbSurplusFor(p);
+      const sColor = surplus >= 0 ? '#10b981' : '#ef4444';
+      return `<tr data-year="${p.year}" data-pick="${p.pick}" style="cursor:pointer">
+        <td style="color:var(--text-muted)">${i + 1}</td>
+        <td><strong>${_escapeHtml(p.player)}</strong></td>
+        <td>${p.year}</td>
+        <td>#${p.pick}</td>
+        <td>${_escapeHtml(p.team)}</td>
+        <td>${_escapeHtml(p.college || '—')}</td>
+        <td style="text-align:right;color:var(--text);font-weight:600">${p.career_av || 0}</td>
+        <td style="text-align:right;color:${sColor};font-weight:600">${surplus >= 0 ? '+' : ''}${surplus.toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+
+    document.querySelectorAll('#qb-college-body .qb-link').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        openPlayerModal(+el.dataset.year, +el.dataset.pick);
+      });
+    });
+    // Top-25 leaderboard rows are picked up by the global tr[data-year][data-pick]
+    // delegation handler that already opens the player modal.
   }
 
   /* ═══════════════════════════════════════════════════════════════════

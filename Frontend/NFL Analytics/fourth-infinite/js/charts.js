@@ -1658,5 +1658,82 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, classStrengthBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
+  /* ── Generic labeled scatter with regression line ─────────────────── */
+  function genericScatter(canvasId, points, xLabel, yLabel, color = ACCENT) {
+    _destroy(canvasId);
+    if (!points.length) return;
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    const n     = points.length;
+    const sumX  = points.reduce((s, p) => s + p.x, 0);
+    const sumY  = points.reduce((s, p) => s + p.y, 0);
+    const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+    const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+    const denom = n * sumX2 - sumX * sumX;
+    const slope = denom ? (n * sumXY - sumX * sumY) / denom : 0;
+    const intercept = (sumY - slope * sumX) / n;
+    const xMin = Math.min(...points.map(p => p.x));
+    const xMax = Math.max(...points.map(p => p.x));
+    const trend = [
+      { x: xMin, y: +(slope * xMin + intercept).toFixed(2) },
+      { x: xMax, y: +(slope * xMax + intercept).toFixed(2) },
+    ];
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: yLabel,
+            data: points,
+            backgroundColor: color + 'cc',
+            borderColor: color,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+          },
+          {
+            label: 'Trend',
+            data: trend,
+            type: 'line',
+            borderColor: '#3b82f6',
+            borderWidth: 1.5,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              label: item => {
+                const p = item.raw;
+                if (!p.label) return `(${p.x}, ${p.y})`;
+                return `${p.label} — ${xLabel}: ${p.x}, ${yLabel}: ${p.y}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: xLabel, color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: yLabel, color: TICK_COLOR(), font: { size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, genericScatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, classStrengthBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
 })();

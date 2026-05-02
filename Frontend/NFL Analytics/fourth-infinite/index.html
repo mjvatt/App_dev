@@ -77,6 +77,9 @@
         <a href="#" class="nav-item" data-view="class-strength">
           <i class="fas fa-trophy"></i><span>Class Strength</span>
         </a>
+        <a href="#" class="nav-item" data-view="qb-lab">
+          <i class="fas fa-football"></i><span>QB Lab</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -720,6 +723,93 @@
           </div>
           <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border)">
             Methodology: surplus = first-team AV (with drafting team) − slot-expected AV from the position-aware curve (24-pick window per position group, fit on completed careers 1994–2021). Career-AV column is informational only and is not used in surplus.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── QB LAB ─── -->
+    <section class="view" id="view-qb-lab">
+      <div class="kpi-row" id="qb-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Hit Rate by Round</h3>
+              <p>Share of QBs taken in each round whose career AV exceeded slot expectation by ≥10. Wilson 95% CI in tooltip.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-qb-round-hit"></canvas></div>
+          <div id="qb-round-table" style="padding:0 16px 14px;font-size:12px"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Top QB College Pipelines</h3>
+              <p>Colleges ranked by average QB career AV (min 3 QB picks since 1994).</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:380px;overflow:auto">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>College</th>
+                  <th style="text-align:right">QBs</th>
+                  <th style="text-align:right">Avg AV</th>
+                  <th style="text-align:right">Hit Rate</th>
+                  <th>Top Producer</th>
+                </tr>
+              </thead>
+              <tbody id="qb-college-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Age at Draft vs Career AV</h3>
+              <p>Older QB prospects historically carry more bust risk. Trend line is least-squares.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-qb-age"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>40-Yard Time vs Career AV</h3>
+              <p>Mobility signal — does a faster 40 correlate with longer NFL careers at QB?</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-qb-forty"></canvas></div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Top 25 QBs by Career AV</h3>
+              <p>Click a row to open the player profile.</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:520px;overflow:auto">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Year</th>
+                  <th>Pick</th>
+                  <th>Team</th>
+                  <th>College</th>
+                  <th style="text-align:right">Career AV</th>
+                  <th style="text-align:right">Surplus</th>
+                </tr>
+              </thead>
+              <tbody id="qb-leaderboard-body"></tbody>
+            </table>
           </div>
         </div>
       </div>
