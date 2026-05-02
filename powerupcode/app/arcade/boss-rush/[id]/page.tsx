@@ -22,6 +22,7 @@ import type {
 const PROBLEM_COUNT = 3;
 const STARTING_LIVES = 3;
 const REVIVE_COST = 5;
+const EXTRA_LIFE_COST = 7;
 
 const STARTER = "def solution(*args):\n    # Boss problem — write your solution here.\n    pass\n";
 
@@ -42,6 +43,7 @@ export default function BossRushRunPage({
   const [code, setCode] = useState(STARTER);
   const [submitting, setSubmitting] = useState(false);
   const [reviving, setReviving] = useState(false);
+  const [buyingLife, setBuyingLife] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [lastPassed, setLastPassed] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +94,24 @@ export default function BossRushRunPage({
       setError(err instanceof Error ? err.message : "Revive failed.");
     } finally {
       setReviving(false);
+    }
+  }
+
+  async function handleBuyExtraLife() {
+    if (!session || buyingLife) return;
+    setBuyingLife(true);
+    setError(null);
+    try {
+      const updated = await authedRequest<BossRushSession>(
+        `/api/boss-rush/${id}/extra-life`,
+        { method: "POST" }
+      );
+      setSession(updated);
+      void refreshTokens();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not buy extra life.");
+    } finally {
+      setBuyingLife(false);
     }
   }
 
@@ -216,18 +236,27 @@ export default function BossRushRunPage({
             <div className="flex-1 overflow-hidden">
               <CodeEditor value={code} onChange={setCode} />
             </div>
-            <div className="border-t border-zinc-900 p-3 flex items-center justify-between">
+            <div className="border-t border-zinc-900 p-3 flex items-center justify-between gap-3">
               <p className="text-xs text-zinc-500">
                 Problem {session.current_index + 1} of {PROBLEM_COUNT} ·{" "}
                 {session.attempts_total} attempt{session.attempts_total === 1 ? "" : "s"}
               </p>
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
-              >
-                {submitting ? "Evaluating…" : "Submit"}
-              </button>
+              <div className="flex items-center gap-2">
+                {session.lives_remaining < STARTING_LIVES && (
+                  <ExtraLifeButton
+                    tokens={tokens}
+                    onBuy={handleBuyExtraLife}
+                    buying={buyingLife}
+                  />
+                )}
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                >
+                  {submitting ? "Evaluating…" : "Submit"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -280,6 +309,38 @@ function TokenCounter({ balance }: { balance: number }) {
         {balance}
       </span>
     </div>
+  );
+}
+
+function ExtraLifeButton({
+  tokens,
+  onBuy,
+  buying,
+}: {
+  tokens: number | null;
+  onBuy: () => void;
+  buying: boolean;
+}) {
+  const canAfford = tokens !== null && tokens >= EXTRA_LIFE_COST;
+  return (
+    <button
+      onClick={onBuy}
+      disabled={!canAfford || buying}
+      title={
+        canAfford
+          ? `Spend ${EXTRA_LIFE_COST} ⚡ to restore one life`
+          : tokens === null
+            ? "Loading token balance…"
+            : `Need ${EXTRA_LIFE_COST} ⚡ (you have ${tokens})`
+      }
+      className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors border ${
+        canAfford
+          ? "border-amber-700 text-amber-200 hover:bg-amber-950/40"
+          : "border-zinc-800 text-zinc-600 cursor-not-allowed"
+      }`}
+    >
+      {buying ? "Buying…" : `+1 Life · ${EXTRA_LIFE_COST} ⚡`}
+    </button>
   );
 }
 

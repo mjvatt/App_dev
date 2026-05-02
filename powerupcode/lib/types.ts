@@ -28,6 +28,7 @@ export interface AttemptResult {
   streak_milestone: number | null;
   daily_streak_days: number;
   daily_streak_milestone: number | null;
+  tokens_earned: number;
 }
 
 export interface DifficultyStats {
@@ -116,6 +117,8 @@ export interface InterviewSession {
   strengths: string[];
   improvements: string[];
   time_ms: number | null;
+  tokens_earned: number;
+  time_freezes_used: number;
 }
 
 export interface InterviewHistoryEntry {

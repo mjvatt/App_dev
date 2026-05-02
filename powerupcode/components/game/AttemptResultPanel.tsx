@@ -78,6 +78,19 @@ export default function AttemptResultPanel({
             +{result.xp_earned} XP
           </motion.span>
         )}
+        {result.tokens_earned > 0 && (
+          <motion.span
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.26, duration: 0.3 }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-200 bg-amber-950/40 border border-amber-900 px-2 py-0.5 rounded-full"
+          >
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
+              <path d="M13 2L3 14h7l-1 8 11-14h-7z" />
+            </svg>
+            +{result.tokens_earned}
+          </motion.span>
+        )}
       </div>
       <p className="text-zinc-400 text-sm leading-relaxed mb-4">{result.feedback}</p>
 

@@ -6,11 +6,15 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import CodeEditor from "@/components/game/CodeEditor";
 import TierBadge from "@/components/game/TierBadge";
 import { authedRequest } from "@/lib/api";
-import type { Difficulty, InterviewSession } from "@/lib/types";
+import type { Difficulty, InterviewSession, UserProgress } from "@/lib/types";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 
 const LANGUAGES = ["python", "javascript", "typescript", "java"] as const;
 type Language = (typeof LANGUAGES)[number];
+
+const TIME_FREEZE_COST = 5;
+const FREEZE_BONUS_MS = 5 * 60_000;
+const MAX_TIME_FREEZES = 3;
 
 const STARTER: Record<Language, string> = {
   python:
@@ -54,6 +58,8 @@ export default function InterviewSessionPage({
   const [transcript, setTranscript] = useState("");
   const [ending, setEnding] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [tokens, setTokens] = useState<number | null>(null);
+  const [freezing, setFreezing] = useState(false);
   const startTime = useRef<number>(Date.now());
   // Re-renders once a second while the session is live so the header
   // timer stays current. Elapsed itself is derived from Date.now() at
@@ -82,7 +88,40 @@ export default function InterviewSessionPage({
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load session.")
       );
+    // Best-effort: pull the user's token balance so the freeze button
+    // knows what to show. Silent failure leaves the button in
+    // loading-balance state.
+    authedRequest<UserProgress>("/api/progress/me")
+      .then((p) => setTokens(p.token_balance))
+      .catch(() => null);
   }, [id]);
+
+  async function refreshTokens() {
+    try {
+      const p = await authedRequest<UserProgress>("/api/progress/me");
+      setTokens(p.token_balance);
+    } catch {
+      // best-effort
+    }
+  }
+
+  async function handleFreeze() {
+    if (!session || freezing) return;
+    setFreezing(true);
+    setError(null);
+    try {
+      const updated = await authedRequest<InterviewSession>(
+        `/api/interviews/${session.id}/time-freeze`,
+        { method: "POST" }
+      );
+      setSession(updated);
+      void refreshTokens();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not freeze time.");
+    } finally {
+      setFreezing(false);
+    }
+  }
 
   function handleLanguageChange(next: Language) {
     setLanguage(next);
@@ -176,7 +215,16 @@ export default function InterviewSessionPage({
             {tier && <TierBadge difficulty={tier} size="sm" />}
           </div>
           <div className="flex items-center gap-3">
-            <InterviewTimer startedAt={startTime.current} />
+            <InterviewTimer
+              startedAt={startTime.current}
+              freezesUsed={session.time_freezes_used}
+            />
+            <FreezeButton
+              tokens={tokens}
+              freezesUsed={session.time_freezes_used}
+              onFreeze={handleFreeze}
+              freezing={freezing}
+            />
             <button
               onClick={() => setConfirming(true)}
               className="px-3 py-1.5 border border-zinc-700 text-white text-xs font-semibold rounded-lg hover:border-white transition-colors"
@@ -335,20 +383,75 @@ function pressureColor(ms: number): string {
   return "text-zinc-300";
 }
 
-function InterviewTimer({ startedAt }: { startedAt: number }) {
+function InterviewTimer({
+  startedAt,
+  freezesUsed,
+}: {
+  startedAt: number;
+  freezesUsed: number;
+}) {
   const elapsed = Math.max(0, Date.now() - startedAt);
-  const overtime = elapsed > INTERVIEW_TARGET_MS;
+  const bonus = freezesUsed * FREEZE_BONUS_MS;
+  const adjustedTarget = INTERVIEW_TARGET_MS + bonus;
+  const adjustedOvertime = INTERVIEW_OVERTIME_MS + bonus;
+  // Pressure ramps shift right by `bonus` so each freeze meaningfully
+  // delays the amber/red transitions, not just the label.
+  const color =
+    elapsed >= adjustedOvertime
+      ? "text-red-400"
+      : elapsed >= adjustedTarget
+        ? "text-amber-300"
+        : "text-zinc-300";
+  const overtime = elapsed > adjustedTarget;
   return (
     <div className="flex flex-col items-end leading-tight">
       <span
-        className={`font-mono text-sm font-semibold tabular-nums ${pressureColor(elapsed)}`}
+        className={`font-mono text-sm font-semibold tabular-nums ${color}`}
       >
         {formatElapsed(elapsed)}
       </span>
       <span className="text-[10px] uppercase tracking-[0.15em] text-zinc-600">
-        {overtime ? "running long" : `target ${formatElapsed(INTERVIEW_TARGET_MS)}`}
+        {overtime ? "running long" : `target ${formatElapsed(adjustedTarget)}`}
+        {freezesUsed > 0 && ` · ${freezesUsed}× freeze`}
       </span>
     </div>
+  );
+}
+
+function FreezeButton({
+  tokens,
+  freezesUsed,
+  onFreeze,
+  freezing,
+}: {
+  tokens: number | null;
+  freezesUsed: number;
+  onFreeze: () => void;
+  freezing: boolean;
+}) {
+  const atCap = freezesUsed >= MAX_TIME_FREEZES;
+  const canAfford = tokens !== null && tokens >= TIME_FREEZE_COST;
+  const enabled = !atCap && canAfford && !freezing;
+  const title = atCap
+    ? `Used the maximum ${MAX_TIME_FREEZES} freezes on this session.`
+    : canAfford
+      ? `Spend ${TIME_FREEZE_COST} ⚡ to add 5 minutes`
+      : tokens === null
+        ? "Loading token balance…"
+        : `Need ${TIME_FREEZE_COST} ⚡ (you have ${tokens})`;
+  return (
+    <button
+      onClick={onFreeze}
+      disabled={!enabled}
+      title={title}
+      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
+        enabled
+          ? "border-amber-700 text-amber-200 hover:bg-amber-950/40"
+          : "border-zinc-800 text-zinc-600 cursor-not-allowed"
+      }`}
+    >
+      {freezing ? "Freezing…" : `+5 min · ${TIME_FREEZE_COST} ⚡`}
+    </button>
   );
 }
 
@@ -455,6 +558,14 @@ function ReportView({ session }: { session: InterviewSession }) {
             {verdict.label}
           </p>
           <p className="text-xs text-zinc-500 mt-0.5">{verdict.note}</p>
+          {session.tokens_earned > 0 && (
+            <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-amber-200 bg-amber-950/40 border border-amber-900 px-2 py-0.5 rounded-full">
+              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
+                <path d="M13 2L3 14h7l-1 8 11-14h-7z" />
+              </svg>
+              +{session.tokens_earned}
+            </p>
+          )}
         </div>
       </div>
 
