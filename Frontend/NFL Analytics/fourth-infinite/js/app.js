@@ -2269,6 +2269,9 @@
       <p style="margin-top:10px"><strong style="color:var(--text)">Limitations:</strong> NFL year-over-year prediction is inherently noisy — coaching changes, injuries, and free agency are not modeled. Individual predictions carry ±4–5 wins of real-world uncertainty. Cap space data is available from 2013 onward; earlier seasons use a neutral fill. Treat the forecast as a probability-weighted central estimate of team strength ordering, not a precise win projection.</p>
       <p style="margin-top:10px"><strong style="color:var(--text)">Training data:</strong> ${meta.n_train.toLocaleString()} franchise-seasons, ${meta.train_from}–${meta.train_to}. Cap space feature: Spotrac, 2013–2025.</p>`;
 
+    // ── Tab 4: Matchup ──────────────────────────────────────────────
+    initOracleMatchup(forecast);
+
     // ── Tab activation ───────────────────────────────────────────────
     function activateOracleTab(id) {
       document.querySelectorAll('[data-oracle-tab]').forEach(t =>
@@ -2284,6 +2287,131 @@
     });
 
     activateOracleTab('forecast');
+  }
+
+  /* ── ORACLE Matchup tab ──────────────────────────────────────────── */
+  // Approximate the standard normal CDF via Abramowitz & Stegun 7.1.26.
+  // Used for converting a projected point spread to a single-game win
+  // probability, with sigma = 13.86 (the conventional NFL game volatility
+  // figure derived from historical scoring variance).
+  const _MATCHUP_SIGMA      = 13.86;
+  const _MATCHUP_HFA_POINTS = 2.5;
+  const _MATCHUP_LEAGUE_TOT = 44.5;
+  const _MATCHUP_AVG_WINS   = 8.5;
+  const _MATCHUP_PTS_PER_W  = 1.5;
+
+  function _erf(x) {
+    const a1 =  0.254829592, a2 = -0.284496736, a3 =  1.421413741;
+    const a4 = -1.453152027, a5 =  1.061405429, p  =  0.3275911;
+    const sign = x < 0 ? -1 : 1;
+    const ax = Math.abs(x);
+    const t = 1 / (1 + p * ax);
+    const y = 1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1) * t * Math.exp(-ax*ax);
+    return sign * y;
+  }
+  function _normalCdf(z) { return 0.5 * (1 + _erf(z / Math.SQRT2)); }
+  function _teamRating(predictedWins) {
+    return (predictedWins - _MATCHUP_AVG_WINS) * _MATCHUP_PTS_PER_W;
+  }
+
+  let _oracleMatchupVenue = 'A';
+
+  function initOracleMatchup(forecast) {
+    const selA = document.getElementById('matchup-team-a');
+    const selB = document.getElementById('matchup-team-b');
+    if (!selA || !selB) return;
+
+    const teamsAlpha = forecast.slice().sort((a, b) => a.franchise.localeCompare(b.franchise));
+    selA.innerHTML = teamsAlpha.map(t => `<option value="${t.franchise}">${t.franchise}</option>`).join('');
+    selB.innerHTML = teamsAlpha.map(t => `<option value="${t.franchise}">${t.franchise}</option>`).join('');
+
+    // Default to top 2 by predicted wins so the user lands on something
+    // meaningful instead of two alphabetically-adjacent teams.
+    const ranked = forecast.slice().sort((a, b) => b.predicted_wins - a.predicted_wins);
+    if (ranked[0]) selA.value = ranked[0].franchise;
+    if (ranked[1]) selB.value = ranked[1].franchise;
+
+    selA.addEventListener('change', () => renderOracleMatchup(forecast));
+    selB.addEventListener('change', () => renderOracleMatchup(forecast));
+    document.querySelectorAll('.matchup-venue-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.matchup-venue-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        _oracleMatchupVenue = btn.dataset.venue;
+        renderOracleMatchup(forecast);
+      });
+    });
+
+    renderOracleMatchup(forecast);
+  }
+
+  function renderOracleMatchup(forecast) {
+    const a = forecast.find(t => t.franchise === document.getElementById('matchup-team-a').value);
+    const b = forecast.find(t => t.franchise === document.getElementById('matchup-team-b').value);
+    const out = document.getElementById('matchup-result');
+    if (!a || !b) { out.innerHTML = ''; return; }
+
+    if (a.franchise === b.franchise) {
+      out.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:12px">
+        Pick two different franchises to see the matchup.</div>`;
+      return;
+    }
+
+    const rA = _teamRating(a.predicted_wins);
+    const rB = _teamRating(b.predicted_wins);
+    const hfa = _oracleMatchupVenue === 'A' ?  _MATCHUP_HFA_POINTS
+              : _oracleMatchupVenue === 'B' ? -_MATCHUP_HFA_POINTS
+              : 0;
+    const spread = (rA - rB) + hfa;
+    const pA = _normalCdf(spread / _MATCHUP_SIGMA);
+    const pB = 1 - pA;
+    const scoreA = (_MATCHUP_LEAGUE_TOT + spread) / 2;
+    const scoreB = (_MATCHUP_LEAGUE_TOT - spread) / 2;
+
+    const venueLabel = _oracleMatchupVenue === 'A' ? `at ${a.franchise}`
+                     : _oracleMatchupVenue === 'B' ? `at ${b.franchise}`
+                     : 'on a neutral field';
+    const favoredAbbr = pA >= pB ? 'A' : 'B';
+    const favored = favoredAbbr === 'A' ? a : b;
+    const dogPts = Math.abs(spread).toFixed(1);
+    const spreadLabel = Math.abs(spread) < 0.1
+      ? 'Pick ’em'
+      : `${favored.franchise} −${dogPts}`;
+
+    out.innerHTML = `
+      <div class="matchup-team-card">
+        <div class="matchup-team-name">${_escapeHtml(a.franchise)}</div>
+        <div class="matchup-team-meta">${a.predicted_wins} predicted wins · rating ${rA >= 0 ? '+' : ''}${rA.toFixed(1)}</div>
+        <div>
+          <div class="matchup-team-prob">${(pA * 100).toFixed(1)}%</div>
+          <div class="matchup-team-prob-label">Win probability</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="matchup-score">${scoreA.toFixed(1)} – ${scoreB.toFixed(1)}</div>
+        <div class="matchup-score-spread">${spreadLabel} · ${venueLabel}</div>
+      </div>
+
+      <div class="matchup-team-card">
+        <div class="matchup-team-name">${_escapeHtml(b.franchise)}</div>
+        <div class="matchup-team-meta">${b.predicted_wins} predicted wins · rating ${rB >= 0 ? '+' : ''}${rB.toFixed(1)}</div>
+        <div>
+          <div class="matchup-team-prob">${(pB * 100).toFixed(1)}%</div>
+          <div class="matchup-team-prob-label">Win probability</div>
+        </div>
+      </div>`;
+
+    // Render the win-probability bar separately below the result grid.
+    const existingBar = document.getElementById('matchup-prob-bar');
+    if (existingBar) existingBar.remove();
+    const bar = document.createElement('div');
+    bar.id = 'matchup-prob-bar';
+    bar.className = 'matchup-prob-bar';
+    bar.innerHTML = `
+      <span style="width:${(pA * 100).toFixed(2)}%;background:var(--oracle)" title="${a.franchise} ${(pA*100).toFixed(1)}%"></span>
+      <span style="width:${(pB * 100).toFixed(2)}%;background:var(--text-muted)" title="${b.franchise} ${(pB*100).toFixed(1)}%"></span>`;
+    out.parentNode.insertBefore(bar, out.nextSibling);
   }
 
   /* ── Player Profile Modal ────────────────────────────────────────── */

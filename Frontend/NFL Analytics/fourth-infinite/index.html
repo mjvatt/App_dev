@@ -1312,6 +1312,7 @@
         <button class="ghost-tab active" data-oracle-tab="forecast">2026 Forecast</button>
         <button class="ghost-tab" data-oracle-tab="backtest">Backtest</button>
         <button class="ghost-tab" data-oracle-tab="drivers">Drivers</button>
+        <button class="ghost-tab" data-oracle-tab="matchup">Matchup</button>
       </div>
 
       <!-- Tab 1: 2026 Forecast -->
@@ -1408,6 +1409,43 @@
               <div><h3>Model Notes</h3><p>What ORACLE can and cannot do</p></div>
             </div>
             <div id="oracle-model-notes" style="padding:16px 20px;font-size:13px;line-height:1.7;color:var(--text-sub)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Matchup -->
+      <div class="ghost-panel" data-oracle-panel="matchup">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Head-to-Head Matchup</h3>
+              <p>Pick two franchises and a venue. Output is win probability and projected score, derived from each team's ORACLE-predicted 2026 wins. Methodology below.</p>
+            </div>
+          </div>
+
+          <div class="matchup-controls">
+            <div class="matchup-team">
+              <label class="filter-label">Team A</label>
+              <select id="matchup-team-a" class="filter-select"></select>
+            </div>
+            <div class="matchup-venue">
+              <label class="filter-label">Venue</label>
+              <div class="matchup-venue-toggle">
+                <button class="matchup-venue-btn active" data-venue="A">Home A</button>
+                <button class="matchup-venue-btn" data-venue="N">Neutral</button>
+                <button class="matchup-venue-btn" data-venue="B">Home B</button>
+              </div>
+            </div>
+            <div class="matchup-team">
+              <label class="filter-label">Team B</label>
+              <select id="matchup-team-b" class="filter-select"></select>
+            </div>
+          </div>
+
+          <div id="matchup-result" class="matchup-result"></div>
+
+          <div style="padding:14px 20px;font-size:12px;line-height:1.7;color:var(--text-sub);border-top:1px solid var(--border)">
+            <strong style="color:var(--text)">Methodology.</strong> Each team's ORACLE-predicted wins are converted to a per-game strength rating in points <em>(rating = (pred_wins − 8.5) × 1.5)</em>. The projected spread from Team A's perspective is <em>(r<sub>A</sub> − r<sub>B</sub>) + home-field advantage</em>, with HFA = +2.5 points at home and 0 on a neutral field. Win probability is a normal CDF on the spread with σ = 13.86 (the conventional NFL game volatility). Projected total uses the league-average 44.5 points; individual team scores split that total around the spread. Treat single-game outputs as a probability-weighted estimate, not a precise prediction — NFL games carry ±10 points of real-world noise per side.
           </div>
         </div>
       </div>
