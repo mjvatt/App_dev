@@ -306,7 +306,10 @@ async def submit_attempt(
         prior_level = 1
         prior_streak = 0
         prior_daily_streak = 0
-        progress = UserProgress(user_id=user_id, total_xp=awarded_xp)
+        # token_balance must be initialized explicitly — the column has a
+        # server_default of 0 but that only applies on flush, leaving the
+        # in-memory attribute None and breaking the += grants below.
+        progress = UserProgress(user_id=user_id, total_xp=awarded_xp, token_balance=0)
         db.add(progress)
     else:
         prior_level = progress.level
