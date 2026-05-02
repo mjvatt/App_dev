@@ -81,13 +81,134 @@
     sidebar.classList.toggle('collapsed');
   });
 
-  /* ── Global search (redirects to draft board) ─────────────────────── */
-  document.getElementById('globalSearch').addEventListener('input', e => {
+  /* ── Global player search ─────────────────────────────────────────── */
+  const _searchInput   = document.getElementById('globalSearch');
+  const _searchResults = document.getElementById('globalSearchResults');
+  const _searchWrap    = document.getElementById('globalSearchWrap');
+  const SEARCH_LIMIT   = 8;
+  let   _searchActive  = -1;
+  let   _searchMatches = [];
+
+  function _escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function _hideSearchResults() {
+    _searchResults.hidden = true;
+    _searchActive = -1;
+    _searchInput.setAttribute('aria-expanded', 'false');
+  }
+
+  function _renderSearchResults(matches, query) {
+    _searchMatches = matches;
+    _searchActive  = -1;
+    if (!query) { _hideSearchResults(); return; }
+    if (!matches.length) {
+      _searchResults.innerHTML =
+        `<div class="search-results-empty">No players match "${_escapeHtml(query)}"</div>`;
+    } else {
+      const rows = matches.map((p, i) => `
+        <div class="search-result" role="option" data-year="${p.year}" data-pick="${p.pick}" data-idx="${i}" id="search-result-${i}">
+          <div class="search-result-name">${_escapeHtml(p.player)}</div>
+          <div class="search-result-pick">${p.year} · #${p.pick}</div>
+          <div class="search-result-meta">${_escapeHtml(p.pos || p.pos_group || '')} · ${_escapeHtml(p.team)} · ${_escapeHtml(p.college || 'Unknown')}</div>
+        </div>`).join('');
+      _searchResults.innerHTML = rows +
+        `<div class="search-results-hint">↑ ↓ to navigate · Enter to open · Esc to close</div>`;
+    }
+    _searchResults.hidden = false;
+    _searchInput.setAttribute('aria-expanded', 'true');
+  }
+
+  function _runSearch(q) {
+    if (!q) { _hideSearchResults(); return; }
+    const ql   = q.toLowerCase();
+    const all  = DraftData.picks();
+    const yMin = (meta.years && meta.years.length) ? Math.min(...meta.years) : 1994;
+    const out  = [];
+    for (let i = 0; i < all.length; i++) {
+      const p    = all[i];
+      const name = (p.player  || '').toLowerCase();
+      const team = (p.team    || '').toLowerCase();
+      const coll = (p.college || '').toLowerCase();
+      let score  = -1;
+      if      (name === ql)              score = 2000;
+      else if (name.startsWith(ql))      score = 1200;
+      else if (name.includes(' ' + ql))  score = 600;
+      else if (name.includes(ql))        score = 300;
+      else if (team.includes(ql))        score = 90;
+      else if (coll.includes(ql))        score = 70;
+      if (score < 0) continue;
+      // tie-breakers: more recent year, then earlier pick (more famous)
+      score += ((p.year || yMin) - yMin) * 0.5;
+      score += Math.max(0, 256 - (p.pick || 256)) * 0.005;
+      out.push({ p, score });
+    }
+    out.sort((a, b) => b.score - a.score);
+    _renderSearchResults(out.slice(0, SEARCH_LIMIT).map(s => s.p), q);
+  }
+
+  function _setActiveResult(idx) {
+    const items = _searchResults.querySelectorAll('.search-result');
+    if (!items.length) { _searchActive = -1; return; }
+    const next = Math.max(0, Math.min(idx, items.length - 1));
+    items.forEach(el => el.classList.remove('active'));
+    items[next].classList.add('active');
+    items[next].scrollIntoView({ block: 'nearest' });
+    _searchInput.setAttribute('aria-activedescendant', `search-result-${next}`);
+    _searchActive = next;
+  }
+
+  function _openSearchPick(pick) {
+    if (!pick) return;
+    openPlayerModal(+pick.year, +pick.pick);
+    _searchInput.value = '';
+    _hideSearchResults();
+    _searchInput.removeAttribute('aria-activedescendant');
+  }
+
+  _searchInput.addEventListener('input', e => _runSearch(e.target.value.trim()));
+  _searchInput.addEventListener('focus', e => {
     const q = e.target.value.trim();
-    if (!q) return;
-    if (_currentView !== 'draftboard') showView('draftboard');
-    document.getElementById('db-search').value = q;
-    filterAndRender();
+    if (q) _runSearch(q);
+  });
+  _searchInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') {
+      if (_searchResults.hidden) {
+        const q = _searchInput.value.trim();
+        if (q) _runSearch(q);
+        return;
+      }
+      e.preventDefault();
+      _setActiveResult(_searchActive + 1);
+    } else if (e.key === 'ArrowUp') {
+      if (_searchResults.hidden) return;
+      e.preventDefault();
+      _setActiveResult(_searchActive - 1);
+    } else if (e.key === 'Enter') {
+      if (_searchResults.hidden || !_searchMatches.length) return;
+      e.preventDefault();
+      _openSearchPick(_searchMatches[_searchActive >= 0 ? _searchActive : 0]);
+    } else if (e.key === 'Escape') {
+      if (_searchResults.hidden) return;
+      e.preventDefault();
+      _hideSearchResults();
+    }
+  });
+
+  _searchResults.addEventListener('mousedown', e => {
+    // mousedown so the click fires before the input's blur hides the panel
+    const item = e.target.closest('.search-result');
+    if (!item) return;
+    e.preventDefault();
+    const idx = +item.dataset.idx;
+    _openSearchPick(_searchMatches[idx]);
+  });
+
+  document.addEventListener('click', e => {
+    if (!_searchWrap.contains(e.target)) _hideSearchResults();
   });
 
   /* ═══════════════════════════════════════════════════════════════════

@@ -121,9 +121,20 @@
         <span class="view-sub" id="viewSub">32 seasons · 8,116 picks · all NFL teams</span>
       </div>
       <div class="topbar-right">
-        <div class="search-wrap">
+        <div class="search-wrap" id="globalSearchWrap">
           <i class="fas fa-search"></i>
-          <input type="text" id="globalSearch" placeholder="Search player, team, college…" autocomplete="off" />
+          <input
+            type="text"
+            id="globalSearch"
+            placeholder="Search player, team, college…"
+            autocomplete="off"
+            spellcheck="false"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="globalSearchResults"
+          />
+          <div class="search-results" id="globalSearchResults" role="listbox" hidden></div>
         </div>
         <div class="theme-switch" id="themeToggle" role="group" aria-label="Theme">
           <button class="theme-switch-opt" data-t="dark">DARK</button>
