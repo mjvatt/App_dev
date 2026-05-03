@@ -136,6 +136,19 @@ export interface DailyLeaderboardResponse {
   total_solvers: number;
 }
 
+export interface InterviewStageEntry {
+  stage_index: number;
+  label: "warmup" | "main" | "follow_up";
+  status: "pending" | "in_progress" | "completed" | "abandoned";
+  challenge: Challenge;
+  overall_score: number | null;
+  feedback: string | null;
+  strengths: string[];
+  improvements: string[];
+  time_ms: number | null;
+  time_freezes_used: number;
+}
+
 export interface InterviewSession {
   id: string;
   status: "in_progress" | "completed" | "abandoned";
@@ -151,6 +164,9 @@ export interface InterviewSession {
   time_ms: number | null;
   tokens_earned: number;
   time_freezes_used: number;
+  is_multi_stage: boolean;
+  current_stage_index: number | null;
+  stages: InterviewStageEntry[];
 }
 
 export interface InterviewHistoryEntry {

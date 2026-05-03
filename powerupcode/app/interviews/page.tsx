@@ -52,6 +52,7 @@ export default function InterviewsLandingPage() {
   const [starting, setStarting] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
+  const [multiStage, setMultiStage] = useState(false);
   // Strict mode + dev hot-reload would otherwise post twice on the
   // start handler if a user double-taps the button.
   const startInFlight = useRef(false);
@@ -70,9 +71,10 @@ export default function InterviewsLandingPage() {
     setStarting(true);
     setError(null);
     try {
-      const body: { topic?: Topic; difficulty?: Difficulty } = {};
+      const body: { topic?: Topic; difficulty?: Difficulty; multi_stage?: boolean } = {};
       if (selectedTopic) body.topic = selectedTopic;
       if (selectedDifficulty) body.difficulty = selectedDifficulty;
+      if (multiStage) body.multi_stage = true;
       const session = await authedRequest<InterviewSession>(
         "/api/interviews/start",
         {
@@ -159,6 +161,48 @@ export default function InterviewsLandingPage() {
                 </button>
               ))}
             </div>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+              Format
+            </p>
+            <button
+              type="button"
+              onClick={() => setMultiStage((v) => !v)}
+              className={`flex items-start gap-3 text-left rounded-xl border px-4 py-3 transition-colors w-full md:w-auto ${
+                multiStage
+                  ? "border-indigo-700 bg-indigo-950/30"
+                  : "border-zinc-800 bg-zinc-900 hover:border-zinc-600"
+              }`}
+            >
+              <span
+                className={`mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded border ${
+                  multiStage
+                    ? "border-indigo-400 bg-indigo-500"
+                    : "border-zinc-600"
+                }`}
+                aria-hidden
+              >
+                {multiStage && (
+                  <svg viewBox="0 0 20 20" fill="white" className="h-3 w-3">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.7 5.3a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0l-3-3a1 1 0 111.4-1.4L9 11.6l6.3-6.3a1 1 0 011.4 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span>
+                <span className="block text-sm font-semibold text-white">
+                  Multi-stage run (3 problems)
+                </span>
+                <span className="block text-xs text-zinc-500 mt-0.5">
+                  Warmup → main → follow-up. Each stage graded separately,
+                  aggregate post-mortem at the end.
+                </span>
+              </span>
+            </button>
           </div>
           <div className="pt-2">
             <button

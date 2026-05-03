@@ -57,10 +57,14 @@ export default function InterviewSessionPage({
   const [language, setLanguage] = useState<Language>("python");
   const [transcript, setTranscript] = useState("");
   const [ending, setEnding] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [tokens, setTokens] = useState<number | null>(null);
   const [freezing, setFreezing] = useState(false);
   const startTime = useRef<number>(Date.now());
+  // Track which stage the local code/transcript belong to so we know
+  // when the active stage swaps under us and the editor needs to reset.
+  const lastStageIndex = useRef<number | null>(null);
   // Re-renders once a second while the session is live so the header
   // timer stays current. Elapsed itself is derived from Date.now() at
   // render, not stored, so we don't drift.
@@ -84,6 +88,7 @@ export default function InterviewSessionPage({
       .then((s) => {
         setSession(s);
         startTime.current = Date.now();
+        lastStageIndex.current = s.current_stage_index;
       })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Failed to load session.")
@@ -95,6 +100,19 @@ export default function InterviewSessionPage({
       .then((p) => setTokens(p.token_balance))
       .catch(() => null);
   }, [id]);
+
+  // When the active stage advances under a multi-stage run, reset the
+  // editor + transcript + per-stage clock so the new problem starts
+  // fresh. Comparing to the ref keeps a single setState-cascade per
+  // advance instead of looping on lastStageIndex updates.
+  useEffect(() => {
+    if (!session || !session.is_multi_stage) return;
+    if (session.current_stage_index === lastStageIndex.current) return;
+    lastStageIndex.current = session.current_stage_index;
+    setCode(STARTER[language]);
+    setTranscript("");
+    startTime.current = Date.now();
+  }, [session, language]);
 
   async function refreshTokens() {
     try {
@@ -160,6 +178,33 @@ export default function InterviewSessionPage({
     }
   }
 
+  async function handleAdvance() {
+    if (!session || advancing || !session.is_multi_stage) return;
+    speech.stop();
+    setAdvancing(true);
+    setError(null);
+    try {
+      const elapsed = Date.now() - startTime.current;
+      const updated = await authedRequest<InterviewSession>(
+        `/api/interviews/${session.id}/advance`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            solution: code,
+            transcript,
+            language,
+            time_ms: elapsed,
+          }),
+        }
+      );
+      setSession(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to advance stage.");
+    } finally {
+      setAdvancing(false);
+    }
+  }
+
   if (error) {
     return (
       <AuthGuard>
@@ -184,7 +229,7 @@ export default function InterviewSessionPage({
     );
   }
 
-  if (session.status === "completed") {
+  if (session.status === "completed" || session.status === "abandoned") {
     return (
       <AuthGuard>
         <ReportView session={session} />
@@ -195,6 +240,11 @@ export default function InterviewSessionPage({
   // in_progress
   const challenge = session.challenge;
   const tier = asDifficulty(challenge.difficulty);
+  const isFinalStage =
+    session.is_multi_stage &&
+    session.current_stage_index !== null &&
+    session.current_stage_index === session.stages.length - 1;
+  const isMidRun = session.is_multi_stage && !isFinalStage;
   return (
     <AuthGuard>
       <div className="flex flex-col h-screen bg-black text-white">
@@ -208,6 +258,12 @@ export default function InterviewSessionPage({
             </Link>
             <span className="text-zinc-800">|</span>
             <span className="text-sm font-bold text-indigo-400">Mock Interview</span>
+            {session.is_multi_stage && session.current_stage_index !== null && (
+              <StageTracker
+                currentIndex={session.current_stage_index}
+                totalStages={session.stages.length}
+              />
+            )}
             <span className="text-zinc-800 hidden sm:inline">·</span>
             <span className="text-zinc-400 text-sm truncate hidden sm:inline">
               {challenge.title}
@@ -217,7 +273,11 @@ export default function InterviewSessionPage({
           <div className="flex items-center gap-3">
             <InterviewTimer
               startedAt={startTime.current}
-              freezesUsed={session.time_freezes_used}
+              freezesUsed={
+                session.is_multi_stage && session.current_stage_index !== null
+                  ? session.stages[session.current_stage_index]?.time_freezes_used ?? 0
+                  : session.time_freezes_used
+              }
             />
             <FreezeButton
               tokens={tokens}
@@ -225,12 +285,22 @@ export default function InterviewSessionPage({
               onFreeze={handleFreeze}
               freezing={freezing}
             />
-            <button
-              onClick={() => setConfirming(true)}
-              className="px-3 py-1.5 border border-zinc-700 text-white text-xs font-semibold rounded-lg hover:border-white transition-colors"
-            >
-              End interview
-            </button>
+            {isMidRun ? (
+              <button
+                onClick={handleAdvance}
+                disabled={advancing}
+                className="px-3 py-1.5 bg-indigo-500 text-white text-xs font-semibold rounded-lg hover:bg-indigo-400 transition-colors disabled:opacity-50"
+              >
+                {advancing ? "Submitting…" : "Submit & continue"}
+              </button>
+            ) : (
+              <button
+                onClick={() => setConfirming(true)}
+                className="px-3 py-1.5 border border-zinc-700 text-white text-xs font-semibold rounded-lg hover:border-white transition-colors"
+              >
+                {isFinalStage ? "Submit & finish" : "End interview"}
+              </button>
+            )}
           </div>
         </header>
 
@@ -352,10 +422,24 @@ export default function InterviewSessionPage({
 
         {confirming && (
           <ConfirmDialog
-            disabled={ending}
+            disabled={ending || advancing}
             onCancel={() => setConfirming(false)}
-            onConfirm={handleEnd}
-            ending={ending}
+            onConfirm={async () => {
+              if (isFinalStage) {
+                await handleAdvance();
+                setConfirming(false);
+              } else {
+                await handleEnd();
+              }
+            }}
+            ending={ending || advancing}
+            mode={
+              session.is_multi_stage
+                ? isFinalStage
+                  ? "finalize"
+                  : "abandon"
+                : "single"
+            }
           />
         )}
       </div>
@@ -455,27 +539,54 @@ function FreezeButton({
   );
 }
 
+type ConfirmMode = "single" | "finalize" | "abandon";
+
+const CONFIRM_COPY: Record<
+  ConfirmMode,
+  { title: string; body: string; confirm: string; busy: string }
+> = {
+  single: {
+    title: "End the interview?",
+    body:
+      "Submits your final code and explanation, then synthesizes the post-mortem. This call is rate-limited and can't be undone.",
+    confirm: "End and grade",
+    busy: "Grading…",
+  },
+  finalize: {
+    title: "Submit the final stage?",
+    body:
+      "Grades this stage and aggregates the run across all three problems. This call is rate-limited and can't be undone.",
+    confirm: "Submit and grade",
+    busy: "Grading…",
+  },
+  abandon: {
+    title: "End the interview early?",
+    body:
+      "Abandons the run without grading the remaining stages. The session is locked but you won't get a post-mortem score.",
+    confirm: "Abandon run",
+    busy: "Ending…",
+  },
+};
+
 function ConfirmDialog({
   disabled,
   ending,
   onCancel,
   onConfirm,
+  mode,
 }: {
   disabled: boolean;
   ending: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  mode: ConfirmMode;
 }) {
+  const copy = CONFIRM_COPY[mode];
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 max-w-sm w-full">
-        <h2 className="text-base font-semibold text-white mb-2">
-          End the interview?
-        </h2>
-        <p className="text-sm text-zinc-400 mb-5">
-          Submits your final code and explanation, then synthesizes the
-          post-mortem. This call is rate-limited and can&apos;t be undone.
-        </p>
+        <h2 className="text-base font-semibold text-white mb-2">{copy.title}</h2>
+        <p className="text-sm text-zinc-400 mb-5">{copy.body}</p>
         <div className="flex gap-2 justify-end">
           <button
             onClick={onCancel}
@@ -489,7 +600,7 @@ function ConfirmDialog({
             disabled={disabled}
             className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
           >
-            {ending ? "Grading…" : "End and grade"}
+            {ending ? copy.busy : copy.confirm}
           </button>
         </div>
       </div>
@@ -497,10 +608,39 @@ function ConfirmDialog({
   );
 }
 
+const STAGE_LABEL: Record<number, string> = {
+  0: "Warmup",
+  1: "Main",
+  2: "Follow-up",
+};
+
+function StageTracker({
+  currentIndex,
+  totalStages,
+}: {
+  currentIndex: number;
+  totalStages: number;
+}) {
+  return (
+    <span className="hidden md:inline-flex items-center gap-1.5 text-xs">
+      <span className="text-zinc-600 uppercase tracking-[0.15em]">
+        Stage {currentIndex + 1} of {totalStages}
+      </span>
+      <span className="text-indigo-300 font-semibold">
+        · {STAGE_LABEL[currentIndex] ?? `Stage ${currentIndex + 1}`}
+      </span>
+    </span>
+  );
+}
+
 function ReportView({ session }: { session: InterviewSession }) {
   const tier = asDifficulty(session.challenge.difficulty);
   const score = session.overall_score ?? 0;
   const verdict = scoreVerdict(score);
+  const isAbandoned = session.status === "abandoned";
+  const headerTitle = session.is_multi_stage
+    ? `Multi-stage interview · ${session.stages.length} stages`
+    : session.challenge.title;
 
   return (
     <div className="p-8 max-w-3xl">
@@ -512,20 +652,34 @@ function ReportView({ session }: { session: InterviewSession }) {
           ← Interviews
         </Link>
         <span className="text-zinc-800">|</span>
-        <span className="text-xs uppercase tracking-[0.2em] text-emerald-400">
-          Post-mortem
+        <span
+          className={`text-xs uppercase tracking-[0.2em] ${
+            isAbandoned ? "text-zinc-500" : "text-emerald-400"
+          }`}
+        >
+          {isAbandoned ? "Run abandoned" : "Post-mortem"}
         </span>
       </div>
-      <h1 className="text-2xl font-bold text-white mb-1">
-        {session.challenge.title}
-      </h1>
+      <h1 className="text-2xl font-bold text-white mb-1">{headerTitle}</h1>
       <div className="flex items-center gap-2 mb-6">
-        {tier && <TierBadge difficulty={tier} size="sm" />}
-        <span className="text-xs text-zinc-500 capitalize">
-          {session.challenge.topic.replace(/_/g, " ")}
-        </span>
+        {!session.is_multi_stage && tier && <TierBadge difficulty={tier} size="sm" />}
+        {session.topic && (
+          <span className="text-xs text-zinc-500 capitalize">
+            {session.topic.replace(/_/g, " ")}
+          </span>
+        )}
       </div>
 
+      {isAbandoned && (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 mb-6">
+          <p className="text-sm text-zinc-300">
+            You ended the run before grading. No post-mortem was generated.
+            Start a new run from the interviews page when you&apos;re ready.
+          </p>
+        </div>
+      )}
+
+      {!isAbandoned && (
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-1">
@@ -568,6 +722,11 @@ function ReportView({ session }: { session: InterviewSession }) {
           )}
         </div>
       </div>
+      )}
+
+      {session.is_multi_stage && session.stages.length > 0 && !isAbandoned && (
+        <StageBreakdown stages={session.stages} />
+      )}
 
       {session.feedback && (
         <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 mb-6">
@@ -640,6 +799,57 @@ function BulletCard({
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function StageBreakdown({ stages }: { stages: InterviewSession["stages"] }) {
+  return (
+    <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-6 mb-6">
+      <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-4">
+        Per-stage breakdown
+      </p>
+      <div className="space-y-3">
+        {stages.map((stage) => {
+          const tier = asDifficulty(stage.challenge.difficulty);
+          return (
+            <div
+              key={stage.stage_index}
+              className="flex items-center gap-4 border border-zinc-900 rounded-lg p-3"
+            >
+              <span className="text-xs uppercase tracking-[0.15em] text-zinc-500 w-16 shrink-0">
+                {STAGE_LABEL[stage.stage_index] ?? `Stage ${stage.stage_index + 1}`}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {stage.challenge.title}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  {tier && <TierBadge difficulty={tier} size="sm" />}
+                  <span className="text-xs text-zinc-500 capitalize">
+                    {stage.challenge.topic.replace(/_/g, " ")}
+                  </span>
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                {stage.overall_score !== null ? (
+                  <p className="text-base font-bold text-white tabular-nums">
+                    {stage.overall_score}
+                    <span className="text-zinc-500 text-xs">/100</span>
+                  </p>
+                ) : (
+                  <p className="text-xs text-zinc-600">{stage.status}</p>
+                )}
+                {stage.time_ms !== null && (
+                  <p className="text-[10px] text-zinc-600 tabular-nums">
+                    {formatElapsed(stage.time_ms)}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

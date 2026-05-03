@@ -199,9 +199,12 @@ class BossRushRun(Base):
 
 
 class InterviewSession(Base):
-    """One mock-interview run. Created when the user clicks Start, completed
-    when they click End and the post-mortem is synthesized. Single-problem
-    in Phase 1; Phase 2 will add a sequence (warmup -> main -> follow-up)."""
+    """One mock-interview run. Single-stage runs (is_multi_stage=False) keep
+    challenge_id + the post-mortem fields on this row. Multi-stage runs
+    delegate to the InterviewStage children for per-stage state and use
+    the session-level fields for the *aggregate* report; challenge_id on
+    a multi-stage row is the main (stage 1) challenge for history-list
+    convenience."""
 
     __tablename__ = "interview_sessions"
 
@@ -223,7 +226,51 @@ class InterviewSession(Base):
     improvements: Mapped[str | None] = mapped_column(String, nullable=True)
     # Number of time-freeze power-ups spent on this session. Authoritative
     # server-side counter — the frontend bumps the soft target by N * 5 min
-    # where N matches this column.
+    # where N matches this column. For multi-stage runs this is also the
+    # cumulative count across stages so the cap stays a per-session limit.
+    time_freezes_used: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    is_multi_stage: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    # Pointer to the active InterviewStage. NULL on single-stage rows.
+    current_stage_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
+class InterviewStage(Base):
+    """One problem within a multi-stage Mock Interview run. Three rows per
+    session (warmup=0, main=1, follow_up=2). Per-stage grading + clocks
+    + freeze counts live here; the parent session aggregates them."""
+
+    __tablename__ = "interview_stages"
+    __table_args__ = (
+        UniqueConstraint("session_id", "stage_index", name="uq_interview_stage_session_index"),
+    )
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id: Mapped[str] = mapped_column(
+        String, ForeignKey("interview_sessions.id", ondelete="CASCADE"), nullable=False
+    )
+    stage_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    challenge_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String, nullable=False, default="pending", server_default=text("'pending'")
+    )
+    solution: Mapped[str | None] = mapped_column(String, nullable=True)
+    transcript: Mapped[str | None] = mapped_column(String, nullable=True)
+    language: Mapped[str | None] = mapped_column(String, nullable=True)
+    time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    overall_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    feedback: Mapped[str | None] = mapped_column(String, nullable=True)
+    strengths: Mapped[str | None] = mapped_column(String, nullable=True)
+    improvements: Mapped[str | None] = mapped_column(String, nullable=True)
     time_freezes_used: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")
     )

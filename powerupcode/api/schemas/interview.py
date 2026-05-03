@@ -8,6 +8,7 @@ from api.schemas.challenge import ChallengeResponse
 class InterviewStartRequest(BaseModel):
     topic: str | None = None
     difficulty: str | None = None
+    multi_stage: bool = False
 
 
 class InterviewEndRequest(BaseModel):
@@ -17,9 +18,26 @@ class InterviewEndRequest(BaseModel):
     time_ms: int = 0
 
 
+class InterviewStageResponse(BaseModel):
+    """One stage in a multi-stage interview run. Active stage carries the
+    challenge body; completed stages carry per-stage post-mortem fields."""
+    stage_index: int
+    label: str  # 'warmup' | 'main' | 'follow_up'
+    status: str  # pending | in_progress | completed
+    challenge: ChallengeResponse
+    overall_score: int | None
+    feedback: str | None
+    strengths: list[str]
+    improvements: list[str]
+    time_ms: int | None
+    time_freezes_used: int
+
+
 class InterviewSessionResponse(BaseModel):
     """Full session state. Active sessions populate challenge + status;
-    completed sessions also populate the post-mortem fields."""
+    completed sessions also populate the post-mortem fields. Multi-stage
+    sessions populate `stages` and `current_stage_index`; single-stage
+    sessions leave `stages` empty for backward compatibility."""
     id: str
     status: str  # in_progress | completed | abandoned
     challenge: ChallengeResponse
@@ -27,7 +45,8 @@ class InterviewSessionResponse(BaseModel):
     difficulty: str | None
     started_at: datetime
     ended_at: datetime | None
-    # Post-mortem fields — null until status == 'completed'
+    # Post-mortem fields — null until status == 'completed'.
+    # On multi-stage runs these are the aggregate over stages.
     overall_score: int | None
     feedback: str | None
     strengths: list[str]
@@ -39,6 +58,11 @@ class InterviewSessionResponse(BaseModel):
     # Cumulative count of time-freeze power-ups spent on this session.
     # Frontend extends the soft target by N * 5 min.
     time_freezes_used: int = 0
+    # Multi-stage support — empty list + None for legacy single-stage
+    # rows so existing clients keep working unchanged.
+    is_multi_stage: bool = False
+    current_stage_index: int | None = None
+    stages: list[InterviewStageResponse] = []
 
 
 class InterviewHistoryItem(BaseModel):
