@@ -207,6 +207,7 @@ def _update_daily_streak(progress: UserProgress, today_utc: date) -> int:
     if last is None:
         progress.daily_streak_days = 1
         progress.last_daily_solved_date = today_utc
+        _ratchet_longest_daily_streak(progress)
         return 0
 
     delta = (today_utc - last).days
@@ -215,6 +216,7 @@ def _update_daily_streak(progress: UserProgress, today_utc: date) -> int:
     if delta == 1:
         progress.daily_streak_days += 1
         progress.last_daily_solved_date = today_utc
+        _ratchet_longest_daily_streak(progress)
         return 0
 
     # delta > 1 → user missed (delta - 1) days. Spend shields if enough.
@@ -226,11 +228,23 @@ def _update_daily_streak(progress: UserProgress, today_utc: date) -> int:
         progress.streak_shields = shields_held - missed_days
         progress.daily_streak_days += 1
         progress.last_daily_solved_date = today_utc
+        _ratchet_longest_daily_streak(progress)
         return missed_days
 
     progress.daily_streak_days = 1
     progress.last_daily_solved_date = today_utc
+    _ratchet_longest_daily_streak(progress)
     return 0
+
+
+def _ratchet_longest_daily_streak(progress: UserProgress) -> None:
+    progress.longest_daily_streak = max(
+        progress.longest_daily_streak or 0, progress.daily_streak_days
+    )
+
+
+def _ratchet_longest_streak(progress: UserProgress) -> None:
+    progress.longest_streak = max(progress.longest_streak or 0, progress.streak_days)
 
 
 async def _get_today_daily_id(db: AsyncSession) -> str | None:
@@ -263,6 +277,7 @@ def _update_streak(progress: UserProgress, now: datetime | None = None) -> None:
             progress.streak_days = 1
         # delta == 0 (same UTC day): no change
     progress.last_active = current
+    _ratchet_longest_streak(progress)
 
 
 @router.get("/next", response_model=ChallengeResponse)
@@ -327,14 +342,16 @@ async def submit_attempt(
         prior_level = 1
         prior_streak = 0
         prior_daily_streak = 0
-        # token_balance + streak_shields must be initialized explicitly
-        # — column server_defaults only fire on flush, so the in-memory
-        # attributes start as None and break += / shield-consumption below.
+        # token_balance, streak_shields, and longest_* must be initialized
+        # explicitly — column server_defaults only fire on flush, so the
+        # in-memory attributes start as None and break += / max() below.
         progress = UserProgress(
             user_id=user_id,
             total_xp=awarded_xp,
             token_balance=0,
             streak_shields=0,
+            longest_streak=0,
+            longest_daily_streak=0,
         )
         db.add(progress)
     else:

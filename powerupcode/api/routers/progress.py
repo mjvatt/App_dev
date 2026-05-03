@@ -64,6 +64,8 @@ async def get_my_progress(
         xp_to_next=_XP_PER_LEVEL - (progress.total_xp % _XP_PER_LEVEL),
         streak_days=progress.streak_days,
         daily_streak_days=progress.daily_streak_days,
+        longest_streak=progress.longest_streak,
+        longest_daily_streak=progress.longest_daily_streak,
         token_balance=progress.token_balance,
         streak_shields=progress.streak_shields,
         topics=progress.topics or {},

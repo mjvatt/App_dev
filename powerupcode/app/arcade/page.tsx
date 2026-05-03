@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AuthGuard from "@/components/auth/AuthGuard";
+import StreakOverlay from "@/components/game/StreakOverlay";
 import TierBadge from "@/components/game/TierBadge";
 
 interface Mode {
@@ -74,6 +75,8 @@ export default function ArcadeHubPage() {
             <TierBadge difficulty="boss" size="sm" showWorld />
           </div>
         </div>
+
+        <StreakOverlay />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {MODES.map((mode) => (

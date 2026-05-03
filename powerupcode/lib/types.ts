@@ -45,10 +45,24 @@ export interface UserProgress {
   xp_to_next: number;
   streak_days: number;
   daily_streak_days: number;
+  longest_streak: number;
+  longest_daily_streak: number;
   token_balance: number;
   streak_shields: number;
   topics: Record<Topic, number>;
   difficulty_stats: Partial<Record<Difficulty, DifficultyStats>>;
+}
+
+export interface PublicProfile {
+  username: string;
+  level: number;
+  total_xp: number;
+  streak_days: number;
+  daily_streak_days: number;
+  longest_streak: number;
+  longest_daily_streak: number;
+  challenges_passed: number;
+  topics: Record<Topic, number>;
 }
 
 export interface StreakShieldResponse {

@@ -20,6 +20,7 @@ from api.routers import (
     friends,
     interview,
     leaderboard,
+    profiles,
     progress,
 )
 
@@ -73,6 +74,7 @@ app.include_router(curriculum.router, prefix="/api/curriculum", tags=["curriculu
 app.include_router(friends.router, prefix="/api/friends", tags=["friends"])
 app.include_router(interview.router, prefix="/api/interviews", tags=["interviews"])
 app.include_router(boss_rush.router, prefix="/api/boss-rush", tags=["boss-rush"])
+app.include_router(profiles.router, prefix="/api/profiles", tags=["profiles"])
 
 
 @app.get("/health", tags=["meta"])

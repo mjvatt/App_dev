@@ -220,6 +220,116 @@ def test_daily_streak_idempotent_within_same_day() -> None:
     assert progress.daily_streak_days == 7
 
 
+def test_longest_streak_ratchets_on_increment() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        streak_days=3,
+        longest_streak=3,
+        last_active=_utc(2026, 5, 1),
+    )
+    _update_streak(progress, now=_utc(2026, 5, 2))
+    assert progress.streak_days == 4
+    assert progress.longest_streak == 4
+
+
+def test_longest_streak_does_not_decrement_on_reset() -> None:
+    """A 10-day streak that breaks must not erase the personal best."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        streak_days=10,
+        longest_streak=10,
+        last_active=_utc(2026, 5, 1),
+    )
+    _update_streak(progress, now=_utc(2026, 5, 5))
+    assert progress.streak_days == 1
+    assert progress.longest_streak == 10
+
+
+def test_longest_streak_unchanged_within_same_utc_day() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        streak_days=7,
+        longest_streak=12,
+        last_active=_utc(2026, 5, 1, 1),
+    )
+    _update_streak(progress, now=_utc(2026, 5, 1, 23))
+    assert progress.longest_streak == 12
+
+
+def test_longest_streak_handles_uninitialized_field_as_zero() -> None:
+    """Defensive: a bare UserProgress() has longest_streak=None until the
+    server-default fires. The ratchet must coerce that to 0 rather than
+    crash on max(None, int)."""
+    progress = UserProgress(user_id="u1", total_xp=0, streak_days=0)
+    _update_streak(progress, now=_utc(2026, 5, 1))
+    assert progress.streak_days == 1
+    assert progress.longest_streak == 1
+
+
+def test_longest_daily_streak_ratchets_on_increment() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=4,
+        longest_daily_streak=4,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 2))
+    assert progress.daily_streak_days == 5
+    assert progress.longest_daily_streak == 5
+
+
+def test_longest_daily_streak_does_not_decrement_on_reset() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=12,
+        longest_daily_streak=12,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 4))
+    assert progress.daily_streak_days == 1
+    assert progress.longest_daily_streak == 12
+
+
+def test_longest_daily_streak_unchanged_when_idempotent_same_day() -> None:
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=7,
+        longest_daily_streak=15,
+        last_daily_solved_date=date(2026, 5, 1),
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 1))
+    assert progress.longest_daily_streak == 15
+
+
+def test_longest_daily_streak_handles_uninitialized_field_as_zero() -> None:
+    progress = UserProgress(user_id="u1", total_xp=0, daily_streak_days=0)
+    _update_daily_streak(progress, today_utc=date(2026, 5, 1))
+    assert progress.daily_streak_days == 1
+    assert progress.longest_daily_streak == 1
+
+
+def test_longest_daily_streak_ratchets_through_shield_bridge() -> None:
+    """A shield-bridged increment must update longest_daily_streak too —
+    the user kept the streak alive, the personal best should reflect that."""
+    progress = UserProgress(
+        user_id="u1",
+        total_xp=0,
+        daily_streak_days=12,
+        longest_daily_streak=12,
+        last_daily_solved_date=date(2026, 5, 1),
+        streak_shields=2,
+    )
+    _update_daily_streak(progress, today_utc=date(2026, 5, 3))
+    assert progress.daily_streak_days == 13
+    assert progress.longest_daily_streak == 13
+
+
 def test_daily_milestone_first_threshold_is_three() -> None:
     assert _daily_milestone_just_hit(prior=2, current=3) == 3
 

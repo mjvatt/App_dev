@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authedRequest } from "@/lib/api";
 import type { LeaderboardEntry, LeaderboardResponse } from "@/lib/types";
@@ -75,8 +76,9 @@ export default function LeaderboardPage() {
                 </span>
 
                 <div className="min-w-0">
-                  <span
-                    className={`text-sm font-medium truncate block ${
+                  <Link
+                    href={`/u/${encodeURIComponent(entry.username)}`}
+                    className={`text-sm font-medium truncate block hover:underline ${
                       entry.is_current_user ? "text-white" : "text-zinc-300"
                     }`}
                   >
@@ -84,7 +86,7 @@ export default function LeaderboardPage() {
                     {entry.is_current_user && (
                       <span className="ml-2 text-xs text-zinc-500 font-normal">you</span>
                     )}
-                  </span>
+                  </Link>
                   <span className="md:hidden text-xs text-zinc-500 mt-0.5 block tabular-nums">
                     Lv {entry.level} · {entry.total_xp.toLocaleString()} XP · {entry.streak_days}d
                   </span>
