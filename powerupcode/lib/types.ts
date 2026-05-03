@@ -53,6 +53,17 @@ export interface UserProgress {
   difficulty_stats: Partial<Record<Difficulty, DifficultyStats>>;
 }
 
+export interface TokenGiftRequest {
+  recipient_username: string;
+  amount: number;
+}
+
+export interface TokenGiftResponse {
+  recipient_username: string;
+  amount: number;
+  sender_token_balance: number;
+}
+
 export interface PublicProfile {
   username: string;
   level: number;

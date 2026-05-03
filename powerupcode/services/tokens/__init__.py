@@ -79,6 +79,13 @@ MAX_DAILY_STREAK_SHIELDS = 3           # stockpile cap. Three is enough
                                        # wealthy account vacation through
                                        # a streak indefinitely
 
+# Friend-to-friend token gifting (Tokens v3). Bounded amount per gift
+# plus one-gift-per-recipient-per-UTC-day rate limit so the system
+# can't be turned into a launder loop or a notification-spam vehicle.
+MIN_GIFT_TOKENS = 1
+MAX_GIFT_TOKENS = 25
+MAX_GIFTS_PER_DAY_PER_RECIPIENT = 1
+
 
 # ---------------------------------------------------------------------
 # Earn helpers

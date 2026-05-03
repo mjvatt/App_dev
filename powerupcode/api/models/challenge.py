@@ -235,6 +235,27 @@ class InterviewSession(Base):
     )
 
 
+class TokenGift(Base):
+    """One friend-to-friend token transfer. Append-only audit row written
+    atomically with the balance updates so a successful gift always has
+    a paper trail. Used to enforce per-day per-recipient caps and to
+    surface a future gift history if needed."""
+
+    __tablename__ = "token_gifts"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    sender_id: Mapped[str] = mapped_column(
+        String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    recipient_id: Mapped[str] = mapped_column(
+        String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)
+    sent_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
 class ReviewSchedule(Base):
     __tablename__ = "review_schedule"
     __table_args__ = (

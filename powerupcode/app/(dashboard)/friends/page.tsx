@@ -7,11 +7,16 @@ import type {
   FriendRequestsResponse,
   FriendsListResponse,
   FriendshipEntry,
+  TokenGiftResponse,
+  UserProgress,
   UserSearchEntry,
   UserSearchResponse,
 } from "@/lib/types";
 
 type Tab = "friends" | "requests" | "find";
+
+const GIFT_MIN = 1;
+const GIFT_MAX = 25;
 
 export default function FriendsPage() {
   const [tab, setTab] = useState<Tab>("friends");
@@ -19,6 +24,7 @@ export default function FriendsPage() {
   const [incoming, setIncoming] = useState<FriendshipEntry[]>([]);
   const [outgoing, setOutgoing] = useState<FriendshipEntry[]>([]);
   const [board, setBoard] = useState<FriendLeaderboardResponse | null>(null);
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -34,10 +40,17 @@ export default function FriendsPage() {
     authedRequest<FriendLeaderboardResponse>("/api/friends/leaderboard")
       .then(setBoard)
       .catch(() => null);
+    authedRequest<UserProgress>("/api/progress/me")
+      .then((p) => setTokenBalance(p.token_balance))
+      .catch(() => null);
   }, [refreshKey]);
 
   function refresh() {
     setRefreshKey((n) => n + 1);
+  }
+
+  function applyGiftResult(result: TokenGiftResponse) {
+    setTokenBalance(result.sender_token_balance);
   }
 
   return (
@@ -61,7 +74,12 @@ export default function FriendsPage() {
       </div>
 
       {tab === "friends" && (
-        <FriendsTab board={board} onChange={refresh} />
+        <FriendsTab
+          board={board}
+          onChange={refresh}
+          tokenBalance={tokenBalance}
+          onGifted={applyGiftResult}
+        />
       )}
       {tab === "requests" && (
         <RequestsTab incoming={incoming} outgoing={outgoing} onChange={refresh} />
@@ -95,9 +113,13 @@ function TabButton({
 function FriendsTab({
   board,
   onChange,
+  tokenBalance,
+  onGifted,
 }: {
   board: FriendLeaderboardResponse | null;
   onChange: () => void;
+  tokenBalance: number | null;
+  onGifted: (result: TokenGiftResponse) => void;
 }) {
   if (board === null) {
     return <p className="text-zinc-500 text-sm">Loading…</p>;
@@ -112,7 +134,17 @@ function FriendsTab({
 
   return (
     <div className="space-y-2">
-      <div className="hidden md:grid grid-cols-[3rem_1fr_5rem_7rem_5rem_5rem] gap-4 px-5 mb-2">
+      {tokenBalance !== null && (
+        <div className="mb-2 flex items-center justify-between px-1">
+          <p className="text-xs text-zinc-500">
+            Send tokens to a friend — capped at {GIFT_MAX} per gift, one gift per friend per day.
+          </p>
+          <p className="text-xs text-amber-300 tabular-nums">
+            {tokenBalance} ⚡ available
+          </p>
+        </div>
+      )}
+      <div className="hidden md:grid grid-cols-[3rem_1fr_5rem_7rem_5rem_8rem] gap-4 px-5 mb-2">
         <span className="text-xs text-zinc-600 font-medium">#</span>
         <span className="text-xs text-zinc-600 font-medium">Player</span>
         <span className="text-xs text-zinc-600 font-medium text-right">Level</span>
@@ -123,7 +155,7 @@ function FriendsTab({
       {board.entries.map((entry) => (
         <div
           key={entry.username}
-          className={`rounded-xl px-5 py-4 grid grid-cols-[3rem_1fr] md:grid-cols-[3rem_1fr_5rem_7rem_5rem_5rem] gap-4 items-center border ${
+          className={`rounded-xl px-5 py-4 grid grid-cols-[3rem_1fr] md:grid-cols-[3rem_1fr_5rem_7rem_5rem_8rem] gap-4 items-center border ${
             entry.is_current_user
               ? "bg-zinc-900 border-zinc-700"
               : "bg-zinc-950 border-zinc-900"
@@ -156,14 +188,135 @@ function FriendsTab({
           <span className="hidden md:block text-sm text-zinc-500 text-right tabular-nums">
             {entry.streak_days}d
           </span>
-          <span className="hidden md:block text-right">
+          <span className="hidden md:flex justify-end items-center gap-3">
             {!entry.is_current_user && (
-              <RemoveFriendButton username={entry.username} onChange={onChange} />
+              <>
+                <GiftFriendButton
+                  username={entry.username}
+                  tokenBalance={tokenBalance}
+                  onGifted={onGifted}
+                />
+                <RemoveFriendButton username={entry.username} onChange={onChange} />
+              </>
             )}
           </span>
         </div>
       ))}
     </div>
+  );
+}
+
+function GiftFriendButton({
+  username,
+  tokenBalance,
+  onGifted,
+}: {
+  username: string;
+  tokenBalance: number | null;
+  onGifted: (result: TokenGiftResponse) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState(GIFT_MIN);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  function close() {
+    setOpen(false);
+    setAmount(GIFT_MIN);
+    setError(null);
+    setSuccess(null);
+    setPending(false);
+  }
+
+  const balance = tokenBalance ?? 0;
+  const cappedMax = Math.min(GIFT_MAX, balance);
+  const valid = amount >= GIFT_MIN && amount <= cappedMax;
+
+  async function send() {
+    if (!valid || pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      const result = await authedRequest<TokenGiftResponse>(
+        "/api/progress/gift-tokens",
+        {
+          method: "POST",
+          body: JSON.stringify({ recipient_username: username, amount }),
+        }
+      );
+      onGifted(result);
+      setSuccess(`Sent ${result.amount} ⚡ to ${result.recipient_username}.`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.detail : "Could not send gift.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="text-xs text-amber-300 hover:text-amber-200 transition-colors"
+      >
+        Gift ⚡
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={close}
+        >
+          <div
+            className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm font-semibold text-white mb-1">
+              Gift tokens to {username}
+            </p>
+            <p className="text-xs text-zinc-500 mb-5">
+              Your balance: <span className="text-amber-300 tabular-nums">{balance} ⚡</span>
+              {" · "}
+              Max per gift: {GIFT_MAX} ⚡
+            </p>
+
+            <label className="block text-xs text-zinc-400 mb-1.5">Amount</label>
+            <input
+              type="number"
+              min={GIFT_MIN}
+              max={cappedMax}
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              disabled={pending || !!success}
+              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white tabular-nums focus:outline-none focus:border-white disabled:opacity-50"
+            />
+
+            {error && <p className="text-xs text-red-400 mt-3">{error}</p>}
+            {success && <p className="text-xs text-emerald-400 mt-3">{success}</p>}
+
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                onClick={close}
+                className="px-3 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+              >
+                {success ? "Close" : "Cancel"}
+              </button>
+              {!success && (
+                <button
+                  onClick={send}
+                  disabled={!valid || pending}
+                  className="px-3 py-1.5 bg-amber-500 text-black text-xs font-semibold rounded-lg hover:bg-amber-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {pending ? "Sending…" : `Send ${amount} ⚡`}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

@@ -31,6 +31,20 @@ class StreakShieldResponse(BaseModel):
     token_balance: int
 
 
+class TokenGiftRequest(BaseModel):
+    recipient_username: str
+    amount: int
+
+
+class TokenGiftResponse(BaseModel):
+    """Returned after a successful gift. Echoes back the new sender
+    balance + the amount transferred so the client can update locally
+    without a follow-up GET."""
+    recipient_username: str
+    amount: int
+    sender_token_balance: int
+
+
 class AttemptHistoryItem(BaseModel):
     attempt_id: str
     challenge_id: str
