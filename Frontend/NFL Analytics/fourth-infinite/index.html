@@ -85,6 +85,9 @@
         <a href="#" class="nav-item" data-view="picks-calc">
           <i class="fas fa-calculator"></i><span>Pick Value Calc</span>
         </a>
+        <a href="#" class="nav-item" data-view="trade-search">
+          <i class="fas fa-arrow-right-arrow-left"></i><span>Trade Search</span>
+        </a>
         <a href="#" class="nav-item" data-view="class-strength">
           <i class="fas fa-trophy"></i><span>Class Strength</span>
         </a>
@@ -689,6 +692,44 @@
             </div>
           </div>
           <div id="ts-verdict" class="trade-sim-verdict">Add picks on both sides to see the trade verdict.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TRADE SEARCH ─── -->
+    <section class="view" id="view-trade-search">
+      <div class="filter-bar" style="margin-bottom:14px;flex-wrap:wrap;gap:14px">
+        <label class="filter-label" for="tsh-team">Team:</label>
+        <select id="tsh-team" class="filter-select"></select>
+
+        <label class="filter-label" for="tsh-yfrom">From:</label>
+        <select id="tsh-yfrom" class="filter-select"></select>
+
+        <label class="filter-label" for="tsh-yto">To:</label>
+        <select id="tsh-yto" class="filter-select"></select>
+
+        <label class="filter-label" for="tsh-sort">Sort:</label>
+        <select id="tsh-sort" class="filter-select">
+          <option value="pvDelta">Biggest pick-value disagreement</option>
+          <option value="avDelta">Biggest career-AV disagreement</option>
+          <option value="flip">Verdict flip (pick-value loser won by AV)</option>
+          <option value="recent">Most recent</option>
+        </select>
+
+        <label class="filter-label" style="margin-left:auto"><input type="checkbox" id="tsh-flip-only" style="margin-right:6px">Verdict flips only</label>
+      </div>
+
+      <div class="kpi-row" id="tsh-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3 id="tsh-list-title">Top 50 trades by pick-value disagreement</h3>
+              <p>Click any trade to expand and see who each side actually drafted, summed career AV, and which side won by career outcome. Click a resolved player row inside the expanded view to open the player profile.</p>
+            </div>
+          </div>
+          <div id="tsh-list" class="trade-list"></div>
         </div>
       </div>
     </section>

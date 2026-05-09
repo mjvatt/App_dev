@@ -178,6 +178,9 @@ today_ids = [
     'view-class-compare', 'cc-year-a', 'cc-year-b', 'cc-kpis',
     'chart-cc-strength', 'cc-leaderboard-a', 'cc-leaderboard-b',
     'cc-leaderboard-a-title', 'cc-leaderboard-b-title',
+    # Trade Search
+    'view-trade-search', 'tsh-team', 'tsh-yfrom', 'tsh-yto', 'tsh-sort',
+    'tsh-flip-only', 'tsh-kpis', 'tsh-list', 'tsh-list-title',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(
