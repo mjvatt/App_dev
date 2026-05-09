@@ -2637,6 +2637,7 @@
   function closePlayerModal() {
     if (!playerModal.classList.contains('open')) return;
     playerModal.classList.remove('open');
+    playerModal.setAttribute('aria-hidden', 'true');
     _modalPrimaryKey = null;
     if (!_suppressUrlPush) _clearModalUrl();
     if (_modalOpenerEl && typeof _modalOpenerEl.focus === 'function') {
@@ -2959,7 +2960,7 @@
     return `
       <div class="profile-header">
         <div>
-          <h2 class="profile-name">${p.player}</h2>
+          <h2 class="profile-name"${compareMode ? '' : ' id="playerModalTitle"'}>${p.player}</h2>
           <div class="profile-meta">${p.year} Draft · Round ${p.round} · Pick #${p.pick}</div>
           <div class="profile-meta">${p.franchise} · ${p.pos} · ${p.college}</div>
         </div>
@@ -3138,6 +3139,7 @@
 
     const wasOpen = playerModal.classList.contains('open');
     playerModal.classList.add('open');
+    playerModal.setAttribute('aria-hidden', 'false');
 
     const newPrimaryKey = `${+year}|${+pick}`;
     if (!_suppressUrlPush) {
@@ -3215,6 +3217,44 @@
     if (year && pick) openPlayerModal(year, pick);
   });
 
+  /* ── A11y: synthesize accessible names on dynamically-rendered controls
+     and chart canvases so Lighthouse's `label` and `image-alt` audits pass.
+     Inputs already labeled via aria-label, aria-labelledby, or a <label for>
+     are left untouched. */
+  function _a11yInferLabel(el) {
+    if (el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby')) return null;
+    const id = el.id;
+    if (id && document.querySelector(`label[for="${(window.CSS && CSS.escape ? CSS.escape(id) : id)}"]`)) return null;
+    if (el.getAttribute('role') === 'combobox') return null;
+    if (el.tagName === 'SELECT' && el.options && el.options.length) {
+      const txt = (el.options[0].textContent || '').replace(/…|…/g, '').trim();
+      if (txt) return txt;
+    }
+    if (el.tagName === 'INPUT' && el.placeholder) {
+      const txt = el.placeholder.replace(/…|…/g, '').trim();
+      if (txt) return txt;
+    }
+    if (id) return id.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return null;
+  }
+
+  function _applyA11yLabels() {
+    document.querySelectorAll('canvas').forEach(c => {
+      if (c.hasAttribute('aria-label') || c.hasAttribute('aria-labelledby')) return;
+      const card = c.closest('.chart-card') || c.closest('section') || c.parentElement;
+      const h    = card && card.querySelector('h3, h2');
+      const sub  = card && card.querySelector('.chart-card-header p');
+      const name = (h ? h.textContent : (c.id || 'chart')).trim();
+      const desc = sub ? `: ${sub.textContent.trim()}` : '';
+      c.setAttribute('role', 'img');
+      c.setAttribute('aria-label', `${name}${desc}`);
+    });
+    document.querySelectorAll('select, input').forEach(el => {
+      const label = _a11yInferLabel(el);
+      if (label) el.setAttribute('aria-label', label);
+    });
+  }
+
   /* ── Theme toggle ─────────────────────────────────────────────────── */
   function applyTheme(theme) {
     if (theme === 'light') {
@@ -3223,7 +3263,9 @@
       document.documentElement.removeAttribute('data-theme');
     }
     document.querySelectorAll('.theme-switch-opt').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.t === theme);
+      const isActive = btn.dataset.t === theme;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
     });
     localStorage.setItem('fi-theme', theme);
   }
@@ -3382,6 +3424,7 @@
   /* ── Boot sequence ────────────────────────────────────────────────── */
   initCollegeFilters();
   showView('dashboard');
+  _applyA11yLabels();
 
   // Deep-link: if the page loaded with ?player=YYYY-PP[&vs=YYYY-PP], open the
   // matching player modal. Suppress the URL push so the user's pasted link

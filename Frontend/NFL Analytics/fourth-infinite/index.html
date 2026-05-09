@@ -28,6 +28,8 @@
 </head>
 <body>
 
+  <a class="skip-link" href="#main">Skip to main content</a>
+
   <!-- Loading overlay (visible until DraftData.load() resolves) -->
   <div class="app-loading" id="appLoading">
     <div class="app-loading-inner">
@@ -127,7 +129,7 @@
   </aside>
 
   <!-- Main -->
-  <main class="main" id="main">
+  <main class="main" id="main" tabindex="-1">
 
     <!-- Top bar -->
     <header class="topbar">
@@ -152,8 +154,8 @@
           <div class="search-results" id="globalSearchResults" role="listbox" hidden></div>
         </div>
         <div class="theme-switch" id="themeToggle" role="group" aria-label="Theme">
-          <button class="theme-switch-opt" data-t="dark">DARK</button>
-          <button class="theme-switch-opt" data-t="light">LIGHT</button>
+          <button class="theme-switch-opt" data-t="dark" aria-label="Use dark theme" aria-pressed="false">DARK</button>
+          <button class="theme-switch-opt" data-t="light" aria-label="Use light theme" aria-pressed="false">LIGHT</button>
         </div>
         <div class="data-badge">
           <i class="fas fa-database"></i>
@@ -1612,10 +1614,10 @@
     </section>
 
     <!-- ─── PLAYER PROFILE MODAL ─── -->
-    <div class="player-modal-overlay" id="playerModal">
+    <div class="player-modal-overlay" id="playerModal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle" aria-hidden="true" tabindex="-1">
       <div class="player-modal-card">
-        <button class="player-modal-close" id="playerModalClose" aria-label="Close">
-          <i class="fas fa-xmark"></i>
+        <button class="player-modal-close" id="playerModalClose" aria-label="Close player profile">
+          <i class="fas fa-xmark" aria-hidden="true"></i>
         </button>
         <div id="playerModalContent"></div>
       </div>

@@ -1519,3 +1519,21 @@ td.empty-state {
   .kpi-row { grid-template-columns: 1fr; }
   .profile-stat-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── Skip to main content (visible only when focused) ───────────── */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -40px;
+  z-index: 1100;
+  padding: 8px 14px;
+  background: #f59e0b;
+  color: #0a0a0a;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: top .15s ease;
+}
+.skip-link:focus { top: 8px; outline: 2px solid #0a0a0a; outline-offset: 2px; }
+#main:focus { outline: none; }
