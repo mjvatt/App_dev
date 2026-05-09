@@ -170,6 +170,10 @@ today_ids = [
     # QB Lab
     'view-qb-lab', 'qb-kpis', 'chart-qb-round-hit', 'qb-round-table',
     'qb-college-body', 'chart-qb-age', 'chart-qb-forty', 'qb-leaderboard-body',
+    # Position Lab
+    'view-position-lab', 'pl-pos-toggle', 'pl-kpis', 'chart-pl-round-hit',
+    'pl-round-table', 'pl-college-body', 'chart-pl-age', 'chart-pl-forty',
+    'pl-leaderboard-body',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(

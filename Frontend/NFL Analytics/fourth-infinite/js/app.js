@@ -36,6 +36,7 @@
     'picks-calc': ['Pick Value Calc', 'Historical expected career AV by pick slot and position'],
     'class-strength': ['Class Strength', 'Realized first-team AV vs slot expectation, by draft year'],
     'qb-lab':         ['QB Lab', 'Quarterback prospect deep-dive — hit rates, college pipelines, age and athletic effects'],
+    'position-lab':   ['Position Lab', 'Position deep-dive — hit rates, college pipelines, age and athletic effects per group'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -65,6 +66,7 @@
     if (id === 'picks-calc') initPicksCalc();
     if (id === 'class-strength') initClassStrength();
     if (id === 'qb-lab') initQBLab();
+    if (id === 'position-lab') initPositionLab();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -1236,6 +1238,230 @@
     });
     // Top-25 leaderboard rows are picked up by the global tr[data-year][data-pick]
     // delegation handler that already opens the player modal.
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     POSITION LAB
+     Generalized QB Lab — same five lenses, parameterized by pos_group.
+  ═══════════════════════════════════════════════════════════════════ */
+  let _positionLabInited = false;
+  let _activePositionLab = 'RB';
+  const PL_GROUPS         = ['RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB'];
+  const PL_HIT_THRESHOLD  = 10;
+  const PL_INCOMPLETE_YEAR = 2022;
+
+  function _plSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function initPositionLab() {
+    if (_positionLabInited) {
+      renderPositionLab(_activePositionLab);
+      return;
+    }
+    _positionLabInited = true;
+
+    const container = document.getElementById('pl-pos-toggle');
+    PL_GROUPS.forEach(g => {
+      const btn = document.createElement('button');
+      btn.type            = 'button';
+      btn.className       = 'pos-toggle' + (g === _activePositionLab ? ' on' : '');
+      btn.textContent     = g;
+      btn.dataset.group   = g;
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', g === _activePositionLab ? 'true' : 'false');
+      const color = DraftData.posColor(g);
+      btn.style.borderColor = color;
+      if (g === _activePositionLab) {
+        btn.style.background = color;
+        btn.style.color      = '#000';
+      } else {
+        btn.style.color = color;
+      }
+      btn.addEventListener('click', () => {
+        if (_activePositionLab === g) return;
+        _activePositionLab = g;
+        container.querySelectorAll('.pos-toggle').forEach(other => {
+          const og = other.dataset.group;
+          const oc = DraftData.posColor(og);
+          if (og === g) {
+            other.classList.add('on');
+            other.style.background  = oc;
+            other.style.color       = '#000';
+            other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'true');
+          } else {
+            other.classList.remove('on');
+            other.style.background  = '';
+            other.style.color       = oc;
+            other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'false');
+          }
+        });
+        renderPositionLab(g);
+      });
+      container.appendChild(btn);
+    });
+
+    renderPositionLab(_activePositionLab);
+  }
+
+  function renderPositionLab(posGroup) {
+    const picks         = DraftData.picks({ pos_group: posGroup }).filter(p => p.pick > 0);
+    const completePicks = picks.filter(p => p.year < PL_INCOMPLETE_YEAR);
+    const color         = DraftData.posColor(posGroup);
+
+    /* ── KPIs ──────────────────────────────────────────────────────── */
+    const totalCareerAV = completePicks.reduce((s, p) => s + (p.career_av || 0), 0);
+    const hits          = completePicks.filter(p => _plSurplusFor(p) > PL_HIT_THRESHOLD).length;
+    const hitRate       = completePicks.length ? hits / completePicks.length : 0;
+    const r1Picks       = completePicks.filter(p => p.round === 1);
+    const r1Hits        = r1Picks.filter(p => _plSurplusFor(p) > PL_HIT_THRESHOLD).length;
+    const r1HitRate     = r1Picks.length ? r1Hits / r1Picks.length : 0;
+
+    const kpis = [
+      { icon: 'fa-people-group', label: `${posGroup} picks (1994–2025)`,
+        value: picks.length.toLocaleString(),
+        sub: `${completePicks.length.toLocaleString()} with complete careers` },
+      { icon: 'fa-bullseye',   label: 'Overall hit rate',
+        value: `${(hitRate * 100).toFixed(1)}%`,
+        sub: `${hits} hits / ${completePicks.length}` },
+      { icon: 'fa-medal',      label: 'Round-1 hit rate',
+        value: r1Picks.length ? `${(r1HitRate * 100).toFixed(1)}%` : 'n/a',
+        sub: r1Picks.length ? `${r1Hits} / ${r1Picks.length} R1 ${posGroup}s` : 'no R1 picks' },
+      { icon: 'fa-chart-line', label: 'Career AV (complete)',
+        value: totalCareerAV.toLocaleString(),
+        sub: 'sum across 1994–2021' },
+    ];
+    document.getElementById('pl-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${k.sub}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    /* ── Hit rate by round ─────────────────────────────────────────── */
+    const byRound = {};
+    completePicks.forEach(p => {
+      const r = p.round;
+      if (!byRound[r]) byRound[r] = { n: 0, hits: 0 };
+      byRound[r].n++;
+      if (_plSurplusFor(p) > PL_HIT_THRESHOLD) byRound[r].hits++;
+    });
+    const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+    const rates  = rounds.map(r => +(byRound[r].hits / byRound[r].n).toFixed(3));
+    const colors = rounds.map(r => r === 1 ? color : color + 'aa');
+    DraftCharts.vbar('chart-pl-round-hit', {
+      labels: rounds.map(r => `R${r}`),
+      values: rates.map(v => +(v * 100).toFixed(1)),
+      colors,
+    });
+
+    document.getElementById('pl-round-table').innerHTML = rounds.length ? `
+      <table style="width:100%;border-collapse:collapse;font-size:11px;color:var(--text-sub);margin-top:8px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Round</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Picks</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Hits</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Rate</th>
+            <th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)">Wilson 95% CI</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rounds.map(r => {
+            const c = byRound[r];
+            const [lo, hi] = _wilsonCI(c.hits, c.n);
+            return `<tr>
+              <td style="padding:4px 6px">R${r}</td>
+              <td style="text-align:right;padding:4px 6px">${c.n}</td>
+              <td style="text-align:right;padding:4px 6px">${c.hits}</td>
+              <td style="text-align:right;padding:4px 6px;color:var(--text);font-weight:600">${(c.hits/c.n*100).toFixed(1)}%</td>
+              <td style="text-align:right;padding:4px 6px">[${(lo*100).toFixed(1)}%, ${(hi*100).toFixed(1)}%]</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>` : '<div style="padding:8px 6px;color:var(--text-muted);font-size:12px">No completed-career picks for this group yet.</div>';
+
+    /* ── Top college pipelines ─────────────────────────────────────── */
+    const byCollege = {};
+    completePicks.forEach(p => {
+      const c = (p.college || '').trim();
+      if (!c) return;
+      if (!byCollege[c]) byCollege[c] = { n: 0, totalAV: 0, hits: 0, top: null };
+      const ent = byCollege[c];
+      ent.n++;
+      ent.totalAV += (p.career_av || 0);
+      if (_plSurplusFor(p) > PL_HIT_THRESHOLD) ent.hits++;
+      if (!ent.top || (p.career_av || 0) > (ent.top.career_av || 0)) ent.top = p;
+    });
+    const colleges = Object.entries(byCollege)
+      .filter(([, c]) => c.n >= 3)
+      .map(([college, c]) => ({
+        college, n: c.n, avgAV: +(c.totalAV / c.n).toFixed(1),
+        hitRate: c.hits / c.n, top: c.top,
+      }))
+      .sort((a, b) => b.avgAV - a.avgAV)
+      .slice(0, 12);
+
+    const collegeBody = document.getElementById('pl-college-body');
+    collegeBody.innerHTML = colleges.length ? colleges.map(c => `
+      <tr>
+        <td><strong>${_escapeHtml(c.college)}</strong></td>
+        <td style="text-align:right">${c.n}</td>
+        <td style="text-align:right;color:var(--text);font-weight:600">${c.avgAV}</td>
+        <td style="text-align:right">${(c.hitRate * 100).toFixed(0)}%</td>
+        <td>
+          <a href="#" class="pl-link" data-year="${c.top.year}" data-pick="${c.top.pick}" style="color:var(--text);text-decoration:none">
+            ${_escapeHtml(c.top.player)} <span style="color:var(--text-muted);font-size:11px">(${c.top.year}, ${c.top.career_av || 0} AV)</span>
+          </a>
+        </td>
+      </tr>`).join('') : `<tr><td colspan="5" style="padding:14px;color:var(--text-muted);font-size:12px">No colleges with 3+ ${posGroup} picks.</td></tr>`;
+
+    /* ── Scatter: age at draft vs career AV ────────────────────────── */
+    const agePoints = completePicks
+      .filter(p => p.age != null && p.career_av != null)
+      .map(p => ({ x: p.age, y: p.career_av, label: p.player }));
+    DraftCharts.genericScatter('chart-pl-age', agePoints,
+      'Age at draft', 'Career AV', color);
+
+    /* ── Scatter: 40-yard time vs career AV ────────────────────────── */
+    const fortyPoints = completePicks
+      .filter(p => p.forty != null && p.career_av != null)
+      .map(p => ({ x: +p.forty, y: p.career_av, label: p.player }));
+    DraftCharts.genericScatter('chart-pl-forty', fortyPoints,
+      '40-yard time (s)', 'Career AV', color);
+
+    /* ── Top 25 leaderboard ────────────────────────────────────────── */
+    const top25 = completePicks
+      .slice()
+      .sort((a, b) => (b.career_av || 0) - (a.career_av || 0))
+      .slice(0, 25);
+    const lbBody = document.getElementById('pl-leaderboard-body');
+    lbBody.innerHTML = top25.length ? top25.map((p, i) => {
+      const surplus = _plSurplusFor(p);
+      const sColor = surplus >= 0 ? '#10b981' : '#ef4444';
+      return `<tr data-year="${p.year}" data-pick="${p.pick}" style="cursor:pointer">
+        <td style="color:var(--text-muted)">${i + 1}</td>
+        <td><strong>${_escapeHtml(p.player)}</strong></td>
+        <td>${p.year}</td>
+        <td>#${p.pick}</td>
+        <td>${_escapeHtml(p.team)}</td>
+        <td>${_escapeHtml(p.college || '—')}</td>
+        <td style="text-align:right;color:var(--text);font-weight:600">${p.career_av || 0}</td>
+        <td style="text-align:right;color:${sColor};font-weight:600">${surplus >= 0 ? '+' : ''}${surplus.toFixed(1)}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="8" style="padding:14px;color:var(--text-muted);font-size:12px">No completed-career picks for ${posGroup}.</td></tr>`;
+
+    collegeBody.querySelectorAll('.pl-link').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        openPlayerModal(+el.dataset.year, +el.dataset.pick);
+      });
+    });
   }
 
   /* ═══════════════════════════════════════════════════════════════════
