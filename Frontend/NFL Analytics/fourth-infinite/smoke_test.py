@@ -174,6 +174,10 @@ today_ids = [
     'view-position-lab', 'pl-pos-toggle', 'pl-kpis', 'chart-pl-round-hit',
     'pl-round-table', 'pl-college-body', 'chart-pl-age', 'chart-pl-forty',
     'pl-leaderboard-body',
+    # Class Compare
+    'view-class-compare', 'cc-year-a', 'cc-year-b', 'cc-kpis',
+    'chart-cc-strength', 'cc-leaderboard-a', 'cc-leaderboard-b',
+    'cc-leaderboard-a-title', 'cc-leaderboard-b-title',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(

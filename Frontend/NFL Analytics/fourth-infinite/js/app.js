@@ -35,6 +35,7 @@
     colleges:   ['College Pipeline', 'Which programs feed the NFL draft'],
     'picks-calc': ['Pick Value Calc', 'Historical expected career AV by pick slot and position'],
     'class-strength': ['Class Strength', 'Realized first-team AV vs slot expectation, by draft year'],
+    'class-compare':  ['Class Compare',  'Side-by-side compare of two draft classes — KPIs, highlighted strength chart, top-10 leaderboards'],
     'qb-lab':         ['QB Lab', 'Quarterback prospect deep-dive — hit rates, college pipelines, age and athletic effects'],
     'position-lab':   ['Position Lab', 'Position deep-dive — hit rates, college pipelines, age and athletic effects per group'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
@@ -65,6 +66,7 @@
     if (id === 'class2027')  initClass2027();
     if (id === 'picks-calc') initPicksCalc();
     if (id === 'class-strength') initClassStrength();
+    if (id === 'class-compare')  initClassCompare();
     if (id === 'qb-lab') initQBLab();
     if (id === 'position-lab') initPositionLab();
     if (id === 'atlas')      initATLAS();
@@ -1055,6 +1057,159 @@
         openPlayerModal(+el.dataset.year, +el.dataset.pick);
       });
     });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     CLASS COMPARE — two-year side-by-side using the class-strength engine.
+  ═══════════════════════════════════════════════════════════════════ */
+  let _ccInited = false;
+  let _ccData   = null;
+
+  function initClassCompare() {
+    _ccData = DraftData.draftClassStrength();
+    const yearA = document.getElementById('cc-year-a');
+    const yearB = document.getElementById('cc-year-b');
+
+    if (!_ccInited) {
+      const years = meta.years.slice();
+      years.forEach(y => {
+        yearA.add(new Option(y, y));
+        yearB.add(new Option(y, y));
+      });
+
+      // Default to the most extreme delta among complete classes — best vs weakest
+      // surplus per pick — to anchor the demo on an interesting comparison.
+      const complete = _ccData.filter(d => !d.incomplete && d.picks > 0);
+      const ranked   = complete.slice().sort((a, b) => b.surplusPerPick - a.surplusPerPick);
+      const defaultA = ranked.length ? ranked[0].year                 : years[years.length - 1];
+      const defaultB = ranked.length ? ranked[ranked.length - 1].year : years[0];
+      yearA.value = String(defaultA);
+      yearB.value = String(defaultB);
+
+      yearA.addEventListener('change', renderClassCompare);
+      yearB.addEventListener('change', renderClassCompare);
+      _ccInited = true;
+    }
+
+    renderClassCompare();
+  }
+
+  function _ccRowFor(year) {
+    return _ccData.find(d => +d.year === +year);
+  }
+
+  function _ccTopPicks(year, n = 10) {
+    return DraftData.picks({ year: +year })
+      .filter(p => p.pick > 0)
+      .slice()
+      .sort((a, b) => (b.career_av || 0) - (a.career_av || 0))
+      .slice(0, n);
+  }
+
+  function _ccSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function _ccDeltaSpan(value, fmt = v => v.toFixed(2), neutral = false) {
+    if (value == null || Number.isNaN(value)) return '<span style="color:var(--text-muted)">—</span>';
+    if (neutral) return `<span style="color:var(--text-muted)">${fmt(value)}</span>`;
+    const color = value > 0 ? '#10b981' : value < 0 ? '#ef4444' : 'var(--text-muted)';
+    const sign  = value > 0 ? '+' : '';
+    return `<span style="color:${color};font-weight:600">${sign}${fmt(value)}</span>`;
+  }
+
+  function _ccKpiCard(label, valueA, valueB, delta) {
+    return `
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <span class="kpi-label">${label}</span>
+          <div style="display:flex;gap:14px;align-items:baseline;margin-top:4px;flex-wrap:wrap">
+            <span style="color:var(--text-muted);font-size:11px">A</span>
+            <span class="kpi-value" style="font-size:18px">${valueA}</span>
+            <span style="color:var(--text-muted);font-size:11px">B</span>
+            <span class="kpi-value" style="font-size:18px">${valueB}</span>
+          </div>
+          <span class="kpi-label" style="font-size:11px;opacity:0.85;margin-top:2px">Δ ${delta}</span>
+        </div>
+      </div>`;
+  }
+
+  function _ccLeaderboardHtml(picks, year) {
+    if (!picks.length) {
+      return `<tr><td colspan="7" style="padding:14px;color:var(--text-muted);font-size:12px">No picks recorded for ${year}.</td></tr>`;
+    }
+    return picks.map((p, i) => {
+      const surplus = _ccSurplusFor(p);
+      const sColor  = surplus >= 0 ? '#10b981' : '#ef4444';
+      return `<tr data-year="${p.year}" data-pick="${p.pick}" style="cursor:pointer">
+        <td style="color:var(--text-muted)">${i + 1}</td>
+        <td><strong>${_escapeHtml(p.player)}</strong></td>
+        <td>#${p.pick}</td>
+        <td>${_escapeHtml(p.pos_group || '—')}</td>
+        <td>${_escapeHtml(p.team)}</td>
+        <td style="text-align:right;color:var(--text);font-weight:600">${p.career_av || 0}</td>
+        <td style="text-align:right;color:${sColor};font-weight:600">${surplus >= 0 ? '+' : ''}${surplus.toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderClassCompare() {
+    const yA = +document.getElementById('cc-year-a').value;
+    const yB = +document.getElementById('cc-year-b').value;
+    const a  = _ccRowFor(yA);
+    const b  = _ccRowFor(yB);
+
+    /* ── KPI row: A · B · Δ ────────────────────────────────────────── */
+    const fmtSurplus = v => `${v >= 0 ? '+' : ''}${v.toFixed(2)}`;
+    const fmtTotal   = v => `${v >= 0 ? '+' : ''}${v.toFixed(0)}`;
+    const aIncomplete = a?.incomplete ? ' (incomplete)' : '';
+    const bIncomplete = b?.incomplete ? ' (incomplete)' : '';
+
+    const cards = [
+      _ccKpiCard(
+        `Picks${aIncomplete && bIncomplete ? ' (both incomplete)' : aIncomplete || bIncomplete}`,
+        a ? a.picks.toLocaleString() : '—',
+        b ? b.picks.toLocaleString() : '—',
+        _ccDeltaSpan(a && b ? a.picks - b.picks : null, v => v.toFixed(0)),
+      ),
+      _ccKpiCard(
+        'Surplus per pick',
+        a ? fmtSurplus(a.surplusPerPick) : '—',
+        b ? fmtSurplus(b.surplusPerPick) : '—',
+        _ccDeltaSpan(a && b ? a.surplusPerPick - b.surplusPerPick : null, v => v.toFixed(2)),
+      ),
+      _ccKpiCard(
+        'Total surplus AV',
+        a ? fmtTotal(a.surplusTotal) : '—',
+        b ? fmtTotal(b.surplusTotal) : '—',
+        _ccDeltaSpan(a && b ? a.surplusTotal - b.surplusTotal : null, v => v.toFixed(0)),
+      ),
+      _ccKpiCard(
+        'Total career AV',
+        a ? a.totalCareerAV.toLocaleString() : '—',
+        b ? b.totalCareerAV.toLocaleString() : '—',
+        _ccDeltaSpan(a && b ? a.totalCareerAV - b.totalCareerAV : null, v => v.toFixed(0), a?.incomplete || b?.incomplete),
+      ),
+    ];
+    document.getElementById('cc-kpis').innerHTML = cards.join('');
+
+    /* ── Highlighted class-strength chart ──────────────────────────── */
+    const chronological = _ccData.slice().sort((x, y) => x.year - y.year);
+    DraftCharts.classStrengthBar('chart-cc-strength', chronological, 'surplusPerPick', {
+      highlightYears: [yA, yB],
+    });
+
+    /* ── Side-by-side top-10 leaderboards ──────────────────────────── */
+    const topA = _ccTopPicks(yA, 10);
+    const topB = _ccTopPicks(yB, 10);
+    document.getElementById('cc-leaderboard-a-title').textContent =
+      `${yA} — Top 10 by Career AV${aIncomplete}`;
+    document.getElementById('cc-leaderboard-b-title').textContent =
+      `${yB} — Top 10 by Career AV${bIncomplete}`;
+    document.getElementById('cc-leaderboard-a').innerHTML = _ccLeaderboardHtml(topA, yA);
+    document.getElementById('cc-leaderboard-b').innerHTML = _ccLeaderboardHtml(topB, yB);
+    // Top-10 rows are picked up by the global tr[data-year][data-pick]
+    // delegation handler that already opens the player modal.
   }
 
   /* ═══════════════════════════════════════════════════════════════════

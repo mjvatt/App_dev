@@ -88,6 +88,9 @@
         <a href="#" class="nav-item" data-view="class-strength">
           <i class="fas fa-trophy"></i><span>Class Strength</span>
         </a>
+        <a href="#" class="nav-item" data-view="class-compare">
+          <i class="fas fa-scale-balanced"></i><span>Class Compare</span>
+        </a>
         <a href="#" class="nav-item" data-view="qb-lab">
           <i class="fas fa-football"></i><span>QB Lab</span>
         </a>
@@ -737,6 +740,80 @@
           </div>
           <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border)">
             Methodology: surplus = first-team AV (with drafting team) − slot-expected AV from the position-aware curve (24-pick window per position group, fit on completed careers 1994–2021). Career-AV column is informational only and is not used in surplus.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CLASS COMPARE ─── -->
+    <section class="view" id="view-class-compare">
+      <div class="filter-bar" style="margin-bottom:14px;flex-wrap:wrap">
+        <label class="filter-label" for="cc-year-a">Year A:</label>
+        <select id="cc-year-a" class="filter-select"></select>
+        <label class="filter-label" for="cc-year-b" style="margin-left:14px">Year B:</label>
+        <select id="cc-year-b" class="filter-select"></select>
+      </div>
+
+      <div class="kpi-row" id="cc-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Class Strength — Both Years Highlighted</h3>
+              <p>Per-pick surplus AV across all classes; the two selected years stay at full intensity, the rest dim.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-cc-strength"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3 id="cc-leaderboard-a-title">Year A — Top 10 by Career AV</h3>
+              <p>Click a row to open the player profile.</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:520px;overflow:auto">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Pick</th>
+                  <th>Pos</th>
+                  <th>Team</th>
+                  <th style="text-align:right">Career AV</th>
+                  <th style="text-align:right">Surplus</th>
+                </tr>
+              </thead>
+              <tbody id="cc-leaderboard-a"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3 id="cc-leaderboard-b-title">Year B — Top 10 by Career AV</h3>
+              <p>Click a row to open the player profile.</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:520px;overflow:auto">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Pick</th>
+                  <th>Pos</th>
+                  <th>Team</th>
+                  <th style="text-align:right">Career AV</th>
+                  <th style="text-align:right">Surplus</th>
+                </tr>
+              </thead>
+              <tbody id="cc-leaderboard-b"></tbody>
+            </table>
           </div>
         </div>
       </div>

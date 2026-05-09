@@ -1590,24 +1590,32 @@ const DraftCharts = (() => {
   }
 
   /* ── Class strength bar — divergent (positive vs negative surplus) ── */
-  function classStrengthBar(canvasId, data, metric = 'surplusPerPick') {
+  function classStrengthBar(canvasId, data, metric = 'surplusPerPick', opts = {}) {
     _destroy(canvasId);
     const ctx = document.getElementById(canvasId).getContext('2d');
 
     const POS = '#10b981';   // emerald
     const NEG = '#ef4444';   // red
     const INC = 'rgba(107,114,128,0.4)';
+    const DIM_POS = 'rgba(16,185,129,0.18)';
+    const DIM_NEG = 'rgba(239,68,68,0.18)';
+    const DIM_INC = 'rgba(107,114,128,0.15)';
+
+    // When highlightYears is provided, non-highlighted bars dim; the two selected
+    // years stay at full intensity to anchor the side-by-side compare view.
+    const highlight = new Set((opts.highlightYears || []).map(Number));
+    const isFocus   = d => highlight.size === 0 || highlight.has(+d.year);
 
     const values = data.map(d => d[metric]);
     const colors = data.map(d => {
-      if (d.incomplete)            return INC;
-      const v = d[metric] || 0;
-      return v >= 0 ? POS + 'cc' : NEG + 'cc';
+      if (!isFocus(d)) return d.incomplete ? DIM_INC : ((d[metric] || 0) >= 0 ? DIM_POS : DIM_NEG);
+      if (d.incomplete) return INC;
+      return (d[metric] || 0) >= 0 ? POS + 'cc' : NEG + 'cc';
     });
     const borders = data.map(d => {
-      if (d.incomplete)            return INC;
-      const v = d[metric] || 0;
-      return v >= 0 ? POS : NEG;
+      if (!isFocus(d)) return d.incomplete ? DIM_INC : ((d[metric] || 0) >= 0 ? DIM_POS : DIM_NEG);
+      if (d.incomplete) return INC;
+      return (d[metric] || 0) >= 0 ? POS : NEG;
     });
 
     const yLabel = metric === 'surplusPerPick'
