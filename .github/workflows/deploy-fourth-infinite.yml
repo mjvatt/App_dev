@@ -59,3 +59,37 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  lighthouse:
+    needs: smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Start static server
+        working-directory: 'Frontend/NFL Analytics/fourth-infinite'
+        run: |
+          python -m http.server 8000 >/tmp/http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:8000/ >/dev/null; then
+              echo "server up"
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "server failed to start" >&2
+          cat /tmp/http.log >&2
+          exit 1
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: 'Frontend/NFL Analytics/fourth-infinite/lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: false
