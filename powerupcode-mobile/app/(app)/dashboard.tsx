@@ -19,9 +19,12 @@ import { colors, fontSize, spacing, radius } from "@/lib/theme";
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 interface ProgressData {
-  xp: number;
+  total_xp: number;
   level: number;
-  streak: number;
+  streak_days: number;
+  daily_streak_days: number;
+  longest_daily_streak: number;
+  streak_shields: number;
   token_balance: number;
   topics: Record<string, number>;
 }
@@ -111,11 +114,15 @@ export default function DashboardScreen() {
         {progress && (
           <>
             <Card style={styles.statsCard}>
-              <XPBar xp={progress.xp} level={progress.level} />
+              <XPBar xp={progress.total_xp} level={progress.level} />
               <View style={styles.statRow}>
                 <StatPill label="Level" value={String(progress.level)} color={colors.xp} />
-                <StatPill label="Streak" value={`${progress.streak}d`} color={colors.warning} />
-                <StatPill label="XP" value={String(progress.xp)} color={colors.primary} />
+                <StatPill
+                  label="Streak"
+                  value={`${progress.daily_streak_days ?? 0}d`}
+                  color={colors.warning}
+                />
+                <StatPill label="XP" value={String(progress.total_xp)} color={colors.primary} />
                 <StatPill
                   label="Tokens"
                   value={String(progress.token_balance ?? 0)}
@@ -123,6 +130,39 @@ export default function DashboardScreen() {
                   icon="lightning-bolt"
                 />
               </View>
+              {(progress.streak_shields > 0 || progress.longest_daily_streak > 0) && (
+                <View style={styles.streakDetailRow}>
+                  {progress.longest_daily_streak > 0 && (
+                    <View style={styles.streakDetail}>
+                      <MaterialCommunityIcons
+                        name="trophy"
+                        size={14}
+                        color={colors.textMuted}
+                      />
+                      <Text style={styles.streakDetailText}>
+                        Best: {progress.longest_daily_streak}d
+                      </Text>
+                    </View>
+                  )}
+                  {progress.streak_shields > 0 && (
+                    <View style={styles.streakDetail}>
+                      <MaterialCommunityIcons
+                        name="shield-check"
+                        size={14}
+                        color={colors.primary}
+                      />
+                      <Text
+                        style={[
+                          styles.streakDetailText,
+                          { color: colors.primary, fontWeight: "700" },
+                        ]}
+                      >
+                        ×{progress.streak_shields}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
             </Card>
 
             <Text style={styles.sectionTitle}>Topics</Text>
@@ -214,6 +254,9 @@ const styles = StyleSheet.create({
   retryText: { color: colors.primary, fontSize: fontSize.sm, fontWeight: "600" },
   statsCard: { gap: spacing.md },
   statRow: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap" },
+  streakDetailRow: { flexDirection: "row", gap: spacing.md, flexWrap: "wrap" },
+  streakDetail: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  streakDetailText: { color: colors.textMuted, fontSize: fontSize.xs },
   sectionTitle: { color: colors.textMuted, fontSize: fontSize.sm, fontWeight: "600", letterSpacing: 1 },
   topicsGrid: {
     flexDirection: "row",

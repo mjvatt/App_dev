@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Card from "@/components/ui/Card";
+import { authedRequest } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 import { colors, fontSize, radius, spacing } from "@/lib/theme";
+
+interface StreakSnapshot {
+  daily_streak_days: number;
+  longest_daily_streak: number;
+  streak_shields: number;
+}
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -61,6 +69,23 @@ const MODES: Mode[] = [
 ];
 
 export default function ArcadeHubScreen() {
+  const [streak, setStreak] = useState<StreakSnapshot | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const data = await authedRequest<StreakSnapshot>("/api/progress/me", token);
+        if (active) setStreak(data);
+      } catch {
+        // Non-fatal: hub still renders without the streak chip.
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -68,6 +93,47 @@ export default function ArcadeHubScreen() {
           <Text style={styles.screenTitle}>Arcade</Text>
           <Text style={styles.subtitle}>Pick a game mode</Text>
         </View>
+
+        {streak && (streak.daily_streak_days > 0 || streak.streak_shields > 0) && (
+          <Card
+            style={[
+              styles.streakOverlay,
+              streak.streak_shields > 0 && styles.streakOverlayShielded,
+            ]}
+          >
+            <View style={styles.streakOverlayItem}>
+              <MaterialCommunityIcons name="fire" size={18} color={colors.warning} />
+              <Text style={styles.streakOverlayValue}>
+                {streak.daily_streak_days}d
+              </Text>
+              <Text style={styles.streakOverlayLabel}>streak</Text>
+            </View>
+            {streak.longest_daily_streak > streak.daily_streak_days && (
+              <View style={styles.streakOverlayItem}>
+                <MaterialCommunityIcons
+                  name="trophy"
+                  size={14}
+                  color={colors.textMuted}
+                />
+                <Text style={styles.streakOverlayMuted}>
+                  best {streak.longest_daily_streak}d
+                </Text>
+              </View>
+            )}
+            {streak.streak_shields > 0 && (
+              <View style={[styles.streakOverlayItem, { marginLeft: "auto" }]}>
+                <MaterialCommunityIcons
+                  name="shield-check"
+                  size={16}
+                  color={colors.primary}
+                />
+                <Text style={styles.streakOverlayShieldText}>
+                  ×{streak.streak_shields}
+                </Text>
+              </View>
+            )}
+          </Card>
+        )}
 
         <View style={styles.modeList}>
           {MODES.map((mode) => {
@@ -143,6 +209,21 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   subtitle: { color: colors.textMuted, fontSize: fontSize.sm },
+  streakOverlay: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    flexWrap: "wrap",
+  },
+  streakOverlayShielded: {
+    borderColor: colors.primary + "55",
+    backgroundColor: colors.primary + "10",
+  },
+  streakOverlayItem: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  streakOverlayValue: { color: colors.text, fontSize: fontSize.lg, fontWeight: "800" },
+  streakOverlayLabel: { color: colors.textMuted, fontSize: fontSize.xs, letterSpacing: 0.5 },
+  streakOverlayMuted: { color: colors.textMuted, fontSize: fontSize.xs },
+  streakOverlayShieldText: { color: colors.primary, fontSize: fontSize.sm, fontWeight: "700" },
   modeList: { gap: spacing.sm },
   modeCard: {
     flexDirection: "row",
