@@ -193,6 +193,9 @@ today_ids = [
     # Team Draft DNA
     'view-team-dna', 'td-team', 'td-kpis', 'chart-td-pos-bias',
     'chart-td-round-hit', 'td-colleges-body', 'td-steals-body', 'td-reaches-body',
+    # Head-to-Head
+    'view-h2h', 'h2h-a-input', 'h2h-a-results', 'h2h-b-input',
+    'h2h-b-results', 'h2h-swap', 'h2h-content',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(

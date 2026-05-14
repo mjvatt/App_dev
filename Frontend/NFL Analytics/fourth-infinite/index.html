@@ -112,6 +112,9 @@
         <a href="#" class="nav-item" data-view="team-dna">
           <i class="fas fa-fingerprint"></i><span>Team Draft DNA</span>
         </a>
+        <a href="#" class="nav-item" data-view="h2h">
+          <i class="fas fa-arrows-left-right"></i><span>Head-to-Head</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -1248,6 +1251,31 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ─── PROSPECT HEAD-TO-HEAD VIEW ─── -->
+    <section class="view" id="view-h2h">
+      <div class="filter-bar" style="margin-bottom:14px;gap:16px;align-items:flex-end">
+        <div style="flex:1 1 240px;position:relative" id="h2h-a-wrap">
+          <label class="filter-label" id="h2h-a-label" for="h2h-a-input" style="display:block;margin-bottom:4px">Prospect A</label>
+          <input id="h2h-a-input" type="text" class="filter-select" autocomplete="off"
+            placeholder="Search by name, team, or college"
+            aria-labelledby="h2h-a-label" aria-autocomplete="list" aria-expanded="false" />
+          <div id="h2h-a-results" class="search-results" hidden style="position:absolute;left:0;right:0;top:100%;z-index:30"></div>
+        </div>
+
+        <button type="button" id="h2h-swap" class="filter-select" style="padding:8px 14px" aria-label="Swap prospects">⇄ Swap</button>
+
+        <div style="flex:1 1 240px;position:relative" id="h2h-b-wrap">
+          <label class="filter-label" id="h2h-b-label" for="h2h-b-input" style="display:block;margin-bottom:4px">Prospect B</label>
+          <input id="h2h-b-input" type="text" class="filter-select" autocomplete="off"
+            placeholder="Search by name, team, or college"
+            aria-labelledby="h2h-b-label" aria-autocomplete="list" aria-expanded="false" />
+          <div id="h2h-b-results" class="search-results" hidden style="position:absolute;left:0;right:0;top:100%;z-index:30"></div>
+        </div>
+      </div>
+
+      <div id="h2h-content"></div>
     </section>
 
     <!-- ─── ATLAS VIEW ─── -->

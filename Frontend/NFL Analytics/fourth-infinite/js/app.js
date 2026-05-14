@@ -43,6 +43,7 @@
     'round-heatmap':  ['Round × Year Heatmap', 'Hit rate or median surplus per round per year — see which round-year buckets paid off'],
     'pos-runs':       ['Position Runs', 'Streaks of consecutive same-position picks within a draft — ranked by how the run actually played out'],
     'team-dna':       ['Team Draft DNA', 'Per-franchise fingerprint — position bias vs league, round hit-rate curve, college pipelines, biggest steals & reaches'],
+    'h2h':            ['Prospect Head-to-Head', 'Search any two prospects and compare combine, college, pick context, and career outcomes side by side'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -79,6 +80,7 @@
     if (id === 'round-heatmap') initRoundHeatmap();
     if (id === 'pos-runs') initPosRuns();
     if (id === 'team-dna') initTeamDna();
+    if (id === 'h2h') initH2h();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -2564,6 +2566,275 @@
     const emptyRow = `<tr><td colspan="5" style="padding:14px;color:var(--text-muted);font-size:12px">No complete-career picks for this franchise.</td></tr>`;
     document.getElementById('td-steals-body').innerHTML  = steals.length  ? steals.map(rowHtml).join('')  : emptyRow;
     document.getElementById('td-reaches-body').innerHTML = reaches.length ? reaches.map(rowHtml).join('') : emptyRow;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PROSPECT HEAD-TO-HEAD
+  ═══════════════════════════════════════════════════════════════════ */
+  let _h2hInited = false;
+  let _h2hA      = null;   // pick row
+  let _h2hB      = null;
+  const H2H_INCOMPLETE_YEAR = 2022;
+  const H2H_HIT_THRESHOLD   = 10;
+
+  // Measurables: [{ key, label, lowerIsBetter, format }]
+  const H2H_METRICS = [
+    { key: 'ht_in',       label: 'Height',     lower: false, fmt: v => `${Math.floor(v / 12)}'${v % 12}"` },
+    { key: 'wt',          label: 'Weight',     lower: false, fmt: v => `${v} lb` },
+    { key: 'forty',       label: '40-yard',    lower: true,  fmt: v => `${v.toFixed(2)} s` },
+    { key: 'bench',       label: 'Bench',      lower: false, fmt: v => `${v} reps` },
+    { key: 'vertical',    label: 'Vertical',   lower: false, fmt: v => `${v.toFixed(1)}"` },
+    { key: 'broad_jump',  label: 'Broad jump', lower: false, fmt: v => `${v}"` },
+    { key: 'cone',        label: '3-cone',     lower: true,  fmt: v => `${v.toFixed(2)} s` },
+    { key: 'shuttle',     label: 'Shuttle',    lower: true,  fmt: v => `${v.toFixed(2)} s` },
+  ];
+
+  function _h2hSearch(query, limit = 8) {
+    if (!query) return [];
+    const ql = query.toLowerCase();
+    const all = DraftData.picks();
+    const yMin = (meta.years && meta.years.length) ? Math.min(...meta.years) : 1994;
+    const out = [];
+    for (let i = 0; i < all.length; i++) {
+      const p    = all[i];
+      const name = (p.player  || '').toLowerCase();
+      const team = (p.team    || '').toLowerCase();
+      const coll = (p.college || '').toLowerCase();
+      let score  = -1;
+      if      (name === ql)             score = 2000;
+      else if (name.startsWith(ql))     score = 1200;
+      else if (name.includes(' ' + ql)) score = 600;
+      else if (name.includes(ql))       score = 300;
+      else if (team.includes(ql))       score = 90;
+      else if (coll.includes(ql))       score = 70;
+      if (score < 0) continue;
+      score += ((p.year || yMin) - yMin) * 0.5;
+      score += Math.max(0, 256 - (p.pick || 256)) * 0.005;
+      out.push({ p, score });
+    }
+    out.sort((a, b) => b.score - a.score);
+    return out.slice(0, limit).map(s => s.p);
+  }
+
+  function _h2hWireSlot(slot, inputId, resultsId) {
+    const input   = document.getElementById(inputId);
+    const results = document.getElementById(resultsId);
+    let activeIdx = -1;
+    let matches   = [];
+
+    const hide = () => { results.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIdx = -1; };
+
+    const render = (q) => {
+      matches   = _h2hSearch(q, 8);
+      activeIdx = -1;
+      if (!q) { hide(); return; }
+      if (!matches.length) {
+        results.innerHTML = `<div class="search-results-empty">No players match "${_escapeHtml(q)}"</div>`;
+      } else {
+        results.innerHTML = matches.map((p, i) => `
+          <div class="search-result" role="option" data-idx="${i}" data-slot="${slot}">
+            <div class="search-result-name">${_escapeHtml(p.player)}</div>
+            <div class="search-result-pick">${p.year} · #${p.pick}</div>
+            <div class="search-result-meta">${_escapeHtml(p.pos || p.pos_group || '')} · ${_escapeHtml(p.team)} · ${_escapeHtml(p.college || 'Unknown')}</div>
+          </div>`).join('') +
+          `<div class="search-results-hint">↑ ↓ to navigate · Enter to select · Esc to close</div>`;
+      }
+      results.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+    };
+
+    const setActive = (idx) => {
+      const items = results.querySelectorAll('.search-result');
+      if (!items.length) { activeIdx = -1; return; }
+      const next = Math.max(0, Math.min(idx, items.length - 1));
+      items.forEach(el => el.classList.remove('active'));
+      items[next].classList.add('active');
+      items[next].scrollIntoView({ block: 'nearest' });
+      activeIdx = next;
+    };
+
+    const pick = (idx) => {
+      const m = matches[idx];
+      if (!m) return;
+      if (slot === 'A') _h2hA = m; else _h2hB = m;
+      input.value = `${m.player} (${m.year} #${m.pick})`;
+      hide();
+      renderH2h();
+    };
+
+    input.addEventListener('input',  e => render(e.target.value.trim()));
+    input.addEventListener('focus',  e => { const q = e.target.value.trim(); if (q) render(q); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') {
+        if (results.hidden) { const q = input.value.trim(); if (q) render(q); return; }
+        e.preventDefault(); setActive(activeIdx + 1);
+      } else if (e.key === 'ArrowUp') {
+        if (results.hidden) return;
+        e.preventDefault(); setActive(activeIdx - 1);
+      } else if (e.key === 'Enter') {
+        if (results.hidden) return;
+        e.preventDefault();
+        const target = activeIdx >= 0 ? activeIdx : 0;
+        pick(target);
+      } else if (e.key === 'Escape') {
+        hide();
+      }
+    });
+
+    results.addEventListener('click', e => {
+      const item = e.target.closest('.search-result');
+      if (!item) return;
+      pick(+item.dataset.idx);
+    });
+
+    document.addEventListener('click', e => {
+      if (!input.contains(e.target) && !results.contains(e.target)) hide();
+    });
+  }
+
+  function initH2h() {
+    if (_h2hInited) {
+      renderH2h();
+      return;
+    }
+    _h2hInited = true;
+    _h2hWireSlot('A', 'h2h-a-input', 'h2h-a-results');
+    _h2hWireSlot('B', 'h2h-b-input', 'h2h-b-results');
+    document.getElementById('h2h-swap').addEventListener('click', () => {
+      [_h2hA, _h2hB] = [_h2hB, _h2hA];
+      document.getElementById('h2h-a-input').value = _h2hA ? `${_h2hA.player} (${_h2hA.year} #${_h2hA.pick})` : '';
+      document.getElementById('h2h-b-input').value = _h2hB ? `${_h2hB.player} (${_h2hB.year} #${_h2hB.pick})` : '';
+      renderH2h();
+    });
+    renderH2h();
+  }
+
+  function _h2hCard(p, color, side) {
+    if (!p) {
+      return `<div class="chart-card" style="display:flex;align-items:center;justify-content:center;min-height:240px;padding:24px;color:var(--text-muted);font-size:13px">
+        Search ${side === 'A' ? 'Prospect A' : 'Prospect B'} above to begin.
+      </div>`;
+    }
+    const surplus = p.career_av != null && p.year < H2H_INCOMPLETE_YEAR
+      ? +((p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group)).toFixed(1)
+      : null;
+    const sColor = surplus == null ? 'var(--text-muted)' : (surplus >= 0 ? '#10b981' : '#ef4444');
+    const verdict = surplus == null
+      ? '<span style="color:var(--text-muted);font-size:12px">Career still in progress</span>'
+      : `<span style="color:${sColor};font-weight:600;font-size:13px">${surplus >= 0 ? '+' : ''}${surplus.toFixed(1)} surplus vs slot</span>`;
+
+    return `<div class="chart-card">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);background:${color}22">
+        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+          <h3 style="margin:0;color:${color}">${_escapeHtml(p.player)}</h3>
+          <span style="color:var(--text-muted);font-size:12px">${p.year} · #${p.pick} · ${_escapeHtml(p.pos || p.pos_group || '—')}</span>
+        </div>
+        <div style="margin-top:4px;color:var(--text-sub);font-size:12px">${_escapeHtml(p.team || '—')} · ${_escapeHtml(p.college || 'Unknown college')}</div>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;font-size:12px">
+          <div><span style="color:var(--text-muted)">Round</span><div style="color:var(--text);font-weight:600">${p.round || '—'}</div></div>
+          <div><span style="color:var(--text-muted)">Age at draft</span><div style="color:var(--text);font-weight:600">${p.age != null ? p.age.toFixed(1) : '—'}</div></div>
+          <div><span style="color:var(--text-muted)">Career AV</span><div style="color:var(--text);font-weight:600">${p.career_av != null ? p.career_av : '—'}</div></div>
+          <div><span style="color:var(--text-muted)">Slot-expected AV</span><div style="color:var(--text);font-weight:600">${DraftData.expectedAvForPick(p.pick, p.pos_group).toFixed(1)}</div></div>
+        </div>
+        <div style="margin-top:12px">${verdict}</div>
+      </div>
+    </div>`;
+  }
+
+  function _h2hCompareRow(metric, a, b) {
+    const av = a ? a[metric.key] : null;
+    const bv = b ? b[metric.key] : null;
+    if (av == null && bv == null) return '';
+
+    let aHi = false, bHi = false;
+    if (av != null && bv != null) {
+      if (av === bv) {}
+      else if (metric.lower) { aHi = av < bv; bHi = bv < av; }
+      else                   { aHi = av > bv; bHi = bv > av; }
+    } else if (av != null && bv == null) aHi = true;
+    else if (bv != null && av == null) bHi = true;
+
+    const aColor = aHi ? '#10b981' : (av == null ? 'var(--text-muted)' : 'var(--text)');
+    const bColor = bHi ? '#10b981' : (bv == null ? 'var(--text-muted)' : 'var(--text)');
+
+    // Bar widths (proportional vs the larger of the two, lower-is-better inverted)
+    const both = [av, bv].filter(v => v != null);
+    const max = both.length ? Math.max(...both.map(Math.abs)) : 1;
+    const widthFor = (v) => {
+      if (v == null) return 0;
+      if (metric.lower) {
+        const lo = Math.min(...both); const hi = Math.max(...both);
+        if (lo === hi) return 100;
+        return Math.round(100 * (hi - v) / (hi - lo) * 0.9 + 10);
+      }
+      return Math.round(100 * Math.abs(v) / max);
+    };
+
+    return `<tr>
+      <td style="text-align:right;padding:6px 10px;font-weight:${aHi ? '700' : '400'};color:${aColor};white-space:nowrap">
+        ${av != null ? _escapeHtml(metric.fmt(av)) : '—'}
+      </td>
+      <td style="padding:6px 6px;width:35%">
+        <div style="display:flex;justify-content:flex-end">
+          <div style="height:6px;width:${widthFor(av)}%;background:${aHi ? '#10b981' : 'var(--border)'};border-radius:3px"></div>
+        </div>
+      </td>
+      <td style="text-align:center;padding:6px 6px;color:var(--text-muted);font-size:11px;white-space:nowrap">${_escapeHtml(metric.label)}</td>
+      <td style="padding:6px 6px;width:35%">
+        <div style="display:flex;justify-content:flex-start">
+          <div style="height:6px;width:${widthFor(bv)}%;background:${bHi ? '#10b981' : 'var(--border)'};border-radius:3px"></div>
+        </div>
+      </td>
+      <td style="text-align:left;padding:6px 10px;font-weight:${bHi ? '700' : '400'};color:${bColor};white-space:nowrap">
+        ${bv != null ? _escapeHtml(metric.fmt(bv)) : '—'}
+      </td>
+    </tr>`;
+  }
+
+  function renderH2h() {
+    const colorA = '#3b82f6';
+    const colorB = '#f59e0b';
+    const content = document.getElementById('h2h-content');
+
+    const cards = `<div class="chart-grid" style="grid-template-columns:1fr 1fr;gap:14px">
+      ${_h2hCard(_h2hA, colorA, 'A')}
+      ${_h2hCard(_h2hB, colorB, 'B')}
+    </div>`;
+
+    let compare = '';
+    if (_h2hA && _h2hB) {
+      const hasAny = H2H_METRICS.some(m => _h2hA[m.key] != null || _h2hB[m.key] != null);
+      if (hasAny) {
+        compare = `<div class="chart-card" style="margin-top:18px">
+          <div class="chart-card-header"><div><h3>Combine & Bio Comparison</h3><p>Longer green bars = better at that measurable. For times (40, 3-cone, shuttle) lower is better and the inversion is reflected in the bar widths.</p></div></div>
+          <div style="padding:6px 14px 18px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="color:var(--text-muted);font-size:11px">
+                  <th style="text-align:right;padding:4px 10px">${_escapeHtml(_h2hA.player)}</th>
+                  <th colspan="3"></th>
+                  <th style="text-align:left;padding:4px 10px">${_escapeHtml(_h2hB.player)}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${H2H_METRICS.map(m => _h2hCompareRow(m, _h2hA, _h2hB)).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+      }
+    }
+
+    let intro = '';
+    if (!_h2hA && !_h2hB) {
+      intro = `<div class="chart-card" style="padding:20px 22px;margin-bottom:18px;color:var(--text-sub);font-size:13px">
+        Pick any two prospects from any draft class (1994–2026). Compare their combine measurables, college, pick context, and career outcomes side by side. Type a name, team, or college into either box to search.
+      </div>`;
+    }
+
+    content.innerHTML = intro + cards + compare;
   }
 
   /* ═══════════════════════════════════════════════════════════════════
