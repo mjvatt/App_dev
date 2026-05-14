@@ -35,14 +35,14 @@ const MODES: Mode[] = [
     title: "Daily Challenge",
     description: "One problem for everyone today. Ranked by time.",
     icon: "calendar-today",
-    route: null,
+    route: "/(app)/arcade/play?mode=daily",
   },
   {
     key: "review",
     title: "Review",
     description: "Spaced-repetition queue of cards coming due.",
     icon: "book-open-page-variant",
-    route: null,
+    route: "/(app)/arcade/play?mode=review",
   },
   {
     key: "boss-rush",

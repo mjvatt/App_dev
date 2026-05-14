@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router, useLocalSearchParams } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { authedRequest } from "@/lib/api";
 import { getToken } from "@/lib/auth";
@@ -15,6 +16,25 @@ import MonacoEditor from "@/components/game/MonacoEditor";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { colors, fontSize, spacing, radius } from "@/lib/theme";
+
+type Mode = "quick" | "daily" | "review";
+
+const MODE_TITLES: Record<Mode, string> = {
+  quick: "Quick Play",
+  daily: "Daily Challenge",
+  review: "Review",
+};
+
+function resolveMode(raw: string | string[] | undefined): Mode {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value === "daily" || value === "review") return value;
+  return "quick";
+}
+
+interface DailyEnvelope {
+  challenge: Challenge;
+  status?: unknown;
+}
 
 interface Challenge {
   id: number;
@@ -49,6 +69,8 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
 };
 
 export default function ArcadeScreen() {
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const mode = useMemo(() => resolveMode(params.mode), [params.mode]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>("auto");
   const [language, setLanguage] = useState<Language>("python");
@@ -57,32 +79,49 @@ export default function ArcadeScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [emptyReview, setEmptyReview] = useState(false);
 
   const fetchChallenge = useCallback(async (diff: Difficulty) => {
     setResult(null);
     setError("");
+    setEmptyReview(false);
     setLoading(true);
     try {
       const token = await getToken();
       if (!token) return;
-      const data = await authedRequest<Challenge>(
-        `/api/challenges/next?difficulty=${diff}`,
-        token,
-      );
+      let data: Challenge;
+      if (mode === "daily") {
+        const envelope = await authedRequest<DailyEnvelope>(
+          "/api/challenges/daily",
+          token,
+        );
+        data = envelope.challenge;
+      } else if (mode === "review") {
+        data = await authedRequest<Challenge>("/api/challenges/review", token);
+      } else {
+        data = await authedRequest<Challenge>(
+          `/api/challenges/next?difficulty=${diff}`,
+          token,
+        );
+      }
       setChallenge(data);
       setCode(data.starter_code?.[language] ?? "");
     } catch (err: unknown) {
-      if (err instanceof Error && err.message.includes("402")) {
+      const message = err instanceof Error ? err.message : "";
+      if (mode === "review" && message.includes("404")) {
+        setEmptyReview(true);
+        setChallenge(null);
+      } else if (message.includes("402")) {
         setError("Upgrade to premium to unlock this difficulty.");
       } else {
-        setError(err instanceof Error ? err.message : "Failed to load challenge.");
+        setError(message || "Failed to load challenge.");
       }
     } finally {
       setLoading(false);
     }
-  }, [language]);
+  }, [language, mode]);
 
-  useEffect(() => { fetchChallenge(difficulty); }, []);
+  useEffect(() => { fetchChallenge(difficulty); }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleDifficultyChange(diff: Difficulty) {
     setDifficulty(diff);
@@ -119,31 +158,48 @@ export default function ArcadeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.screenTitle}>Quick Play</Text>
+        <Text style={styles.screenTitle}>{MODE_TITLES[mode]}</Text>
 
-        <View style={styles.diffRow}>
-          {DIFFICULTIES.map((d) => (
-            <TouchableOpacity
-              key={d}
-              onPress={() => handleDifficultyChange(d)}
-              style={[
-                styles.diffBtn,
-                { borderColor: DIFFICULTY_COLORS[d] },
-                difficulty === d ? { backgroundColor: DIFFICULTY_COLORS[d] + "20" } : null,
-              ]}
-            >
-              <Text
+        {mode === "quick" && (
+          <View style={styles.diffRow}>
+            {DIFFICULTIES.map((d) => (
+              <TouchableOpacity
+                key={d}
+                onPress={() => handleDifficultyChange(d)}
                 style={[
-                  styles.diffLabel,
-                  { color: DIFFICULTY_COLORS[d] },
-                  difficulty === d ? styles.diffLabelActive : null,
+                  styles.diffBtn,
+                  { borderColor: DIFFICULTY_COLORS[d] },
+                  difficulty === d ? { backgroundColor: DIFFICULTY_COLORS[d] + "20" } : null,
                 ]}
               >
-                {d.charAt(0).toUpperCase() + d.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Text
+                  style={[
+                    styles.diffLabel,
+                    { color: DIFFICULTY_COLORS[d] },
+                    difficulty === d ? styles.diffLabelActive : null,
+                  ]}
+                >
+                  {d.charAt(0).toUpperCase() + d.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {emptyReview && !loading && (
+          <Card style={styles.emptyCard}>
+            <Text style={styles.emptyHeadline}>No reviews due</Text>
+            <Text style={styles.emptyBody}>
+              Nothing on your spaced-repetition queue is due yet. Come back later
+              or run a fresh Quick Play attempt.
+            </Text>
+            <Button
+              label="Back to Arcade"
+              onPress={() => router.push("/(app)/arcade")}
+              variant="secondary"
+            />
+          </Card>
+        )}
 
         {loading && (
           <View style={styles.centered}>
@@ -230,12 +286,22 @@ export default function ArcadeScreen() {
                   )}
                 </View>
                 <Text style={styles.resultFeedback}>{result.feedback}</Text>
-                <Button
-                  label="Next challenge"
-                  onPress={() => fetchChallenge(difficulty)}
-                  variant="secondary"
-                  style={{ marginTop: spacing.sm }}
-                />
+                {mode !== "daily" && (
+                  <Button
+                    label="Next challenge"
+                    onPress={() => fetchChallenge(difficulty)}
+                    variant="secondary"
+                    style={{ marginTop: spacing.sm }}
+                  />
+                )}
+                {mode === "daily" && (
+                  <Button
+                    label="Back to Arcade"
+                    onPress={() => router.push("/(app)/arcade")}
+                    variant="secondary"
+                    style={{ marginTop: spacing.sm }}
+                  />
+                )}
               </Card>
             )}
           </>
@@ -308,5 +374,8 @@ const styles = StyleSheet.create({
     borderColor: colors.warning + "60",
   },
   tokenChipText: { color: colors.warning, fontSize: fontSize.sm, fontWeight: "700" },
+  emptyCard: { gap: spacing.sm, alignItems: "flex-start" },
+  emptyHeadline: { color: colors.text, fontSize: fontSize.lg, fontWeight: "700" },
+  emptyBody: { color: colors.textMuted, fontSize: fontSize.sm, lineHeight: 20 },
   resultFeedback: { color: colors.textMuted, fontSize: fontSize.sm, lineHeight: 20 },
 });
