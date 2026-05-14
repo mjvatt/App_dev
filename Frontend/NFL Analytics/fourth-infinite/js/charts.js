@@ -1743,5 +1743,73 @@ const DraftCharts = (() => {
     });
   }
 
-  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, genericScatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, classStrengthBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
+  function divergentScatter(canvasId, points, xLabel, yLabel, opts = {}) {
+    _destroy(canvasId);
+    if (!points.length) return;
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const onPointClick = opts.onPointClick;
+
+    const maxAbs = Math.max(1, ...points.map(p => Math.abs(p.y)));
+    const colorFor = (y) => {
+      const intensity = Math.min(1, Math.abs(y) / maxAbs);
+      const a = 0.35 + 0.55 * intensity;
+      return y >= 0
+        ? `rgba(16, 185, 129, ${a})`
+        : `rgba(239, 68, 68, ${a})`;
+    };
+    const borderFor = (y) => y >= 0 ? '#10b981' : '#ef4444';
+    const pointBg     = points.map(p => colorFor(p.y));
+    const pointBorder = points.map(p => borderFor(p.y));
+
+    _charts[canvasId] = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: yLabel,
+          data: points,
+          backgroundColor: pointBg,
+          borderColor: pointBorder,
+          pointRadius: 4,
+          pointHoverRadius: 7,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        onClick: onPointClick ? (evt, elements) => {
+          if (!elements.length) return;
+          const pt = points[elements[0].index];
+          if (pt) onPointClick(pt);
+        } : undefined,
+        plugins: {
+          legend: _baseLegend(false),
+          tooltip: {
+            ..._tooltip(),
+            callbacks: {
+              label: item => {
+                const p = item.raw;
+                const sign = p.y >= 0 ? '+' : '';
+                if (!p.label) return `(${p.x}, ${sign}${p.y})`;
+                return `${p.label} — ${xLabel}: ${p.x}, ${yLabel}: ${sign}${p.y}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: xLabel, color: TICK_COLOR(), font: { size: 11 } },
+          },
+          y: {
+            grid: { color: GRID_COLOR() },
+            ticks: { color: TICK_COLOR(), font: { family: FONT_FAMILY, size: 11 } },
+            title: { display: true, text: yLabel, color: TICK_COLOR(), font: { size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
+  return { picksPerYear, winsPerYear, trajectoryChart, leagueDraftWinsChart, eraRankingsChart, boomBustScatter, scatter, genericScatter, divergentScatter, donut, hbar, vbar, multiLine, pickValueLine, roundCapitalBar, slotGradeChart, efficiencyBar, proBowlBar, draftClassBar, classStrengthBar, draftClassPosBar, ghostLeaderboard, atlasLeaderboard, oracleBacktestScatter, oracleTeamLine, statLine, calibrationPlot, update };
 })();

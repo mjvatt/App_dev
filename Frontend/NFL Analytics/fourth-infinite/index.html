@@ -100,6 +100,9 @@
         <a href="#" class="nav-item" data-view="position-lab">
           <i class="fas fa-people-group"></i><span>Position Lab</span>
         </a>
+        <a href="#" class="nav-item" data-view="reach-steal">
+          <i class="fas fa-crosshairs"></i><span>Reach &amp; Steal</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -1033,6 +1036,84 @@
                 </tr>
               </thead>
               <tbody id="pl-leaderboard-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── REACH & STEAL MAP VIEW ─── -->
+    <section class="view" id="view-reach-steal">
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="rs-pos-toggle-label">Position group:</span>
+        <div class="pos-toggle-group" id="rs-pos-toggle" role="radiogroup" aria-labelledby="rs-pos-toggle-label"></div>
+      </div>
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="rs-team-label">Team:</span>
+        <select id="rs-team" class="filter-select" aria-labelledby="rs-team-label"></select>
+        <span class="filter-label" style="margin-left:14px" id="rs-yfrom-label">From:</span>
+        <select id="rs-yfrom" class="filter-select" aria-labelledby="rs-yfrom-label"></select>
+        <span class="filter-label" id="rs-yto-label">to:</span>
+        <select id="rs-yto" class="filter-select" aria-labelledby="rs-yto-label"></select>
+      </div>
+
+      <div class="kpi-row" id="rs-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Reach / Steal Scatter</h3>
+              <p>Every pick plotted by surplus = career AV − position-aware slot expectation. Green = steal (outperformed slot). Red = reach (underperformed). Y-axis is centered at zero. Click any point or table row to open the player.</p>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:520px"><canvas id="chart-rs-scatter"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Top 15 Steals</h3>
+              <p>Picks whose career AV most exceeded slot expectation in the filter set.</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:480px;overflow:auto">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Year</th>
+                  <th>Pick</th>
+                  <th>Pos</th>
+                  <th style="text-align:right">AV</th>
+                  <th style="text-align:right">Surplus</th>
+                </tr>
+              </thead>
+              <tbody id="rs-steals-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>Top 15 Reaches</h3>
+              <p>Picks whose career AV most underperformed slot expectation in the filter set.</p>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:480px;overflow:auto">
+            <table class="draft-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Year</th>
+                  <th>Pick</th>
+                  <th>Pos</th>
+                  <th style="text-align:right">AV</th>
+                  <th style="text-align:right">Surplus</th>
+                </tr>
+              </thead>
+              <tbody id="rs-reaches-body"></tbody>
             </table>
           </div>
         </div>

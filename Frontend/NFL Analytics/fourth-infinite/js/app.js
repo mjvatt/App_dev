@@ -39,6 +39,7 @@
     'class-compare':  ['Class Compare',  'Side-by-side compare of two draft classes — KPIs, highlighted strength chart, top-10 leaderboards'],
     'qb-lab':         ['QB Lab', 'Quarterback prospect deep-dive — hit rates, college pipelines, age and athletic effects'],
     'position-lab':   ['Position Lab', 'Position deep-dive — hit rates, college pipelines, age and athletic effects per group'],
+    'reach-steal':    ['Reach & Steal Map', 'Every pick plotted by surplus vs slot expectation — find the biggest steals and worst reaches'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -71,6 +72,7 @@
     if (id === 'class-compare')  initClassCompare();
     if (id === 'qb-lab') initQBLab();
     if (id === 'position-lab') initPositionLab();
+    if (id === 'reach-steal') initReachSteal();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -1755,6 +1757,175 @@
         openPlayerModal(+el.dataset.year, +el.dataset.pick);
       });
     });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     REACH & STEAL MAP
+  ═══════════════════════════════════════════════════════════════════ */
+  let _rsInited      = false;
+  let _rsActivePos   = 'All';
+  let _rsActiveTeam  = '';
+  let _rsYearFrom    = null;
+  let _rsYearTo      = null;
+  const RS_POS_OPTIONS     = ['All', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB'];
+  const RS_INCOMPLETE_YEAR = 2022;
+
+  function _rsSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function _rsMedian(arr) {
+    if (!arr.length) return 0;
+    const s = arr.slice().sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  function initReachSteal() {
+    if (_rsInited) {
+      renderReachSteal();
+      return;
+    }
+    _rsInited = true;
+
+    const posContainer = document.getElementById('rs-pos-toggle');
+    RS_POS_OPTIONS.forEach(g => {
+      const btn = document.createElement('button');
+      btn.type            = 'button';
+      btn.className       = 'pos-toggle' + (g === _rsActivePos ? ' on' : '');
+      btn.textContent     = g;
+      btn.dataset.group   = g;
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', g === _rsActivePos ? 'true' : 'false');
+      const color = g === 'All' ? '#9ca3af' : DraftData.posColor(g);
+      btn.style.borderColor = color;
+      if (g === _rsActivePos) {
+        btn.style.background = color;
+        btn.style.color      = '#000';
+      } else {
+        btn.style.color = color;
+      }
+      btn.addEventListener('click', () => {
+        if (_rsActivePos === g) return;
+        _rsActivePos = g;
+        posContainer.querySelectorAll('.pos-toggle').forEach(other => {
+          const og = other.dataset.group;
+          const oc = og === 'All' ? '#9ca3af' : DraftData.posColor(og);
+          if (og === g) {
+            other.classList.add('on');
+            other.style.background  = oc;
+            other.style.color       = '#000';
+            other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'true');
+          } else {
+            other.classList.remove('on');
+            other.style.background  = '';
+            other.style.color       = oc;
+            other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'false');
+          }
+        });
+        renderReachSteal();
+      });
+      posContainer.appendChild(btn);
+    });
+
+    const teamSel = document.getElementById('rs-team');
+    teamSel.innerHTML = '<option value="">All teams</option>' +
+      DraftData.franchiseTeams().map(t => `<option value="${_escapeHtml(t)}">${_escapeHtml(t)}</option>`).join('');
+    teamSel.addEventListener('change', e => { _rsActiveTeam = e.target.value; renderReachSteal(); });
+
+    const years         = meta.years;
+    const completeYears = years.filter(y => y < RS_INCOMPLETE_YEAR);
+    if (_rsYearFrom == null) _rsYearFrom = Math.min(...completeYears);
+    if (_rsYearTo   == null) _rsYearTo   = Math.max(...completeYears);
+    const yfrom = document.getElementById('rs-yfrom');
+    const yto   = document.getElementById('rs-yto');
+    yfrom.innerHTML = years.map(y => `<option value="${y}"${y === _rsYearFrom ? ' selected' : ''}>${y}</option>`).join('');
+    yto.innerHTML   = years.map(y => `<option value="${y}"${y === _rsYearTo   ? ' selected' : ''}>${y}</option>`).join('');
+    yfrom.addEventListener('change', e => { _rsYearFrom = +e.target.value; renderReachSteal(); });
+    yto.addEventListener('change',   e => { _rsYearTo   = +e.target.value; renderReachSteal(); });
+
+    ['rs-steals-body', 'rs-reaches-body'].forEach(bodyId => {
+      document.getElementById(bodyId).addEventListener('click', e => {
+        const tr = e.target.closest('tr[data-year]');
+        if (!tr) return;
+        openPlayerModal(+tr.dataset.year, +tr.dataset.pick);
+      });
+    });
+
+    renderReachSteal();
+  }
+
+  function renderReachSteal() {
+    const filter = { yearFrom: _rsYearFrom, yearTo: Math.min(_rsYearTo, RS_INCOMPLETE_YEAR - 1) };
+    if (_rsActivePos && _rsActivePos !== 'All') filter.pos_group = _rsActivePos;
+    if (_rsActiveTeam) filter.franchise = _rsActiveTeam;
+
+    const rows = DraftData.picks(filter).filter(p => p.pick > 0 && p.career_av != null);
+    const points = rows.map(p => ({
+      x:       p.pick,
+      y:       +(_rsSurplusFor(p)).toFixed(1),
+      label:   `${p.player} (${p.year} #${p.pick})`,
+      year:    p.year,
+      pick:    p.pick,
+      pos:     p.pos_group,
+      player:  p.player,
+      av:      p.career_av || 0,
+    }));
+
+    const surpluses    = points.map(pt => pt.y);
+    const median       = _rsMedian(surpluses);
+    const biggestSteal = points.length ? points.reduce((a, b) => a.y > b.y ? a : b) : null;
+    const biggestReach = points.length ? points.reduce((a, b) => a.y < b.y ? a : b) : null;
+
+    const kpis = [
+      { icon: 'fa-list',   label: 'Picks shown',
+        value: points.length.toLocaleString(),
+        sub: `${_rsYearFrom}–${Math.min(_rsYearTo, RS_INCOMPLETE_YEAR - 1)} complete careers` },
+      { icon: 'fa-trophy', label: 'Biggest steal',
+        value: biggestSteal ? `+${biggestSteal.y.toFixed(1)}` : '—',
+        sub: biggestSteal ? `${biggestSteal.player} · ${biggestSteal.year} #${biggestSteal.pick}` : '' },
+      { icon: 'fa-skull',  label: 'Biggest reach',
+        value: biggestReach ? `${biggestReach.y.toFixed(1)}` : '—',
+        sub: biggestReach ? `${biggestReach.player} · ${biggestReach.year} #${biggestReach.pick}` : '' },
+      { icon: 'fa-equals', label: 'Median surplus',
+        value: median.toFixed(1),
+        sub: median >= 0 ? 'set leans steal' : 'set leans reach' },
+    ];
+    document.getElementById('rs-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${_escapeHtml(k.sub)}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    DraftCharts.divergentScatter('chart-rs-scatter', points, 'Pick #', 'Surplus AV', {
+      onPointClick: (pt) => openPlayerModal(pt.year, pt.pick),
+    });
+
+    const sorted = points.slice().sort((a, b) => b.y - a.y);
+    const top    = sorted.slice(0, 15);
+    const bot    = sorted.slice(-15).reverse();
+
+    const rowHtml = (pt) => {
+      const sColor = pt.y >= 0 ? '#10b981' : '#ef4444';
+      return `<tr data-year="${pt.year}" data-pick="${pt.pick}" style="cursor:pointer">
+        <td><strong>${_escapeHtml(pt.player)}</strong></td>
+        <td>${pt.year}</td>
+        <td>#${pt.pick}</td>
+        <td>${_escapeHtml(pt.pos || '—')}</td>
+        <td style="text-align:right">${pt.av}</td>
+        <td style="text-align:right;color:${sColor};font-weight:600">${pt.y >= 0 ? '+' : ''}${pt.y.toFixed(1)}</td>
+      </tr>`;
+    };
+
+    const emptyRow = `<tr><td colspan="6" style="padding:14px;color:var(--text-muted);font-size:12px">No picks in filter.</td></tr>`;
+    document.getElementById('rs-steals-body').innerHTML  = top.length ? top.map(rowHtml).join('') : emptyRow;
+    document.getElementById('rs-reaches-body').innerHTML = bot.length ? bot.map(rowHtml).join('') : emptyRow;
   }
 
   /* ═══════════════════════════════════════════════════════════════════

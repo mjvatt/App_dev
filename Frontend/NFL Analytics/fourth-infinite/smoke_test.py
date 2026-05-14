@@ -181,6 +181,9 @@ today_ids = [
     # Trade Search
     'view-trade-search', 'tsh-team', 'tsh-yfrom', 'tsh-yto', 'tsh-sort',
     'tsh-flip-only', 'tsh-kpis', 'tsh-list', 'tsh-list-title',
+    # Reach & Steal Map
+    'view-reach-steal', 'rs-pos-toggle', 'rs-team', 'rs-yfrom', 'rs-yto',
+    'rs-kpis', 'chart-rs-scatter', 'rs-steals-body', 'rs-reaches-body',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(
@@ -205,8 +208,9 @@ check(
 )
 
 expected_chart_helpers = [
-    'classStrengthBar',  # Class Strength view
-    'genericScatter',    # QB Lab scatters
+    'classStrengthBar',   # Class Strength view
+    'genericScatter',     # QB Lab scatters
+    'divergentScatter',   # Reach & Steal Map
 ]
 missing_chart_helpers = [h for h in expected_chart_helpers if h not in charts_exports]
 check(
