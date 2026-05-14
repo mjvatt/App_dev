@@ -117,7 +117,7 @@ export default function ArcadeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.screenTitle}>Arcade</Text>
+        <Text style={styles.screenTitle}>Quick Play</Text>
 
         <View style={styles.diffRow}>
           {DIFFICULTIES.map((d) => (
