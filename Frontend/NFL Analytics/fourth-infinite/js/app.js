@@ -44,6 +44,7 @@
     'pos-runs':       ['Position Runs', 'Streaks of consecutive same-position picks within a draft — ranked by how the run actually played out'],
     'team-dna':       ['Team Draft DNA', 'Per-franchise fingerprint — position bias vs league, round hit-rate curve, college pipelines, biggest steals & reaches'],
     'h2h':            ['Prospect Head-to-Head', 'Search any two prospects and compare combine, college, pick context, and career outcomes side by side'],
+    'inflection':     ['Draft Inflection Points', 'Biggest year-over-year shifts in each franchise’s drafting performance — a data-driven proxy for regime changes'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -81,6 +82,7 @@
     if (id === 'pos-runs') initPosRuns();
     if (id === 'team-dna') initTeamDna();
     if (id === 'h2h') initH2h();
+    if (id === 'inflection') initInflection();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -2835,6 +2837,230 @@
     }
 
     content.innerHTML = intro + cards + compare;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     DRAFT INFLECTION POINTS
+  ═══════════════════════════════════════════════════════════════════ */
+  let _ifInited     = false;
+  let _ifActiveTeam = 'All';
+  let _ifWindow     = 3;
+  let _ifSort       = 'abs';
+  const IF_INCOMPLETE_YEAR = 2022;
+
+  function _ifSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function _ifBuildTeamYearStats() {
+    // returns { [team]: { [year]: { totalSurplus, n, topPick } } } for complete-career years
+    const out = {};
+    const all = DraftData.picks().filter(p => p.pick > 0 && p.year < IF_INCOMPLETE_YEAR && p.career_av != null);
+    for (const p of all) {
+      const t = p.franchise;
+      if (!out[t]) out[t] = {};
+      const y = p.year;
+      if (!out[t][y]) out[t][y] = { totalSurplus: 0, n: 0, top: null };
+      const cell = out[t][y];
+      cell.totalSurplus += _ifSurplusFor(p);
+      cell.n++;
+      if (!cell.top || (p.career_av || 0) > (cell.top.career_av || 0)) cell.top = p;
+    }
+    return out;
+  }
+
+  function _ifDetectInflections(stats) {
+    const W = _ifWindow;
+    const teams = Object.keys(stats);
+    const inflections = [];
+
+    for (const t of teams) {
+      const years = Object.keys(stats[t]).map(Number).sort((a, b) => a - b);
+      if (years.length < W * 2) continue;
+      const minYear = Math.min(...years);
+      const maxYear = Math.max(...years);
+
+      for (let pivot = minYear + W; pivot <= maxYear - W + 1; pivot++) {
+        // BEFORE = pivot-W .. pivot-1
+        // AFTER  = pivot   .. pivot+W-1
+        let beforeTotal = 0, beforeN = 0, beforeYears = 0;
+        let afterTotal  = 0, afterN  = 0, afterYears  = 0;
+        let topBefore = null, topAfter = null;
+
+        for (let y = pivot - W; y < pivot; y++) {
+          const c = stats[t][y];
+          if (!c) continue;
+          beforeTotal += c.totalSurplus;
+          beforeN     += c.n;
+          beforeYears++;
+          if (!topBefore || (c.top && (c.top.career_av || 0) > (topBefore.career_av || 0))) topBefore = c.top;
+        }
+        for (let y = pivot; y < pivot + W; y++) {
+          const c = stats[t][y];
+          if (!c) continue;
+          afterTotal += c.totalSurplus;
+          afterN     += c.n;
+          afterYears++;
+          if (!topAfter || (c.top && (c.top.career_av || 0) > (topAfter.career_av || 0))) topAfter = c.top;
+        }
+        // Require both windows fully covered
+        if (beforeYears < W || afterYears < W) continue;
+
+        const beforeAvg = beforeN ? beforeTotal / beforeN : 0;
+        const afterAvg  = afterN  ? afterTotal  / afterN  : 0;
+        inflections.push({
+          team: t,
+          pivot,
+          beforeAvg,
+          afterAvg,
+          delta: afterAvg - beforeAvg,
+          beforeRange: [pivot - W, pivot - 1],
+          afterRange:  [pivot, pivot + W - 1],
+          beforeN, afterN,
+          topBefore, topAfter,
+        });
+      }
+    }
+
+    return inflections;
+  }
+
+  function initInflection() {
+    if (_ifInited) {
+      renderInflection();
+      return;
+    }
+    _ifInited = true;
+
+    const teams = ['All', ...DraftData.franchiseTeams()];
+    const sel = document.getElementById('if-team');
+    sel.innerHTML = teams.map(t => `<option value="${_escapeHtml(t)}"${t === _ifActiveTeam ? ' selected' : ''}>${t === 'All' ? 'All teams' : _escapeHtml(t)}</option>`).join('');
+    sel.addEventListener('change', e => { _ifActiveTeam = e.target.value; renderInflection(); });
+
+    const winContainer = document.getElementById('if-window-toggle');
+    winContainer.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-window]');
+      if (!btn) return;
+      const w = +btn.dataset.window;
+      if (w === _ifWindow) return;
+      _ifWindow = w;
+      winContainer.querySelectorAll('button[data-window]').forEach(o => {
+        const on = +o.dataset.window === w;
+        o.classList.toggle('on', on);
+        o.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      renderInflection();
+    });
+
+    const sortSel = document.getElementById('if-sort');
+    sortSel.value = _ifSort;
+    sortSel.addEventListener('change', e => { _ifSort = e.target.value; renderInflection(); });
+
+    document.getElementById('if-list').addEventListener('click', e => {
+      const chip = e.target.closest('[data-if-year][data-if-pick]');
+      if (!chip) return;
+      openPlayerModal(+chip.dataset.ifYear, +chip.dataset.ifPick);
+    });
+
+    renderInflection();
+  }
+
+  function renderInflection() {
+    const stats = _ifBuildTeamYearStats();
+    let inflections = _ifDetectInflections(stats);
+    if (_ifActiveTeam !== 'All') inflections = inflections.filter(i => i.team === _ifActiveTeam);
+
+    const sorted = inflections.slice().sort((a, b) => {
+      switch (_ifSort) {
+        case 'positive': return b.delta - a.delta;
+        case 'negative': return a.delta - b.delta;
+        case 'recent':   return b.pivot - a.pivot || Math.abs(b.delta) - Math.abs(a.delta);
+        case 'abs':
+        default:         return Math.abs(b.delta) - Math.abs(a.delta);
+      }
+    });
+
+    const biggestUp   = inflections.length ? inflections.reduce((a, b) => a.delta > b.delta ? a : b) : null;
+    const biggestDown = inflections.length ? inflections.reduce((a, b) => a.delta < b.delta ? a : b) : null;
+
+    // Volatility per team (avg abs delta) for KPI
+    const byTeam = {};
+    inflections.forEach(i => {
+      if (!byTeam[i.team]) byTeam[i.team] = [];
+      byTeam[i.team].push(Math.abs(i.delta));
+    });
+    let mostVolatile = null;
+    let topAvg = -1;
+    for (const [t, ds] of Object.entries(byTeam)) {
+      const avg = ds.reduce((s, v) => s + v, 0) / ds.length;
+      if (avg > topAvg) { topAvg = avg; mostVolatile = t; }
+    }
+
+    const kpis = [
+      { icon: 'fa-wave-square',  label: 'Inflections found',
+        value: inflections.length.toLocaleString(),
+        sub: `${_ifWindow}-yr window · ${_ifActiveTeam === 'All' ? 'all teams' : _ifActiveTeam}` },
+      { icon: 'fa-arrow-up',     label: 'Biggest improvement',
+        value: biggestUp ? `+${biggestUp.delta.toFixed(1)}` : '—',
+        sub: biggestUp ? `${biggestUp.team} · pivot ${biggestUp.pivot}` : '' },
+      { icon: 'fa-arrow-down',   label: 'Biggest decline',
+        value: biggestDown ? `${biggestDown.delta.toFixed(1)}` : '—',
+        sub: biggestDown ? `${biggestDown.team} · pivot ${biggestDown.pivot}` : '' },
+      { icon: 'fa-chart-line',   label: 'Most volatile team',
+        value: mostVolatile || '—',
+        sub: mostVolatile ? `avg ${topAvg.toFixed(1)} AV swing per pivot` : '' },
+    ];
+    document.getElementById('if-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${_escapeHtml(String(k.value))}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${_escapeHtml(k.sub)}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    const CAP = 40;
+    const show = sorted.slice(0, CAP);
+    document.getElementById('if-list-title').textContent =
+      sorted.length > CAP ? `Detected Inflections (top ${CAP} of ${sorted.length})` : `Detected Inflections (${sorted.length})`;
+
+    if (!show.length) {
+      document.getElementById('if-list').innerHTML =
+        `<div style="padding:24px;color:var(--text-muted);font-size:12px">No ${_ifWindow}-year inflections detected for these filters.</div>`;
+      return;
+    }
+
+    document.getElementById('if-list').innerHTML = show.map(i => {
+      const sign  = i.delta >= 0 ? '+' : '';
+      const color = i.delta >= 0 ? '#10b981' : '#ef4444';
+      const tag   = i.delta >= 0 ? 'Improvement' : 'Decline';
+      const chipFor = (p, label) => {
+        if (!p) return `<span style="color:var(--text-muted);font-size:11px">no top pick</span>`;
+        return `<span data-if-year="${p.year}" data-if-pick="${p.pick}"
+          style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:12px;
+                 border:1px solid var(--border);background:var(--card-bg);font-size:11px;cursor:pointer;margin-right:6px">
+          <span style="color:var(--text-muted);font-size:10px">${label}</span>
+          <strong style="color:var(--text)">${_escapeHtml(p.player)}</strong>
+          <span style="color:var(--text-muted);font-size:10px">${p.year} #${p.pick} · ${p.career_av || 0} AV</span>
+        </span>`;
+      };
+      return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:var(--card-bg)">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+          <span style="color:var(--text);font-weight:600;font-size:14px">${_escapeHtml(i.team)}</span>
+          <span style="color:var(--text-sub);font-size:12px">pivot ${i.pivot} (${i.beforeRange[0]}–${i.beforeRange[1]} → ${i.afterRange[0]}–${i.afterRange[1]})</span>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px">
+            <span style="padding:2px 8px;border-radius:10px;background:${color}33;border:1px solid ${color};color:${color};font-weight:700;font-size:11px">${tag}</span>
+            <span style="color:${color};font-weight:700;font-size:14px">${sign}${i.delta.toFixed(1)} AV / pick</span>
+          </span>
+        </div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:var(--text-sub);margin-bottom:8px">
+          <span>Before: <span style="color:var(--text)">${i.beforeAvg >= 0 ? '+' : ''}${i.beforeAvg.toFixed(1)}</span> over ${i.beforeN} pick${i.beforeN === 1 ? '' : 's'}</span>
+          <span>After: <span style="color:var(--text)">${i.afterAvg >= 0 ? '+' : ''}${i.afterAvg.toFixed(1)}</span> over ${i.afterN} pick${i.afterN === 1 ? '' : 's'}</span>
+        </div>
+        <div>${chipFor(i.topBefore, 'Top before')}${chipFor(i.topAfter, 'Top after')}</div>
+      </div>`;
+    }).join('');
   }
 
   /* ═══════════════════════════════════════════════════════════════════

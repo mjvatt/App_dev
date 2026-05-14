@@ -115,6 +115,9 @@
         <a href="#" class="nav-item" data-view="h2h">
           <i class="fas fa-arrows-left-right"></i><span>Head-to-Head</span>
         </a>
+        <a href="#" class="nav-item" data-view="inflection">
+          <i class="fas fa-wave-square"></i><span>Draft Inflections</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -1276,6 +1279,35 @@
       </div>
 
       <div id="h2h-content"></div>
+    </section>
+
+    <!-- ─── DRAFT INFLECTION POINTS VIEW ─── -->
+    <section class="view" id="view-inflection">
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="if-team-label">Team:</span>
+        <select id="if-team" class="filter-select filter-select--lg" aria-labelledby="if-team-label"></select>
+        <span class="filter-label" style="margin-left:14px" id="if-window-label">Window:</span>
+        <div class="pos-toggle-group" id="if-window-toggle" role="radiogroup" aria-labelledby="if-window-label">
+          <button type="button" class="pos-toggle on" data-window="3" role="radio" aria-checked="true">3 yr</button>
+          <button type="button" class="pos-toggle" data-window="5" role="radio" aria-checked="false">5 yr</button>
+        </div>
+        <span class="filter-label" style="margin-left:14px" id="if-sort-label">Sort:</span>
+        <select id="if-sort" class="filter-select" aria-labelledby="if-sort-label">
+          <option value="abs">Biggest swing (either way)</option>
+          <option value="positive">Biggest improvements</option>
+          <option value="negative">Biggest declines</option>
+          <option value="recent">Most recent</option>
+        </select>
+      </div>
+
+      <div class="kpi-row" id="if-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header"><div><h3 id="if-list-title">Detected Inflections</h3><p>An "inflection" is the largest shift in a team's rolling average pick surplus across a window of years. Most inflections line up with coach/GM regime changes — without needing labeled tenure data. Click any player chip to open their profile.</p></div></div>
+          <div id="if-list" style="padding:8px 14px 18px"></div>
+        </div>
+      </div>
     </section>
 
     <!-- ─── ATLAS VIEW ─── -->

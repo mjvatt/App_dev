@@ -196,6 +196,9 @@ today_ids = [
     # Head-to-Head
     'view-h2h', 'h2h-a-input', 'h2h-a-results', 'h2h-b-input',
     'h2h-b-results', 'h2h-swap', 'h2h-content',
+    # Draft Inflection Points
+    'view-inflection', 'if-team', 'if-window-toggle', 'if-sort',
+    'if-kpis', 'if-list', 'if-list-title',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(
