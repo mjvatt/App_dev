@@ -9,16 +9,20 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { authedRequest } from "@/lib/api";
 import { getToken, clearToken } from "@/lib/auth";
 import XPBar from "@/components/game/XPBar";
 import Card from "@/components/ui/Card";
 import { colors, fontSize, spacing, radius } from "@/lib/theme";
 
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
+
 interface ProgressData {
   xp: number;
   level: number;
   streak: number;
+  token_balance: number;
   topics: Record<string, number>;
 }
 
@@ -112,6 +116,12 @@ export default function DashboardScreen() {
                 <StatPill label="Level" value={String(progress.level)} color={colors.xp} />
                 <StatPill label="Streak" value={`${progress.streak}d`} color={colors.warning} />
                 <StatPill label="XP" value={String(progress.xp)} color={colors.primary} />
+                <StatPill
+                  label="Tokens"
+                  value={String(progress.token_balance ?? 0)}
+                  color={colors.warning}
+                  icon="lightning-bolt"
+                />
               </View>
             </Card>
 
@@ -143,10 +153,20 @@ export default function DashboardScreen() {
   );
 }
 
-function StatPill({ label, value, color }: { label: string; value: string; color: string }) {
+interface StatPillProps {
+  label: string;
+  value: string;
+  color: string;
+  icon?: IconName;
+}
+
+function StatPill({ label, value, color, icon }: StatPillProps) {
   return (
     <View style={[statStyles.pill, { borderColor: color + "40" }]}>
-      <Text style={[statStyles.value, { color }]}>{value}</Text>
+      <View style={statStyles.valueRow}>
+        {icon && <MaterialCommunityIcons name={icon} size={16} color={color} />}
+        <Text style={[statStyles.value, { color }]}>{value}</Text>
+      </View>
       <Text style={statStyles.label}>{label}</Text>
     </View>
   );
@@ -155,13 +175,16 @@ function StatPill({ label, value, color }: { label: string; value: string; color
 const statStyles = StyleSheet.create({
   pill: {
     flex: 1,
+    minWidth: "22%",
     alignItems: "center",
     backgroundColor: colors.surface2,
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
     borderWidth: 1,
   },
-  value: { fontSize: fontSize.xl, fontWeight: "800" },
+  valueRow: { flexDirection: "row", alignItems: "center", gap: 2 },
+  value: { fontSize: fontSize.lg, fontWeight: "800" },
   label: { color: colors.textMuted, fontSize: fontSize.xs, marginTop: 2 },
 });
 
@@ -190,7 +213,7 @@ const styles = StyleSheet.create({
   retryBtn: { alignSelf: "flex-start" },
   retryText: { color: colors.primary, fontSize: fontSize.sm, fontWeight: "600" },
   statsCard: { gap: spacing.md },
-  statRow: { flexDirection: "row", gap: spacing.sm },
+  statRow: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap" },
   sectionTitle: { color: colors.textMuted, fontSize: fontSize.sm, fontWeight: "600", letterSpacing: 1 },
   topicsGrid: {
     flexDirection: "row",

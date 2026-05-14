@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { authedRequest } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import MonacoEditor from "@/components/game/MonacoEditor";
@@ -28,6 +29,7 @@ interface Challenge {
 interface AttemptResult {
   passed: boolean;
   xp_earned: number;
+  tokens_earned?: number;
   feedback: string;
   time_ms?: number;
 }
@@ -210,9 +212,23 @@ export default function ArcadeScreen() {
                 <Text style={styles.resultHeadline}>
                   {result.passed ? "Passed" : "Failed"}
                 </Text>
-                {result.xp_earned > 0 && (
-                  <Text style={styles.xpEarned}>+{result.xp_earned} XP</Text>
-                )}
+                <View style={styles.rewardRow}>
+                  {result.xp_earned > 0 && (
+                    <Text style={styles.xpEarned}>+{result.xp_earned} XP</Text>
+                  )}
+                  {!!result.tokens_earned && result.tokens_earned > 0 && (
+                    <View style={styles.tokenChip}>
+                      <MaterialCommunityIcons
+                        name="lightning-bolt"
+                        size={14}
+                        color={colors.warning}
+                      />
+                      <Text style={styles.tokenChipText}>
+                        +{result.tokens_earned}
+                      </Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.resultFeedback}>{result.feedback}</Text>
                 <Button
                   label="Next challenge"
@@ -278,6 +294,19 @@ const styles = StyleSheet.create({
   resultPass: { borderColor: colors.success + "60", backgroundColor: "#001a08" },
   resultFail: { borderColor: colors.error + "60", backgroundColor: "#1a0000" },
   resultHeadline: { color: colors.text, fontSize: fontSize.lg, fontWeight: "700" },
+  rewardRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, flexWrap: "wrap" },
   xpEarned: { color: colors.xp, fontSize: fontSize.md, fontWeight: "600" },
+  tokenChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    backgroundColor: colors.warning + "20",
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.warning + "60",
+  },
+  tokenChipText: { color: colors.warning, fontSize: fontSize.sm, fontWeight: "700" },
   resultFeedback: { color: colors.textMuted, fontSize: fontSize.sm, lineHeight: 20 },
 });
