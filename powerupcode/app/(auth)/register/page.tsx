@@ -7,11 +7,14 @@ import PasswordInput from "@/components/ui/PasswordInput";
 import { Events, identify, track } from "@/lib/analytics";
 import { rememberEmail } from "@/lib/auth";
 
+const INVITE_ONLY = process.env.NEXT_PUBLIC_INVITE_ONLY === "true";
+
 export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -25,11 +28,15 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
     try {
+      const payload: Record<string, string> = { email, username, password };
+      if (INVITE_ONLY && inviteCode.trim()) {
+        payload.invite_code = inviteCode.trim();
+      }
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -100,6 +107,19 @@ export default function RegisterPage() {
             className="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white"
             required
           />
+          {INVITE_ONLY && (
+            <input
+              type="text"
+              placeholder="Invite code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              className="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white tracking-wider uppercase"
+              required
+            />
+          )}
           <button
             type="submit"
             disabled={loading}

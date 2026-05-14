@@ -85,7 +85,8 @@ async def db_engine(pg_url: str) -> AsyncGenerator[AsyncEngine]:
                     "subscriptions, processed_stripe_events, sessions, "
                     "review_schedule, daily_challenges, friendships, "
                     "token_gifts, interview_stages, interview_sessions, "
-                    "boss_rush_runs, proposed_challenges, challenges, users "
+                    "boss_rush_runs, proposed_challenges, challenges, "
+                    "invite_codes, users "
                     "RESTART IDENTITY CASCADE"
                 )
             )

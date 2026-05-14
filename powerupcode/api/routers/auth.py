@@ -4,13 +4,13 @@ from typing import Annotated
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from sqlalchemy import delete, or_, select
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.cookies import REFRESH_COOKIE, clear_auth_cookies, set_auth_cookies
 from api.dependencies import get_current_user, get_db
-from api.models.user import EmailToken, User
+from api.models.user import EmailToken, InviteCode, User
 from api.rate_limit import limiter
 from api.schemas.user import (
     ForgotPasswordRequest,
@@ -30,6 +30,7 @@ from services.auth.sessions import (
     rotate_session,
 )
 from services.email.client import send_password_reset_email, send_verification_email
+from services.invites import is_valid_code_format, normalize_code
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -69,6 +70,9 @@ async def _purge_stale_tokens(db: AsyncSession, user_id: str, token_type: str) -
     )
 
 
+_INVITE_ERROR = "Invalid or expired invite code"
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/15minute")
 async def register(
@@ -77,6 +81,23 @@ async def register(
     body: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
+    if settings.invite_only_registration:
+        raw_code = body.invite_code or ""
+        if not is_valid_code_format(raw_code):
+            raise HTTPException(status_code=400, detail=_INVITE_ERROR)
+        normalized = normalize_code(raw_code)
+        # Atomic redemption: UPDATE only matches when uses < max_uses, so a
+        # concurrent registration cannot oversubscribe a code. rowcount == 0
+        # collapses both "not found" and "exhausted" into the same response
+        # to deter code-enumeration.
+        redeemed = await db.execute(
+            update(InviteCode)
+            .where(InviteCode.code == normalized, InviteCode.uses < InviteCode.max_uses)
+            .values(uses=InviteCode.uses + 1)
+        )
+        if redeemed.rowcount == 0:
+            raise HTTPException(status_code=400, detail=_INVITE_ERROR)
+
     existing = await db.scalar(
         select(User).where(
             (User.email == body.email) | (User.username == body.username)

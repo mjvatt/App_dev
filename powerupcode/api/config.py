@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     cookie_samesite: str = "lax"
     cookie_domain: str = ""
 
+    # Invite-only registration gate. When True, /register requires a
+    # matching unused invite_codes row. Soft-launch / closed-beta switch.
+    invite_only_registration: bool = False
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _parse_cors_origins(cls, v: object) -> object:

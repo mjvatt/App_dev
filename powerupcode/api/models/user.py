@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from api.models.base import Base
@@ -79,6 +79,18 @@ class Friendship(Base):
     )
     accepted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+
+
+class InviteCode(Base):
+    __tablename__ = "invite_codes"
+
+    code: Mapped[str] = mapped_column(String(64), primary_key=True)
+    max_uses: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    uses: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    note: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
 
