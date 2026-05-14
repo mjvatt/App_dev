@@ -103,6 +103,9 @@
         <a href="#" class="nav-item" data-view="reach-steal">
           <i class="fas fa-crosshairs"></i><span>Reach &amp; Steal</span>
         </a>
+        <a href="#" class="nav-item" data-view="round-heatmap">
+          <i class="fas fa-th-large"></i><span>Round × Year Heatmap</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -1116,6 +1119,34 @@
               <tbody id="rs-reaches-body"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ROUND × YEAR HEATMAP VIEW ─── -->
+    <section class="view" id="view-round-heatmap">
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="rh-metric-label">Metric:</span>
+        <div class="pos-toggle-group" id="rh-metric-toggle" role="radiogroup" aria-labelledby="rh-metric-label">
+          <button type="button" class="pos-toggle on" data-metric="hitRate" role="radio" aria-checked="true">Hit rate</button>
+          <button type="button" class="pos-toggle" data-metric="medianSurplus" role="radio" aria-checked="false">Median surplus</button>
+        </div>
+        <span class="filter-label" style="margin-left:20px" id="rh-pos-toggle-label">Position group:</span>
+        <div class="pos-toggle-group" id="rh-pos-toggle" role="radiogroup" aria-labelledby="rh-pos-toggle-label"></div>
+      </div>
+
+      <div class="kpi-row" id="rh-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3>Round × Year Heatmap</h3>
+              <p>Each cell is a (round, year) bucket. Hover for the pick count and top player. Click a cell to open the bucket's top-AV player. Hit-rate midpoint is the dataset-wide hit rate; median-surplus midpoint is zero.</p>
+            </div>
+          </div>
+          <div id="rh-heatmap-container" style="padding:14px 18px"></div>
+          <div id="rh-legend" style="padding:8px 18px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-muted)"></div>
         </div>
       </div>
     </section>

@@ -184,6 +184,9 @@ today_ids = [
     # Reach & Steal Map
     'view-reach-steal', 'rs-pos-toggle', 'rs-team', 'rs-yfrom', 'rs-yto',
     'rs-kpis', 'chart-rs-scatter', 'rs-steals-body', 'rs-reaches-body',
+    # Round × Year Heatmap
+    'view-round-heatmap', 'rh-metric-toggle', 'rh-pos-toggle', 'rh-kpis',
+    'rh-heatmap-container', 'rh-legend',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(

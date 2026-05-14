@@ -40,6 +40,7 @@
     'qb-lab':         ['QB Lab', 'Quarterback prospect deep-dive — hit rates, college pipelines, age and athletic effects'],
     'position-lab':   ['Position Lab', 'Position deep-dive — hit rates, college pipelines, age and athletic effects per group'],
     'reach-steal':    ['Reach & Steal Map', 'Every pick plotted by surplus vs slot expectation — find the biggest steals and worst reaches'],
+    'round-heatmap':  ['Round × Year Heatmap', 'Hit rate or median surplus per round per year — see which round-year buckets paid off'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -73,6 +74,7 @@
     if (id === 'qb-lab') initQBLab();
     if (id === 'position-lab') initPositionLab();
     if (id === 'reach-steal') initReachSteal();
+    if (id === 'round-heatmap') initRoundHeatmap();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -1926,6 +1928,236 @@
     const emptyRow = `<tr><td colspan="6" style="padding:14px;color:var(--text-muted);font-size:12px">No picks in filter.</td></tr>`;
     document.getElementById('rs-steals-body').innerHTML  = top.length ? top.map(rowHtml).join('') : emptyRow;
     document.getElementById('rs-reaches-body').innerHTML = bot.length ? bot.map(rowHtml).join('') : emptyRow;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ROUND × YEAR HEATMAP
+  ═══════════════════════════════════════════════════════════════════ */
+  let _rhInited       = false;
+  let _rhActiveMetric = 'hitRate';
+  let _rhActivePos    = 'All';
+  const RH_POS_OPTIONS     = ['All', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB'];
+  const RH_INCOMPLETE_YEAR = 2022;
+  const RH_HIT_THRESHOLD   = 10;
+
+  function _rhSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function initRoundHeatmap() {
+    if (_rhInited) {
+      renderRoundHeatmap();
+      return;
+    }
+    _rhInited = true;
+
+    const metricContainer = document.getElementById('rh-metric-toggle');
+    metricContainer.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-metric]');
+      if (!btn) return;
+      const m = btn.dataset.metric;
+      if (m === _rhActiveMetric) return;
+      _rhActiveMetric = m;
+      metricContainer.querySelectorAll('button[data-metric]').forEach(o => {
+        const on = o.dataset.metric === m;
+        o.classList.toggle('on', on);
+        o.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      renderRoundHeatmap();
+    });
+
+    const posContainer = document.getElementById('rh-pos-toggle');
+    RH_POS_OPTIONS.forEach(g => {
+      const btn = document.createElement('button');
+      btn.type            = 'button';
+      btn.className       = 'pos-toggle' + (g === _rhActivePos ? ' on' : '');
+      btn.textContent     = g;
+      btn.dataset.group   = g;
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', g === _rhActivePos ? 'true' : 'false');
+      const color = g === 'All' ? '#9ca3af' : DraftData.posColor(g);
+      btn.style.borderColor = color;
+      if (g === _rhActivePos) { btn.style.background = color; btn.style.color = '#000'; }
+      else                    { btn.style.color = color; }
+      btn.addEventListener('click', () => {
+        if (_rhActivePos === g) return;
+        _rhActivePos = g;
+        posContainer.querySelectorAll('.pos-toggle').forEach(other => {
+          const og = other.dataset.group;
+          const oc = og === 'All' ? '#9ca3af' : DraftData.posColor(og);
+          if (og === g) {
+            other.classList.add('on');
+            other.style.background = oc; other.style.color = '#000'; other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'true');
+          } else {
+            other.classList.remove('on');
+            other.style.background = ''; other.style.color = oc; other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'false');
+          }
+        });
+        renderRoundHeatmap();
+      });
+      posContainer.appendChild(btn);
+    });
+
+    document.getElementById('rh-heatmap-container').addEventListener('click', e => {
+      const cell = e.target.closest('[data-top-year][data-top-pick]');
+      if (!cell) return;
+      const ty = +cell.dataset.topYear;
+      const tp = +cell.dataset.topPick;
+      if (ty && tp) openPlayerModal(ty, tp);
+    });
+
+    renderRoundHeatmap();
+  }
+
+  function renderRoundHeatmap() {
+    const filter = { yearTo: RH_INCOMPLETE_YEAR - 1 };
+    if (_rhActivePos !== 'All') filter.pos_group = _rhActivePos;
+    const rows = DraftData.picks(filter).filter(p => p.pick > 0 && p.career_av != null);
+
+    const years   = meta.years.filter(y => y < RH_INCOMPLETE_YEAR);
+    const yearMin = years.length ? Math.min(...years) : 0;
+    const yearMax = years.length ? Math.max(...years) : 0;
+
+    const buckets = {};
+    rows.forEach(p => {
+      if (p.round < 1 || p.round > 7) return;
+      const key = `${p.round}|${p.year}`;
+      if (!buckets[key]) buckets[key] = { n: 0, hits: 0, surpluses: [], top: null };
+      const b = buckets[key];
+      const s = _rhSurplusFor(p);
+      b.n++;
+      b.surpluses.push(s);
+      if (s > RH_HIT_THRESHOLD) b.hits++;
+      if (!b.top || (p.career_av || 0) > (b.top.career_av || 0)) b.top = p;
+    });
+
+    const allStats   = [];
+    const cellValues = [];
+    for (let r = 1; r <= 7; r++) {
+      for (const y of years) {
+        const b = buckets[`${r}|${y}`];
+        if (!b) continue;
+        const v = _rhActiveMetric === 'hitRate' ? b.hits / b.n : _rsMedian(b.surpluses);
+        allStats.push({ round: r, year: y, value: v, count: b.n, top: b.top });
+        cellValues.push(v);
+      }
+    }
+
+    let mid, vMin, vMax;
+    if (_rhActiveMetric === 'hitRate') {
+      const totalHits = rows.filter(p => _rhSurplusFor(p) > RH_HIT_THRESHOLD).length;
+      mid  = rows.length ? totalHits / rows.length : 0.15;
+      vMin = 0;
+      vMax = cellValues.length ? Math.max(...cellValues, mid + 0.01) : 1;
+    } else {
+      mid  = 0;
+      vMin = cellValues.length ? Math.min(...cellValues, -0.01) : -1;
+      vMax = cellValues.length ? Math.max(...cellValues, 0.01)  : 1;
+    }
+
+    function colorFor(v) {
+      if (v === undefined || v === null) return 'transparent';
+      if (v > mid) {
+        const intensity = vMax > mid ? Math.min(1, (v - mid) / (vMax - mid)) : 0;
+        return `rgba(16, 185, 129, ${0.15 + 0.7 * intensity})`;
+      }
+      if (v < mid) {
+        const intensity = mid > vMin ? Math.min(1, (mid - v) / (mid - vMin)) : 0;
+        return `rgba(239, 68, 68, ${0.15 + 0.7 * intensity})`;
+      }
+      return 'rgba(156, 163, 175, 0.20)';
+    }
+
+    const formatV = (v) => _rhActiveMetric === 'hitRate'
+      ? `${(v * 100).toFixed(1)}%`
+      : `${v >= 0 ? '+' : ''}${v.toFixed(1)}`;
+
+    const sorted = allStats.slice().sort((a, b) => b.value - a.value);
+    const best   = sorted[0];
+    const worst  = sorted[sorted.length - 1];
+    const overallHits = rows.filter(p => _rhSurplusFor(p) > RH_HIT_THRESHOLD).length;
+    const overallRate = rows.length ? overallHits / rows.length : 0;
+
+    const kpis = [
+      { icon: 'fa-th',          label: 'Cells shown',
+        value: allStats.length.toLocaleString(),
+        sub: years.length ? `${yearMin}–${yearMax} · 7 rounds` : '' },
+      { icon: 'fa-arrow-up',    label: 'Best bucket',
+        value: best ? formatV(best.value) : '—',
+        sub: best ? `R${best.round} · ${best.year} · ${best.count} pick${best.count > 1 ? 's' : ''}` : '' },
+      { icon: 'fa-arrow-down',  label: 'Worst bucket',
+        value: worst ? formatV(worst.value) : '—',
+        sub: worst ? `R${worst.round} · ${worst.year} · ${worst.count} pick${worst.count > 1 ? 's' : ''}` : '' },
+      { icon: 'fa-bullseye',    label: 'Overall hit rate',
+        value: `${(overallRate * 100).toFixed(1)}%`,
+        sub: `${rows.length.toLocaleString()} picks` },
+    ];
+    document.getElementById('rh-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${_escapeHtml(k.sub)}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    const cellW    = 22;
+    const cellH    = 30;
+    const headerW  = 38;
+    const totalW   = headerW + years.length * cellW;
+    let html = `<div style="overflow-x:auto"><div style="display:inline-block;min-width:${totalW}px">`;
+
+    html += `<div style="display:grid;grid-template-columns:${headerW}px repeat(${years.length}, ${cellW}px);align-items:end;font-size:9px;color:var(--text-muted);margin-bottom:4px"><div></div>`;
+    years.forEach((y, i) => {
+      const showLabel = (i === 0) || (i === years.length - 1) || (y % 5 === 0);
+      html += `<div style="text-align:center;writing-mode:vertical-rl;transform:rotate(180deg);height:42px;${showLabel ? '' : 'opacity:0'}">${y}</div>`;
+    });
+    html += `</div>`;
+
+    for (let r = 1; r <= 7; r++) {
+      html += `<div style="display:grid;grid-template-columns:${headerW}px repeat(${years.length}, ${cellW}px);align-items:center;margin-bottom:2px">`;
+      html += `<div style="font-size:11px;color:var(--text-sub);font-weight:600">R${r}</div>`;
+      for (const y of years) {
+        const b = buckets[`${r}|${y}`];
+        if (!b) {
+          html += `<div style="height:${cellH}px;background:rgba(75,85,99,0.05);border:1px solid rgba(75,85,99,0.10)" title="No ${_rhActivePos === 'All' ? '' : _rhActivePos + ' '}picks in R${r} ${y}"></div>`;
+          continue;
+        }
+        const v   = _rhActiveMetric === 'hitRate' ? b.hits / b.n : _rsMedian(b.surpluses);
+        const bg  = colorFor(v);
+        const topLabel = b.top ? ` — Top: ${b.top.player} (${b.top.career_av || 0} AV)` : '';
+        const tip = `R${r} · ${y} · ${b.n} pick${b.n > 1 ? 's' : ''} · ${formatV(v)}${topLabel}`;
+        const ty  = b.top ? b.top.year : '';
+        const tp  = b.top ? b.top.pick : '';
+        html += `<div data-year="${y}" data-round="${r}" data-top-year="${ty}" data-top-pick="${tp}"
+          style="height:${cellH}px;background:${bg};border:1px solid rgba(255,255,255,0.05);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text);font-weight:600"
+          title="${_escapeHtml(tip)}">${b.n}</div>`;
+      }
+      html += `</div>`;
+    }
+
+    html += `</div></div>`;
+    document.getElementById('rh-heatmap-container').innerHTML = html;
+
+    const stops = _rhActiveMetric === 'hitRate'
+      ? [
+          { v: 0,    label: '0%' },
+          { v: mid,  label: `${(mid * 100).toFixed(0)}% (dataset avg)` },
+          { v: vMax, label: `${(vMax * 100).toFixed(0)}%` },
+        ]
+      : [
+          { v: vMin, label: `${vMin >= 0 ? '+' : ''}${vMin.toFixed(1)}` },
+          { v: 0,    label: '0 (neutral)' },
+          { v: vMax, label: `+${vMax.toFixed(1)}` },
+        ];
+    document.getElementById('rh-legend').innerHTML = stops.map(s =>
+      `<span style="display:inline-flex;align-items:center;gap:6px">
+        <span style="display:inline-block;width:18px;height:14px;background:${colorFor(s.v)};border:1px solid rgba(255,255,255,0.10)"></span>
+        ${_escapeHtml(s.label)}
+      </span>`).join('') + ` <span style="opacity:0.6">· Cell number = pick count in bucket</span>`;
   }
 
   /* ═══════════════════════════════════════════════════════════════════
