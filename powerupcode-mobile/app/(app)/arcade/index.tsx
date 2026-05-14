@@ -49,7 +49,7 @@ const MODES: Mode[] = [
     title: "Boss Rush",
     description: "Three boss-tier problems back-to-back. Three lives.",
     icon: "sword-cross",
-    route: null,
+    route: "/(app)/arcade/boss-rush",
   },
   {
     key: "mock-interview",
