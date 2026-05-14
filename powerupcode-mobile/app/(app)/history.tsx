@@ -11,7 +11,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { authedRequest } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import Card from "@/components/ui/Card";
-import { colors, fontSize, spacing, radius } from "@/lib/theme";
+import TierBadge from "@/components/game/TierBadge";
+import { Difficulty, colors, fontSize, spacing, radius } from "@/lib/theme";
 
 interface Attempt {
   id: number;
@@ -24,12 +25,16 @@ interface Attempt {
   created_at: string;
 }
 
-const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: colors.difficulty.easy,
-  medium: colors.difficulty.medium,
-  hard: colors.difficulty.hard,
-  boss: colors.difficulty.boss,
-};
+const TIER_DIFFICULTIES: ReadonlySet<Difficulty> = new Set<Difficulty>([
+  "easy",
+  "medium",
+  "hard",
+  "boss",
+]);
+
+function asTierDifficulty(raw: string): Difficulty | null {
+  return TIER_DIFFICULTIES.has(raw as Difficulty) ? (raw as Difficulty) : null;
+}
 
 export default function HistoryScreen() {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
@@ -105,9 +110,11 @@ export default function HistoryScreen() {
             </View>
             <View style={styles.rowMeta}>
               <Text style={styles.meta}>{item.topic.replace(/_/g, " ")}</Text>
-              <Text style={[styles.meta, { color: DIFFICULTY_COLORS[item.difficulty] ?? colors.textMuted }]}>
-                {item.difficulty}
-              </Text>
+              {asTierDifficulty(item.difficulty) ? (
+                <TierBadge difficulty={asTierDifficulty(item.difficulty)!} size="sm" />
+              ) : (
+                <Text style={styles.meta}>{item.difficulty}</Text>
+              )}
               {item.xp_earned > 0 && (
                 <Text style={[styles.meta, { color: colors.xp }]}>+{item.xp_earned} XP</Text>
               )}
