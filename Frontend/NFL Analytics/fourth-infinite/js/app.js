@@ -41,6 +41,7 @@
     'position-lab':   ['Position Lab', 'Position deep-dive — hit rates, college pipelines, age and athletic effects per group'],
     'reach-steal':    ['Reach & Steal Map', 'Every pick plotted by surplus vs slot expectation — find the biggest steals and worst reaches'],
     'round-heatmap':  ['Round × Year Heatmap', 'Hit rate or median surplus per round per year — see which round-year buckets paid off'],
+    'pos-runs':       ['Position Runs', 'Streaks of consecutive same-position picks within a draft — ranked by how the run actually played out'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -75,6 +76,7 @@
     if (id === 'position-lab') initPositionLab();
     if (id === 'reach-steal') initReachSteal();
     if (id === 'round-heatmap') initRoundHeatmap();
+    if (id === 'pos-runs') initPosRuns();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -2158,6 +2160,246 @@
         <span style="display:inline-block;width:18px;height:14px;background:${colorFor(s.v)};border:1px solid rgba(255,255,255,0.10)"></span>
         ${_escapeHtml(s.label)}
       </span>`).join('') + ` <span style="opacity:0.6">· Cell number = pick count in bucket</span>`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     POSITION RUNS
+  ═══════════════════════════════════════════════════════════════════ */
+  let _prInited     = false;
+  let _prMinRun     = 4;
+  let _prActivePos  = 'All';
+  let _prYearFrom   = null;
+  let _prYearTo     = null;
+  let _prSort       = 'surplus';
+  const PR_POS_OPTIONS     = ['All', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB'];
+  const PR_INCOMPLETE_YEAR = 2022;
+  const PR_HIT_THRESHOLD   = 10;
+
+  function _prSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function _prDetectRuns() {
+    const allRuns = [];
+    const years = meta.years.filter(y => y >= _prYearFrom && y <= _prYearTo);
+
+    for (const y of years) {
+      const yearPicks = DraftData.picks({ year: y })
+        .filter(p => p.pick > 0 && p.pos_group)
+        .sort((a, b) => a.pick - b.pick);
+      if (!yearPicks.length) continue;
+
+      let current = [];
+      const flush = () => {
+        if (current.length >= _prMinRun) {
+          const pg = current[0].pos_group;
+          if (_prActivePos === 'All' || _prActivePos === pg) {
+            const surpluses = current.map(_prSurplusFor);
+            const total     = surpluses.reduce((s, v) => s + v, 0);
+            const hits      = surpluses.filter(s => s > PR_HIT_THRESHOLD).length;
+            const complete  = current.every(p => p.year < PR_INCOMPLETE_YEAR && p.career_av != null);
+            allRuns.push({
+              year:     y,
+              pos:      pg,
+              length:   current.length,
+              startPick: current[0].pick,
+              endPick:   current[current.length - 1].pick,
+              picks:    current.slice(),
+              totalAv:  current.reduce((s, p) => s + (p.career_av || 0), 0),
+              totalSurplus: total,
+              hits,
+              complete,
+            });
+          }
+        }
+        current = [];
+      };
+
+      for (const p of yearPicks) {
+        if (current.length === 0 || current[current.length - 1].pos_group === p.pos_group) {
+          current.push(p);
+        } else {
+          flush();
+          current = [p];
+        }
+      }
+      flush();
+    }
+    return allRuns;
+  }
+
+  function initPosRuns() {
+    if (_prInited) {
+      renderPosRuns();
+      return;
+    }
+    _prInited = true;
+
+    const minContainer = document.getElementById('pr-min-toggle');
+    minContainer.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-min]');
+      if (!btn) return;
+      const m = +btn.dataset.min;
+      if (m === _prMinRun) return;
+      _prMinRun = m;
+      minContainer.querySelectorAll('button[data-min]').forEach(o => {
+        const on = +o.dataset.min === m;
+        o.classList.toggle('on', on);
+        o.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      renderPosRuns();
+    });
+
+    const posContainer = document.getElementById('pr-pos-toggle');
+    PR_POS_OPTIONS.forEach(g => {
+      const btn = document.createElement('button');
+      btn.type            = 'button';
+      btn.className       = 'pos-toggle' + (g === _prActivePos ? ' on' : '');
+      btn.textContent     = g;
+      btn.dataset.group   = g;
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', g === _prActivePos ? 'true' : 'false');
+      const color = g === 'All' ? '#9ca3af' : DraftData.posColor(g);
+      btn.style.borderColor = color;
+      if (g === _prActivePos) { btn.style.background = color; btn.style.color = '#000'; }
+      else                    { btn.style.color = color; }
+      btn.addEventListener('click', () => {
+        if (_prActivePos === g) return;
+        _prActivePos = g;
+        posContainer.querySelectorAll('.pos-toggle').forEach(other => {
+          const og = other.dataset.group;
+          const oc = og === 'All' ? '#9ca3af' : DraftData.posColor(og);
+          if (og === g) {
+            other.classList.add('on');
+            other.style.background = oc; other.style.color = '#000'; other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'true');
+          } else {
+            other.classList.remove('on');
+            other.style.background = ''; other.style.color = oc; other.style.borderColor = oc;
+            other.setAttribute('aria-checked', 'false');
+          }
+        });
+        renderPosRuns();
+      });
+      posContainer.appendChild(btn);
+    });
+
+    const years = meta.years;
+    if (_prYearFrom == null) _prYearFrom = Math.min(...years);
+    if (_prYearTo   == null) _prYearTo   = Math.max(...years);
+    const yfrom = document.getElementById('pr-yfrom');
+    const yto   = document.getElementById('pr-yto');
+    yfrom.innerHTML = years.map(y => `<option value="${y}"${y === _prYearFrom ? ' selected' : ''}>${y}</option>`).join('');
+    yto.innerHTML   = years.map(y => `<option value="${y}"${y === _prYearTo   ? ' selected' : ''}>${y}</option>`).join('');
+    yfrom.addEventListener('change', e => { _prYearFrom = +e.target.value; renderPosRuns(); });
+    yto.addEventListener('change',   e => { _prYearTo   = +e.target.value; renderPosRuns(); });
+
+    const sortSel = document.getElementById('pr-sort');
+    sortSel.value = _prSort;
+    sortSel.addEventListener('change', e => { _prSort = e.target.value; renderPosRuns(); });
+
+    document.getElementById('pr-list').addEventListener('click', e => {
+      const chip = e.target.closest('[data-pr-year][data-pr-pick]');
+      if (!chip) return;
+      openPlayerModal(+chip.dataset.prYear, +chip.dataset.prPick);
+    });
+
+    renderPosRuns();
+  }
+
+  function renderPosRuns() {
+    const runs = _prDetectRuns();
+
+    const sorted = runs.slice().sort((a, b) => {
+      switch (_prSort) {
+        case 'reach':  return a.totalSurplus - b.totalSurplus;
+        case 'length': return b.length - a.length || b.totalSurplus - a.totalSurplus;
+        case 'recent': return b.year - a.year || b.length - a.length;
+        case 'surplus':
+        default:       return b.totalSurplus - a.totalSurplus;
+      }
+    });
+
+    const completeRuns = runs.filter(r => r.complete);
+    const totalSurplus = completeRuns.reduce((s, r) => s + r.totalSurplus, 0);
+    const longest      = runs.length ? runs.reduce((a, b) => a.length > b.length ? a : b) : null;
+    const biggestHit   = completeRuns.length ? completeRuns.reduce((a, b) => a.totalSurplus > b.totalSurplus ? a : b) : null;
+    const biggestReach = completeRuns.length ? completeRuns.reduce((a, b) => a.totalSurplus < b.totalSurplus ? a : b) : null;
+
+    const kpis = [
+      { icon: 'fa-bolt',     label: 'Runs found',
+        value: runs.length.toLocaleString(),
+        sub: `min ${_prMinRun}+ consecutive · ${_prActivePos === 'All' ? 'any position' : _prActivePos}` },
+      { icon: 'fa-ruler',    label: 'Longest run',
+        value: longest ? `${longest.length}` : '—',
+        sub: longest ? `${longest.year} · ${longest.pos} · picks ${longest.startPick}–${longest.endPick}` : '' },
+      { icon: 'fa-trophy',   label: 'Best run by surplus',
+        value: biggestHit ? `${biggestHit.totalSurplus >= 0 ? '+' : ''}${biggestHit.totalSurplus.toFixed(0)}` : '—',
+        sub: biggestHit ? `${biggestHit.year} · ${biggestHit.pos} · ${biggestHit.length} picks` : '' },
+      { icon: 'fa-skull',    label: 'Worst run by surplus',
+        value: biggestReach ? `${biggestReach.totalSurplus.toFixed(0)}` : '—',
+        sub: biggestReach ? `${biggestReach.year} · ${biggestReach.pos} · ${biggestReach.length} picks` : '' },
+    ];
+    document.getElementById('pr-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${_escapeHtml(k.sub)}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    const CAP = 40;
+    const show = sorted.slice(0, CAP);
+    document.getElementById('pr-list-title').textContent =
+      sorted.length > CAP ? `Detected Runs (top ${CAP} of ${sorted.length})` : `Detected Runs (${sorted.length})`;
+
+    if (!show.length) {
+      document.getElementById('pr-list').innerHTML =
+        `<div style="padding:24px;color:var(--text-muted);font-size:12px">No runs of ${_prMinRun}+ consecutive picks match these filters.</div>`;
+      return;
+    }
+
+    document.getElementById('pr-list').innerHTML = show.map(r => {
+      const posColor = DraftData.posColor(r.pos);
+      const sColor   = r.totalSurplus >= 0 ? '#10b981' : '#ef4444';
+      const verdict  = !r.complete ? 'incomplete careers'
+        : r.totalSurplus >= 0 ? `+${r.totalSurplus.toFixed(0)} surplus`
+        : `${r.totalSurplus.toFixed(0)} surplus`;
+
+      const chips = r.picks.map(p => {
+        const s = _prSurplusFor(p);
+        const chipSColor = p.year >= PR_INCOMPLETE_YEAR || p.career_av == null
+          ? 'var(--text-muted)'
+          : (s >= PR_HIT_THRESHOLD ? '#10b981' : (s <= -PR_HIT_THRESHOLD ? '#ef4444' : 'var(--text-sub)'));
+        const sLabel = p.year >= PR_INCOMPLETE_YEAR || p.career_av == null
+          ? 'tbd'
+          : `${s >= 0 ? '+' : ''}${s.toFixed(0)}`;
+        return `<span class="pr-chip" data-pr-year="${p.year}" data-pr-pick="${p.pick}"
+            style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:14px;
+                   border:1px solid var(--border);background:var(--card-bg);font-size:12px;cursor:pointer;
+                   margin:3px 4px 3px 0">
+            <span style="color:var(--text-muted);font-size:10px">#${p.pick}</span>
+            <strong style="color:var(--text)">${_escapeHtml(p.player)}</strong>
+            <span style="color:var(--text-muted);font-size:10px">${_escapeHtml(p.team || '')}</span>
+            <span style="color:${chipSColor};font-size:10px;font-weight:600">${sLabel}</span>
+          </span>`;
+      }).join('');
+
+      return `<div class="pr-run-card" style="border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:var(--card-bg)">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:10px;background:${posColor}33;border:1px solid ${posColor};color:${posColor};font-weight:700;font-size:12px">
+            ${_escapeHtml(r.pos)} · ${r.length}
+          </span>
+          <span style="color:var(--text);font-weight:600">${r.year}</span>
+          <span style="color:var(--text-sub);font-size:12px">picks ${r.startPick}–${r.endPick}</span>
+          <span style="margin-left:auto;color:${r.complete ? sColor : 'var(--text-muted)'};font-weight:600;font-size:13px">${_escapeHtml(verdict)}</span>
+          ${r.complete ? `<span style="color:var(--text-muted);font-size:11px">${r.hits} hit${r.hits === 1 ? '' : 's'} · ${r.totalAv} total AV</span>` : ''}
+        </div>
+        <div>${chips}</div>
+      </div>`;
+    }).join('');
   }
 
   /* ═══════════════════════════════════════════════════════════════════

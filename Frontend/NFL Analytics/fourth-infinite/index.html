@@ -106,6 +106,9 @@
         <a href="#" class="nav-item" data-view="round-heatmap">
           <i class="fas fa-th-large"></i><span>Round × Year Heatmap</span>
         </a>
+        <a href="#" class="nav-item" data-view="pos-runs">
+          <i class="fas fa-bolt"></i><span>Position Runs</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -1147,6 +1150,47 @@
           </div>
           <div id="rh-heatmap-container" style="padding:14px 18px"></div>
           <div id="rh-legend" style="padding:8px 18px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-muted)"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── POSITION RUNS VIEW ─── -->
+    <section class="view" id="view-pos-runs">
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="pr-min-label">Min run length:</span>
+        <div class="pos-toggle-group" id="pr-min-toggle" role="radiogroup" aria-labelledby="pr-min-label">
+          <button type="button" class="pos-toggle" data-min="3" role="radio" aria-checked="false">3+</button>
+          <button type="button" class="pos-toggle on" data-min="4" role="radio" aria-checked="true">4+</button>
+          <button type="button" class="pos-toggle" data-min="5" role="radio" aria-checked="false">5+</button>
+        </div>
+        <span class="filter-label" style="margin-left:20px" id="pr-pos-toggle-label">Position group:</span>
+        <div class="pos-toggle-group" id="pr-pos-toggle" role="radiogroup" aria-labelledby="pr-pos-toggle-label"></div>
+      </div>
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="pr-sort-label">Sort:</span>
+        <select id="pr-sort" class="filter-select" aria-labelledby="pr-sort-label">
+          <option value="surplus">Biggest total surplus (best runs)</option>
+          <option value="reach">Most negative surplus (worst runs)</option>
+          <option value="length">Longest run</option>
+          <option value="recent">Most recent</option>
+        </select>
+        <span class="filter-label" style="margin-left:14px" id="pr-yfrom-label">From:</span>
+        <select id="pr-yfrom" class="filter-select" aria-labelledby="pr-yfrom-label"></select>
+        <span class="filter-label" id="pr-yto-label">to:</span>
+        <select id="pr-yto" class="filter-select" aria-labelledby="pr-yto-label"></select>
+      </div>
+
+      <div class="kpi-row" id="pr-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <div>
+              <h3 id="pr-list-title">Detected Runs</h3>
+              <p>A "run" is N consecutive picks at the same position group within a single draft. Click any player chip to open their profile.</p>
+            </div>
+          </div>
+          <div id="pr-list" style="padding:8px 14px 18px"></div>
         </div>
       </div>
     </section>

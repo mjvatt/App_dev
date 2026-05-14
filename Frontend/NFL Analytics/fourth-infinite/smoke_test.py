@@ -187,6 +187,9 @@ today_ids = [
     # Round × Year Heatmap
     'view-round-heatmap', 'rh-metric-toggle', 'rh-pos-toggle', 'rh-kpis',
     'rh-heatmap-container', 'rh-legend',
+    # Position Runs
+    'view-pos-runs', 'pr-min-toggle', 'pr-pos-toggle', 'pr-sort',
+    'pr-yfrom', 'pr-yto', 'pr-kpis', 'pr-list', 'pr-list-title',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(
