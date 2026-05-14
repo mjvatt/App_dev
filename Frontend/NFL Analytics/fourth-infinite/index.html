@@ -109,6 +109,9 @@
         <a href="#" class="nav-item" data-view="pos-runs">
           <i class="fas fa-bolt"></i><span>Position Runs</span>
         </a>
+        <a href="#" class="nav-item" data-view="team-dna">
+          <i class="fas fa-fingerprint"></i><span>Team Draft DNA</span>
+        </a>
       </div>
 
       <div class="nav-group">
@@ -1191,6 +1194,58 @@
             </div>
           </div>
           <div id="pr-list" style="padding:8px 14px 18px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TEAM DRAFT DNA VIEW ─── -->
+    <section class="view" id="view-team-dna">
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="filter-label" id="td-team-label">Team:</span>
+        <select id="td-team" class="filter-select filter-select--lg" aria-labelledby="td-team-label"></select>
+      </div>
+
+      <div class="kpi-row" id="td-kpis"></div>
+
+      <div class="chart-grid" style="margin-top:20px">
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Position Bias</h3><p>This team's position-group share minus the league's share. Bars to the right (green) = over-indexes the league. Bars to the left (red) = under-indexes. Computed across this franchise's full draft history.</p></div></div>
+          <div class="chart-wrap"><canvas id="chart-td-pos-bias"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Hit Rate by Round — Team vs League</h3><p>Share of picks per round whose career AV exceeded slot expectation by ≥10. Two lines: this franchise (colored) and the league baseline (gray).</p></div></div>
+          <div class="chart-wrap"><canvas id="chart-td-round-hit"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Top College Pipelines</h3><p>Colleges this franchise has drafted from most (min 2 picks since 1994). Sorted by average career AV.</p></div></div>
+          <div class="table-wrap" style="max-height:420px;overflow:auto">
+            <table class="draft-table">
+              <thead><tr><th>College</th><th style="text-align:right">Picks</th><th style="text-align:right">Avg AV</th><th>Top Pick</th></tr></thead>
+              <tbody id="td-colleges-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Biggest Steals</h3><p>Picks where career AV most exceeded slot expectation. Click any row to open the player.</p></div></div>
+          <div class="table-wrap" style="max-height:420px;overflow:auto">
+            <table class="draft-table">
+              <thead><tr><th>Player</th><th>Year</th><th>Pick</th><th>Pos</th><th style="text-align:right">Surplus</th></tr></thead>
+              <tbody id="td-steals-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header"><div><h3>Biggest Reaches</h3><p>Picks where career AV most underperformed slot expectation. Click any row to open the player.</p></div></div>
+          <div class="table-wrap" style="max-height:420px;overflow:auto">
+            <table class="draft-table">
+              <thead><tr><th>Player</th><th>Year</th><th>Pick</th><th>Pos</th><th style="text-align:right">Surplus</th></tr></thead>
+              <tbody id="td-reaches-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

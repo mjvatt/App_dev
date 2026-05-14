@@ -42,6 +42,7 @@
     'reach-steal':    ['Reach & Steal Map', 'Every pick plotted by surplus vs slot expectation — find the biggest steals and worst reaches'],
     'round-heatmap':  ['Round × Year Heatmap', 'Hit rate or median surplus per round per year — see which round-year buckets paid off'],
     'pos-runs':       ['Position Runs', 'Streaks of consecutive same-position picks within a draft — ranked by how the run actually played out'],
+    'team-dna':       ['Team Draft DNA', 'Per-franchise fingerprint — position bias vs league, round hit-rate curve, college pipelines, biggest steals & reaches'],
     atlas:      ['ATLAS',            'Advanced Team Legacy Analytics System'],
     sage:       ['SAGE',             'Smart Analytics & Grade Engine'],
     ghost:      ['GHOST',            'Grading Hidden Opportunity & Sleeper Tracker'],
@@ -77,6 +78,7 @@
     if (id === 'reach-steal') initReachSteal();
     if (id === 'round-heatmap') initRoundHeatmap();
     if (id === 'pos-runs') initPosRuns();
+    if (id === 'team-dna') initTeamDna();
     if (id === 'atlas')      initATLAS();
     if (id === 'positions')  initPositionTrends();
     if (id === 'colleges')   renderCollegePipeline();
@@ -2400,6 +2402,168 @@
         <div>${chips}</div>
       </div>`;
     }).join('');
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TEAM DRAFT DNA
+  ═══════════════════════════════════════════════════════════════════ */
+  let _tdInited     = false;
+  let _tdActiveTeam = null;
+  const TD_POS_GROUPS      = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB', 'ST'];
+  const TD_INCOMPLETE_YEAR = 2022;
+  const TD_HIT_THRESHOLD   = 10;
+
+  function _tdSurplusFor(p) {
+    return (p.career_av || 0) - DraftData.expectedAvForPick(p.pick, p.pos_group);
+  }
+
+  function initTeamDna() {
+    if (_tdInited) {
+      renderTeamDna();
+      return;
+    }
+    _tdInited = true;
+
+    const teams = DraftData.franchiseTeams();
+    if (!_tdActiveTeam) _tdActiveTeam = teams[0];
+    const sel = document.getElementById('td-team');
+    sel.innerHTML = teams.map(t => `<option value="${_escapeHtml(t)}"${t === _tdActiveTeam ? ' selected' : ''}>${_escapeHtml(t)}</option>`).join('');
+    sel.addEventListener('change', e => { _tdActiveTeam = e.target.value; renderTeamDna(); });
+
+    ['td-steals-body', 'td-reaches-body', 'td-colleges-body'].forEach(bodyId => {
+      document.getElementById(bodyId).addEventListener('click', e => {
+        const tr = e.target.closest('tr[data-year]');
+        if (!tr) return;
+        openPlayerModal(+tr.dataset.year, +tr.dataset.pick);
+      });
+    });
+
+    renderTeamDna();
+  }
+
+  function renderTeamDna() {
+    const team        = _tdActiveTeam;
+    const teamPicks   = DraftData.picks({ franchise: team }).filter(p => p.pick > 0);
+    const teamComplete = teamPicks.filter(p => p.year < TD_INCOMPLETE_YEAR && p.career_av != null);
+    const allComplete  = DraftData.picks().filter(p => p.pick > 0 && p.year < TD_INCOMPLETE_YEAR && p.career_av != null);
+
+    const teamHits = teamComplete.filter(p => _tdSurplusFor(p) > TD_HIT_THRESHOLD).length;
+    const hitRate  = teamComplete.length ? teamHits / teamComplete.length : 0;
+    const leagueHits = allComplete.filter(p => _tdSurplusFor(p) > TD_HIT_THRESHOLD).length;
+    const leagueRate = allComplete.length ? leagueHits / allComplete.length : 0;
+    const avgSurplus = teamComplete.length ? teamComplete.reduce((s, p) => s + _tdSurplusFor(p), 0) / teamComplete.length : 0;
+    const totalAv    = teamComplete.reduce((s, p) => s + (p.career_av || 0), 0);
+
+    const kpis = [
+      { icon: 'fa-list',    label: `${team} picks (1994–2025)`,
+        value: teamPicks.length.toLocaleString(),
+        sub: `${teamComplete.length} with complete careers` },
+      { icon: 'fa-bullseye',label: 'Hit rate',
+        value: `${(hitRate * 100).toFixed(1)}%`,
+        sub: `vs ${(leagueRate * 100).toFixed(1)}% league (${(hitRate - leagueRate >= 0 ? '+' : '')}${((hitRate - leagueRate) * 100).toFixed(1)} pp)` },
+      { icon: 'fa-balance-scale-left', label: 'Avg surplus per pick',
+        value: `${avgSurplus >= 0 ? '+' : ''}${avgSurplus.toFixed(1)}`,
+        sub: avgSurplus >= 0 ? 'beats slot on avg' : 'under-performs slot' },
+      { icon: 'fa-chart-line', label: 'Total career AV',
+        value: totalAv.toLocaleString(),
+        sub: 'sum across completed picks' },
+    ];
+    document.getElementById('td-kpis').innerHTML = kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas ${k.icon}"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-value">${k.value}</span>
+          <span class="kpi-label">${k.label}</span>
+          ${k.sub ? `<span class="kpi-label" style="font-size:11px;opacity:0.7">${_escapeHtml(k.sub)}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    /* Position bias bars */
+    const teamCounts   = {}; TD_POS_GROUPS.forEach(g => teamCounts[g]   = 0);
+    const leagueCounts = {}; TD_POS_GROUPS.forEach(g => leagueCounts[g] = 0);
+    teamPicks.forEach(p => { if (teamCounts[p.pos_group] != null) teamCounts[p.pos_group]++; });
+    DraftData.picks().filter(p => p.pick > 0).forEach(p => { if (leagueCounts[p.pos_group] != null) leagueCounts[p.pos_group]++; });
+    const teamTotal   = teamPicks.length || 1;
+    const leagueTotal = DraftData.picks().filter(p => p.pick > 0).length || 1;
+    const bias = TD_POS_GROUPS.map(g => {
+      const t = teamCounts[g] / teamTotal;
+      const l = leagueCounts[g] / leagueTotal;
+      return { group: g, diff: +((t - l) * 100).toFixed(2) };
+    });
+    const biasColors = bias.map(b => b.diff >= 0 ? '#10b981' : '#ef4444');
+    DraftCharts.vbar('chart-td-pos-bias', {
+      labels: bias.map(b => b.group),
+      values: bias.map(b => b.diff),
+      colors: biasColors,
+    });
+
+    /* Hit rate by round — team vs league */
+    const rounds = [1, 2, 3, 4, 5, 6, 7];
+    const teamByRound   = {}; rounds.forEach(r => teamByRound[r]   = { n: 0, hits: 0 });
+    const leagueByRound = {}; rounds.forEach(r => leagueByRound[r] = { n: 0, hits: 0 });
+    teamComplete.forEach(p => {
+      if (!teamByRound[p.round]) return;
+      teamByRound[p.round].n++;
+      if (_tdSurplusFor(p) > TD_HIT_THRESHOLD) teamByRound[p.round].hits++;
+    });
+    allComplete.forEach(p => {
+      if (!leagueByRound[p.round]) return;
+      leagueByRound[p.round].n++;
+      if (_tdSurplusFor(p) > TD_HIT_THRESHOLD) leagueByRound[p.round].hits++;
+    });
+    const teamRates   = rounds.map(r => teamByRound[r].n   ? +(teamByRound[r].hits   / teamByRound[r].n   * 100).toFixed(1) : 0);
+    const leagueRates = rounds.map(r => leagueByRound[r].n ? +(leagueByRound[r].hits / leagueByRound[r].n * 100).toFixed(1) : 0);
+    DraftCharts.multiLine(
+      'chart-td-round-hit',
+      rounds.map(r => `R${r}`),
+      { [team]: teamRates, 'League': leagueRates },
+      label => label === 'League' ? '#9ca3af' : '#3b82f6',
+      'Hit rate %',
+    );
+
+    /* College table */
+    const byCollege = {};
+    teamPicks.forEach(p => {
+      const c = (p.college || '').trim();
+      if (!c) return;
+      if (!byCollege[c]) byCollege[c] = { n: 0, totalAv: 0, top: null };
+      byCollege[c].n++;
+      byCollege[c].totalAv += (p.career_av || 0);
+      if (!byCollege[c].top || (p.career_av || 0) > (byCollege[c].top.career_av || 0)) byCollege[c].top = p;
+    });
+    const colleges = Object.entries(byCollege)
+      .filter(([, c]) => c.n >= 2)
+      .map(([college, c]) => ({ college, n: c.n, avgAv: +(c.totalAv / c.n).toFixed(1), top: c.top }))
+      .sort((a, b) => b.avgAv - a.avgAv)
+      .slice(0, 12);
+    document.getElementById('td-colleges-body').innerHTML = colleges.length ? colleges.map(c => `
+      <tr data-year="${c.top.year}" data-pick="${c.top.pick}" style="cursor:pointer">
+        <td><strong>${_escapeHtml(c.college)}</strong></td>
+        <td style="text-align:right">${c.n}</td>
+        <td style="text-align:right;color:var(--text);font-weight:600">${c.avgAv}</td>
+        <td>${_escapeHtml(c.top.player)} <span style="color:var(--text-muted);font-size:11px">(${c.top.year}, ${c.top.career_av || 0} AV)</span></td>
+      </tr>`).join('') : `<tr><td colspan="4" style="padding:14px;color:var(--text-muted);font-size:12px">No colleges with 2+ picks.</td></tr>`;
+
+    /* Steals + reaches */
+    const ranked = teamComplete
+      .map(p => ({ ...p, surplus: +_tdSurplusFor(p).toFixed(1) }))
+      .sort((a, b) => b.surplus - a.surplus);
+    const steals  = ranked.slice(0, 10);
+    const reaches = ranked.slice(-10).reverse();
+
+    const rowHtml = (p) => {
+      const sColor = p.surplus >= 0 ? '#10b981' : '#ef4444';
+      return `<tr data-year="${p.year}" data-pick="${p.pick}" style="cursor:pointer">
+        <td><strong>${_escapeHtml(p.player)}</strong></td>
+        <td>${p.year}</td>
+        <td>#${p.pick}</td>
+        <td>${_escapeHtml(p.pos_group || '—')}</td>
+        <td style="text-align:right;color:${sColor};font-weight:600">${p.surplus >= 0 ? '+' : ''}${p.surplus.toFixed(1)}</td>
+      </tr>`;
+    };
+    const emptyRow = `<tr><td colspan="5" style="padding:14px;color:var(--text-muted);font-size:12px">No complete-career picks for this franchise.</td></tr>`;
+    document.getElementById('td-steals-body').innerHTML  = steals.length  ? steals.map(rowHtml).join('')  : emptyRow;
+    document.getElementById('td-reaches-body').innerHTML = reaches.length ? reaches.map(rowHtml).join('') : emptyRow;
   }
 
   /* ═══════════════════════════════════════════════════════════════════

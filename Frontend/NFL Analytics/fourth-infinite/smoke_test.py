@@ -190,6 +190,9 @@ today_ids = [
     # Position Runs
     'view-pos-runs', 'pr-min-toggle', 'pr-pos-toggle', 'pr-sort',
     'pr-yfrom', 'pr-yto', 'pr-kpis', 'pr-list', 'pr-list-title',
+    # Team Draft DNA
+    'view-team-dna', 'td-team', 'td-kpis', 'chart-td-pos-bias',
+    'chart-td-round-hit', 'td-colleges-body', 'td-steals-body', 'td-reaches-body',
 ]
 missing_today = [i for i in today_ids if f'id="{i}"' not in HTML]
 check(
