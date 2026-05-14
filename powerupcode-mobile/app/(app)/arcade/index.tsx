@@ -54,9 +54,9 @@ const MODES: Mode[] = [
   {
     key: "mock-interview",
     title: "Mock Interview",
-    description: "Multi-stage timed session with AI-graded post-mortem.",
+    description: "Timed session with AI-graded post-mortem.",
     icon: "microphone",
-    route: null,
+    route: "/(app)/arcade/interview",
   },
 ];
 
